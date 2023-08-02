@@ -1,0 +1,135 @@
+version: "3.10"
+volumes:
+  #This stores the state of openbis, including logs
+  openbis-state:
+  certs:
+  db_data: null
+  worker_dependency_cache: null
+networks:
+  local:
+    driver: bridge
+
+
+
+services:
+  #Openbis
+  openbis:
+    image: openbis/debian-openbis:latest
+    env_file:
+      - ./.env
+
+    environment:
+      #Here you can configure some openbis options for the AS
+      - SERVER_HOST_PORT=localhost:8443
+      - GROUP_ID=1000
+      #Enable the basic plugins
+      - CORE_PLUGINS=enabled-modules = dataset-uploader, dataset-file-search, xls-import, eln-lims, openbis-ng-ui, search-store, user-management-maintenance
+    volumes:
+      #External configuration files
+      # - type: bind
+      #   source: ./services/openbis/as_service.properties
+      #   target: /home/openbis/openbis_state/as_etc/service.properties
+      #Openbis state
+      - openbis-state:/home/openbis/openbis_state/
+      - certs:/home/openbis/openbis_state/cert/
+    ports:
+      - ${OPENBIS_PORT}:443
+    
+    hostname: openbis
+    healthcheck:
+      test: [ "CMD", "curl", "openbis:443" ]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    networks:
+      - local
+  db:
+    image: postgres:14
+    restart: unless-stopped
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+      # NOTE: if port 5432 are already in use locally, we'll also bind another port
+      - 5433:5432
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: windmill
+    networks:
+      - local
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  windmill_server:
+    image: ghcr.io/windmill-labs/windmill:main
+    deploy:
+      replicas: 1
+    restart: unless-stopped
+    ports:
+      - 8000:8000
+    environment:
+      - DATABASE_URL=postgres://postgres:${DB_PASSWORD}@db/windmill?sslmode=disable
+      - BASE_URL=http://${WM_BASE_URL}
+      - RUST_LOG=info
+      ## You can set the number of workers to > 0 and not need any separate worker service
+      - NUM_WORKERS=0
+      - DISABLE_SERVER=false
+      - METRICS_ADDR=false
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - local
+    # volumes:
+      # - ./oauth.json/:/usr/src/app/oauth.json
+      
+  windmill_worker:
+    image: ghcr.io/windmill-labs/windmill:main
+    deploy:
+      replicas: 3
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgres://postgres:${DB_PASSWORD}@db/windmill?sslmode=disable
+      - BASE_URL=http://${WM_BASE_URL}
+      - BASE_INTERNAL_URL=http://windmill_server:8000
+      - RUST_LOG=info
+      - NUM_WORKERS=1
+      - DISABLE_SERVER=true
+      - KEEP_JOB_DIR=false
+      - DENO_PATH=/usr/bin/deno
+      - PYTHON_PATH=/usr/local/bin/python3
+      - METRICS_ADDR=false
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - local
+    # to mount the worker folder to debug,, KEEP_JOB_DIR=true and mount /tmp/windmill
+    volumes:
+      - worker_dependency_cache:/tmp/windmill/cache
+
+  lsp:
+    image: ghcr.io/windmill-labs/windmill-lsp:latest
+    restart: unless-stopped
+    networks:
+      - local
+    ports:
+      - 3001:3001
+
+  caddy:
+    image: caddy:2.5.2-alpine
+    restart: unless-stopped
+    networks:
+      - local
+    volumes:
+      - ./services/windmill/Caddyfile:/etc/caddy/Caddyfile
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - BASE_URL=${WM_BASE_URL}
+
