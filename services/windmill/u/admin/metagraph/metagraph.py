@@ -1,13 +1,49 @@
 import pybis as pb
+from pybis.entity_type import SampleType
+from pybis import Openbis
 import dataclasses
-from typing import List, Dict, Callable
+from typing import List, Dict, Callable, Optional
 from pydantic import BaseModel, model_validator
 from pydantic import TypeAdapter
+from datetime import date, datetime
 """
 This module is used to define a `metagraph`. This is a graph of openBIS operations that, when run.
 produce a concrete openbis object graph
 """
 
+
+def object_type_to_dict(object_type: SampleType) -> Dict[str, type]:
+    """
+    Convert a pybis object type to a dictionary of field names and python types
+    """
+    return {assignment.code: pybis_types_to_python_types(assignment.dataType) for assignment in object_type.get_property_assignments()}
+
+
+def pybis_types_to_python_types(tp: str) -> type:
+    """
+    Convert an openBIS datatype to a python type
+    """
+    match tp:
+        case "VARCHAR":
+            return str
+        case "INTEGER":
+            return int
+        case "BOOLEAN":
+            return bool
+        case "DATE":
+            return datetime.date
+        case "DATETIME":
+            return datetime.datetime
+        case "REAL":
+            return float
+        case "XML":
+            return str
+        case "SAMPLE":
+            return str
+        case _:
+            return str
+
+openbis_promise = Callable[..., pb.Openbis]
 
 class MetaNode(BaseModel):
     """
@@ -17,7 +53,7 @@ class MetaNode(BaseModel):
     name: str
     depends: List[str]
 
-    def to_constructor(self) -> Callable[...,  Callable[..., pb.Openbis]]:
+    def to_constructor(self, ob: Openbis) -> Callable[...,  openbis_promise]:
         """
         Return a constructor function for the node.
         The function takes all the arguments that should be passed by the user and
@@ -38,8 +74,10 @@ class Creation(MetaNode):
     """
     type: str
 
-    def to_constructor(self) -> Callable[[...],  Callable]:
-        return ob.create_object(....)
+    def to_constructor(self, ob: Openbis) -> Callable[...,  openbis_promise]:
+        object_def: SampleType = ob.get_object_type(self.type)
+        if object_def is not None:
+            assignments = object_def.get_property_assignments()
 
 
 class Selection(MetaNode):
@@ -48,7 +86,7 @@ class Selection(MetaNode):
     collection: str
 
     def to_constructor(self) -> Callable:
-        return ob.get_objects(....)
+        return 12
 
 
 class Metagraph(BaseModel):
