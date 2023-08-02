@@ -29,9 +29,14 @@ class MetaNode(BaseModel):
 
 
 class Creation(MetaNode):
-    """A node that describes a creation of a new object in openbis."""
+    """
+    A node that describes a creation of a new object in openbis.
+    `type` is the type code of the openbis object to be created.
+    When the function is called, it should return a function that has
+    as many inputs as the number of properties of the object to be created and the correct types.
+    In order to do so, we need to do some reflection: we need to get the type definition from openbis
+    """
     type: str
-    properties: dict
 
     def to_constructor(self) -> Callable[[...],  Callable]:
         return ob.create_object(....)
@@ -40,7 +45,7 @@ class Creation(MetaNode):
 class Selection(MetaNode):
     """A node that describes a selection of an existing object in openbis."""
     type: str
-    code: str
+    collection: str
 
     def to_constructor(self) -> Callable:
         return ob.get_objects(....)

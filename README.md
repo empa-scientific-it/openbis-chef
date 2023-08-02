@@ -60,3 +60,7 @@ this will synchronize the remote changes and apply them to the local scripts.
 
 
 
+### How to contribute
+
+- Use type annotations
+- Format your code with `black`
