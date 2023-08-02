@@ -6,10 +6,11 @@ from pybis import Openbis
 # Ctrl+S to format the code. Autocompletion available.
 
 
-
 def main(
-    settings: Params,
+    settings: dict,
+    type: str,
     token: str,
+    collection: str,
     url: str = "https://openbis:443"
 ) -> str:
     ob_type = "PARAMETER_DIES"
@@ -17,6 +18,5 @@ def main(
     ob = Openbis(url, verify_certificates=False)
     ob.set_token(token)
     #We create a new object and store it
-    s1 = ob.new_sample(type=ob_type, props ={"dies_mass_temp":dies_mass_temp, "dies_setting_temp":dies_setting_temp, "dies_pressure":dies_pressure}, experiment=collection)
-    s1.save()
+    s1 = ob.new_sample(type=type, props =settings, experiment=collection)
     return s1

@@ -39,34 +39,3 @@ value:
             type: static
             value: 'https://openbis:443'
         path: u/admin/fill_die
-schema:
-  $schema: 'https://json-schema.org/draft/2020-12/schema'
-  type: object
-  properties:
-    Collection:
-      type: string
-      description: ''
-      default: ''
-      format: ''
-    Die pressure:
-      type: number
-      description: ''
-      default: ''
-      format: ''
-    Die Temperature:
-      type: number
-      description: ''
-      default: ''
-      format: ''
-    Password:
-      type: string
-      description: OpenBIS password
-      default: ''
-      format: ''
-    Username:
-      type: string
-      description: OpenBIS username
-      default: ''
-      format: ''
-  required: []
-tag: null
