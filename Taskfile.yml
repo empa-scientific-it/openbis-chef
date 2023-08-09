@@ -1,0 +1,58 @@
+version: 3
+
+dotenv:
+  - ".env"
+
+tasks:
+  start_openbis:
+      cmds:
+        - docker-compose up -d
+      status:
+        - docker compose ps | grep openbis
+  #TODO fix  this part
+  #If it does not work, just download the tool from here:
+  #https://gitlab.empa.ch/openbis-tools/instance-io/-/packages/57 and place it in the root of the project with the name instance-io.jar
+  download_jar:
+      requires:
+        vars: [TOKEN]
+      cmds:
+        - "curl 'PRIVATE-TOKEN: ${TOKEN}' https://gitlab.empa.ch/api/v4/projects/1553/packages/generic/ch.empa.openbisio.app/0.1.0-SNAPSHOT/app.jar -O instance-io.jar"
+      status:
+        - test -f instance-io.jar
+  export_schema:
+      deps:
+        - download_jar
+      cmds:
+        - java -jar instance-io.jar dump https://openbis-empa-lab402.ethz.ch/ basi_admin eiVo2lee schema_402.json
+      status:
+        - test -f schema_402.json
+  cleanup_schema:
+      deps:
+        - export_schema
+      sources:
+        - schema_402.json
+      generates:
+        - schema_402_clean.json
+      cmds:
+        - cat schema_402.json | jq 'del(.spaces[] | select(.code == "ADFIB_MATERIALS" or .code == "CHEMI_MATERIALS" or .code=="CHEMI_DANIELE.RONCUCCI_AT_EMPA.CH"))' > schema_402_clean.json
+  ##TODO fix this part: improve the checking whether the schema is already imported
+  import_schema:
+      deps:
+        - cleanup_schema
+        - start_openbis
+      cmds:
+        - java -jar instance-io.jar load https://localhost:${OPENBIS_PORT} admin changeit schema_402_clean.json
+        - touch .schema_imported
+      status:
+        - test -f .schema_imported
+  dev-install:
+      dir: ./services/app
+      cmds:
+        - npm install
+  dev:
+      deps:
+        - dev-install
+        - import_schema
+      dir: ./services/app
+      cmds:
+        - npm run vite-dev
