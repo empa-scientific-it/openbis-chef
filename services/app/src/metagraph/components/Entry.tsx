@@ -3,7 +3,7 @@ import { EntryNode } from '@src/metagraph/metagraph';
 import { AuthContext } from '@src/openbis/AuthContext';
 import { SampleType } from '@src/types/openbis';
 import OpenBisEntry from '@src/openbis/components/OpenBisEntry';
-import  V3API from 'v3api/V3API.esm';
+import  {SampleTypeSearchCriteria, SampleTypeFetchOptions, SampleCreation, EntityTypePermId} from '@src/openbis/dto';
 
 
 type Props = {
@@ -17,9 +17,9 @@ function Entry({ node }: Props) {
     const [entityAvailable, setEntityAvailable] = useState(false);
 
     useEffect(() => {
-        const ssc = new V3API.SampleTypeSearchCriteria()
+        const ssc = new SampleTypeSearchCriteria()
         ssc.withCode().thatEquals(node.entityType)
-        const sfo = new V3API.SampleTypeFetchOptions()
+        const sfo = new SampleTypeFetchOptions()
         sfo.withPropertyAssignments().withPropertyType()
         if (loggedIn) {
             service.searchSampleTypes(ssc, sfo).then((res) => {
@@ -32,11 +32,20 @@ function Entry({ node }: Props) {
         }
     }, [node.entityType, loggedIn])
 
+    const handleSave = (event) => {
+        event.preventDefault()
+        const sample = new SampleCreation()
+        sample.setTypeId(new EntityTypePermId(node.entityType));
+        console.log(sample)
+    }
+        
+
     // Render input fields and entity settings
     return (
         <div>
             <div>Create new entry of type {node.entityType}</div>
             {entityAvailable ? <OpenBisEntry objectType={entity} /> : null}
+            <button onClick={handleSave}>Save</button>
         </div>
     );
 }

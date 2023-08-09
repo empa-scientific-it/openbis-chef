@@ -47,8 +47,7 @@ const metagraph = new Metagraph([
   },
 ]);
 
-const res = walkGraph(metagraph, (node) =>  node.id)
-console.log(res)
+
 
 function App() {
   const ob = useLogin()

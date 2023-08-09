@@ -4,8 +4,7 @@ import { SelectNode } from "@src/metagraph/metagraph";
 import NodePage from "./NodePage";
 import { AuthContext } from "@src/openbis/AuthContext";
 import { SampleType, Sample, Experiment } from "@src/types/openbis";
-import V3API from "v3api/V3API.esm"
-import { ExperimentSearchCriteria } from "@src/openbis/dto";
+import { ExperimentSearchCriteria, ExperimentFetchOptions,  SampleTypeFetchOptions, SampleFetchOptions} from "@src/openbis/dto";
 
 import SampleEntry from "@src/openbis/components/SampleEntry";
 import "./Node.css"
@@ -45,10 +44,10 @@ const Select = ({ node }: Props) => {
   useEffect(() => {
     const ssc = new ExperimentSearchCriteria()
     ssc.withIdentifier().thatEquals(node.collection)
-    const sfo = new V3API.ExperimentFetchOptions()
-    const sto = new V3API.SampleTypeFetchOptions()
+    const sfo = new ExperimentFetchOptions()
+    const sto = new SampleTypeFetchOptions()
     sto.withPropertyAssignments().withPropertyType()
-    const sso = new V3API.SampleFetchOptions()
+    const sso = new SampleFetchOptions()
     sso.withProperties()
     sso.withTypeUsing(sto)
     sfo.withSamplesUsing(sso)

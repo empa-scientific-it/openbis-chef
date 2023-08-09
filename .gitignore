@@ -1,3 +1,4 @@
 **/.wmill/**
 **/.task/**
 **/.venv/**
+**/node_modules/**

@@ -23,21 +23,21 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "typeRoots": [
-      "src/types/index.d.ts",
-      "src/types/api-openbis-java.d.ts",
+      "./src/types/index.d.ts",
+      "./src/types/openbis.d.ts",
       "node_modules/@types"
     ],
     "types": ["core-js"],
     "baseUrl": "./",
     "paths": {
       "v3api/*": [
-        "lib/v3api/js/*"
+        "./lib/v3api/js/*"
       ],
       "as/*": [
-        "lib/v3/as/*"
+        "./lib/v3/as/*"
       ],
       "@src/*": [
-        "src/*"
+        "./src/*"
       ],
     }
   },
