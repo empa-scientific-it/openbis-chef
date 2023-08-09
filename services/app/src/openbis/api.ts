@@ -1,245 +1,227 @@
-import autoBind from 'auto-bind'
-import dto from './dto'
-import requirejs from 'requirejs'
+//import { OpenBIS } from '@src/types/openbis'
+import openbis from 'v3api/V3API.esm'
 
-class Facade {
-  v3: any
-  url: String
-  constructor(url: String) {
-    autoBind(this)
-    this.url = url
+export class Facade {
+  v3: typeof openbis
+  constructor() {
+    this.v3 = new openbis.openbis()
   }
 
-  public _init() {
-    let _this = this
-    return new Promise((resolve, reject) => {
-      /* eslint-disable-next-line no-undef */
-      requirejs(
-        this.url,
-        openbis => {
-          _this.v3 = new openbis()
-          resolve(void(0))
-        },
-        error => {
-          reject(error)
-        }
-      )
-    })
-  }
 
-  public useSession(sessionToken) {
+
+  useSession(sessionToken) {
     this.v3._private.sessionToken = sessionToken
   }
 
-  public getSessionInformation() {
+  getSessionInformation() {
     return this.promise(this.v3.getSessionInformation())
   }
 
-  public getServerInformation() {
+  getServerInformation() {
     return this.promise(this.v3.getServerInformation())
   }
 
-  public getServerPublicInformation() {
+  getServerPublicInformation() {
     return this.promise(this.v3.getServerPublicInformation())
   }
 
-  public login(user, password) {
+  login(user, password) {
     return this.promise(this.v3.login(user, password))
   }
 
-  public logout() {
+  logout() {
     return this.promise(this.v3.logout())
   }
 
-  public getSpaces(ids, fo) {
+  getSpaces(ids, fo) {
     return this.promise(this.v3.getSpaces(ids, fo))
   }
 
-  public getProjects(ids, fo) {
+  getProjects(ids, fo) {
     return this.promise(this.v3.getProjects(ids, fo))
   }
 
-  public getExperiments(ids, fo) {
+  getExperiments(ids, fo) {
     return this.promise(this.v3.getExperiments(ids, fo))
   }
 
-  public getSamples(ids, fo) {
+  getSamples(ids, fo) {
     return this.promise(this.v3.getSamples(ids, fo))
   }
 
-  public getDataSets(ids, fo) {
+  getDataSets(ids, fo) {
     return this.promise(this.v3.getDataSets(ids, fo))
   }
 
-  public getPlugins(ids, fo) {
+  getPlugins(ids, fo) {
     return this.promise(this.v3.getPlugins(ids, fo))
   }
 
-  public getQueries(ids, fo) {
+  getQueries(ids, fo) {
     return this.promise(this.v3.getQueries(ids, fo))
   }
 
-  public getPropertyTypes(ids, fo) {
+  getPropertyTypes(ids, fo) {
     return this.promise(this.v3.getPropertyTypes(ids, fo))
   }
 
-  public getAuthorizationGroups(ids, fo) {
+  getAuthorizationGroups(ids, fo) {
     return this.promise(this.v3.getAuthorizationGroups(ids, fo))
   }
 
-  public getPersons(ids, fo) {
+  getPersons(ids, fo) {
     return this.promise(this.v3.getPersons(ids, fo))
   }
 
-  public updatePersons(updates) {
+  updatePersons(updates) {
     return this.promise(this.v3.updatePersons(updates))
   }
 
-  public searchSpaces(criteria, fo) {
+  searchSpaces(criteria, fo) {
     return this.promise(this.v3.searchSpaces(criteria, fo))
   }
 
-  public searchProjects(criteria, fo) {
+  searchProjects(criteria, fo) {
     return this.promise(this.v3.searchProjects(criteria, fo))
   }
 
-  public searchPropertyTypes(criteria, fo) {
+  searchPropertyTypes(criteria, fo) {
     return this.promise(this.v3.searchPropertyTypes(criteria, fo))
   }
 
-  public searchPlugins(criteria, fo) {
+  searchPlugins(criteria, fo) {
     return this.promise(this.v3.searchPlugins(criteria, fo))
   }
 
-  public searchPersonalAccessTokens(criteria, fo) {
+  searchPersonalAccessTokens(criteria, fo) {
     return this.promise(this.v3.searchPersonalAccessTokens(criteria, fo))
   }
 
-  public searchQueries(criteria, fo) {
+  searchQueries(criteria, fo) {
     return this.promise(this.v3.searchQueries(criteria, fo))
   }
 
-  public searchQueryDatabases(criteria, fo) {
+  searchQueryDatabases(criteria, fo) {
     return this.promise(this.v3.searchQueryDatabases(criteria, fo))
   }
 
-  public searchMaterials(criteria, fo) {
+  searchMaterials(criteria, fo) {
     return this.promise(this.v3.searchMaterials(criteria, fo))
   }
 
-  public searchSamples(criteria, fo) {
+  searchSamples(criteria, fo) {
     return this.promise(this.v3.searchSamples(criteria, fo))
   }
 
-  public searchExperiments(criteria, fo) {
+  searchExperiments(criteria, fo) {
     return this.promise(this.v3.searchExperiments(criteria, fo))
   }
 
-  public searchDataSets(criteria, fo) {
+  searchDataSets(criteria, fo) {
     return this.promise(this.v3.searchDataSets(criteria, fo))
   }
 
-  public searchVocabularies(criteria, fo) {
+  searchVocabularies(criteria, fo) {
     return this.promise(this.v3.searchVocabularies(criteria, fo))
   }
 
-  public searchVocabularyTerms(criteria, fo) {
+  searchVocabularyTerms(criteria, fo) {
     return this.promise(this.v3.searchVocabularyTerms(criteria, fo))
   }
 
-  public searchPersons(criteria, fo) {
+  searchPersons(criteria, fo) {
     return this.promise(this.v3.searchPersons(criteria, fo))
   }
 
-  public searchAuthorizationGroups(criteria, fo) {
+  searchAuthorizationGroups(criteria, fo) {
     return this.promise(this.v3.searchAuthorizationGroups(criteria, fo))
   }
 
-  public searchPropertyAssignments(criteria, fo) {
+  searchPropertyAssignments(criteria, fo) {
     return this.promise(this.v3.searchPropertyAssignments(criteria, fo))
   }
 
-  public searchEvents(criteria, fo) {
+  searchEvents(criteria, fo) {
     return this.promise(this.v3.searchEvents(criteria, fo))
   }
 
-  public getSampleTypes(ids, fo) {
+  getSampleTypes(ids, fo) {
     return this.promise(this.v3.getSampleTypes(ids, fo))
   }
 
-  public getExperimentTypes(ids, fo) {
+  getExperimentTypes(ids, fo) {
     return this.promise(this.v3.getExperimentTypes(ids, fo))
   }
 
-  public getDataSetTypes(ids, fo) {
+  getDataSetTypes(ids, fo) {
     return this.promise(this.v3.getDataSetTypes(ids, fo))
   }
 
-  public getMaterialTypes(ids, fo) {
+  getMaterialTypes(ids, fo) {
     return this.promise(this.v3.getMaterialTypes(ids, fo))
   }
 
-  public getVocabularies(ids, fo) {
+  getVocabularies(ids, fo) {
     return this.promise(this.v3.getVocabularies(ids, fo))
   }
 
-  public getOperationExecutions(ids, fo) {
+  getOperationExecutions(ids, fo) {
     return this.promise(this.v3.getOperationExecutions(ids, fo))
   }
 
-  public updateSampleTypes(updates) {
+  updateSampleTypes(updates) {
     return this.promise(this.v3.updateSampleTypes(updates))
   }
 
-  public updateExperimentTypes(updates) {
+  updateExperimentTypes(updates) {
     return this.promise(this.v3.updateExperimentTypes(updates))
   }
 
-  public updateDataSetTypes(updates) {
+  updateDataSetTypes(updates) {
     return this.promise(this.v3.updateDataSetTypes(updates))
   }
 
-  public updateMaterialTypes(updates) {
+  updateMaterialTypes(updates) {
     return this.promise(this.v3.updateMaterialTypes(updates))
   }
 
-  public searchSampleTypes(criteria, fo) {
+  searchSampleTypes(criteria, fo) {
     return this.promise(this.v3.searchSampleTypes(criteria, fo))
   }
 
-  public searchExperimentTypes(criteria, fo) {
+  searchExperimentTypes(criteria, fo) {
     return this.promise(this.v3.searchExperimentTypes(criteria, fo))
   }
 
-  public searchDataSetTypes(criteria, fo) {
+  searchDataSetTypes(criteria, fo) {
     return this.promise(this.v3.searchDataSetTypes(criteria, fo))
   }
 
-  public searchMaterialTypes(criteria, fo) {
+  searchMaterialTypes(criteria, fo) {
     return this.promise(this.v3.searchMaterialTypes(criteria, fo))
   }
 
-  public deleteSampleTypes(ids, options) {
+  deleteSampleTypes(ids, options) {
     return this.promise(this.v3.deleteSampleTypes(ids, options))
   }
 
-  public deleteExperimentTypes(ids, options) {
+  deleteExperimentTypes(ids, options) {
     return this.promise(this.v3.deleteExperimentTypes(ids, options))
   }
 
-  public deleteDataSetTypes(ids, options) {
+  deleteDataSetTypes(ids, options) {
     return this.promise(this.v3.deleteDataSetTypes(ids, options))
   }
 
-  public deleteMaterialTypes(ids, options) {
+  deleteMaterialTypes(ids, options) {
     return this.promise(this.v3.deleteMaterialTypes(ids, options))
   }
 
-  public evaluatePlugin(options) {
+  evaluatePlugin(options) {
     return this.promise(this.v3.evaluatePlugin(options))
   }
 
-  public async executeService(id, options) {
+  async executeService(id, options) {
     const scheduleResult = await this.executeOperations(
       [new dto.ExecuteCustomASServiceOperation(id, options)],
       new dto.AsynchronousOperationExecutionOptions()
@@ -275,15 +257,15 @@ class Facade {
     }
   }
 
-  public executeQuery(id, options) {
+  executeQuery(id, options) {
     return this.promise(this.v3.executeQuery(id, options))
   }
 
-  public executeSql(sql, options) {
+  executeSql(sql, options) {
     return this.promise(this.v3.executeSql(sql, options))
   }
 
-  public executeOperations(operations, options) {
+  executeOperations(operations, options) {
     return this.promise(this.v3.executeOperations(operations, options))
   }
 
@@ -301,5 +283,3 @@ class Facade {
   }
 }
 
-
-export default Facade
