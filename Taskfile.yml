@@ -15,15 +15,18 @@ tasks:
   download_jar:
       requires:
         vars: [TOKEN]
+      dir: ./utils
       cmds:
-        - "curl 'PRIVATE-TOKEN: ${TOKEN}' https://gitlab.empa.ch/api/v4/projects/1553/packages/generic/ch.empa.openbisio.app/0.1.0-SNAPSHOT/app.jar -O instance-io.jar"
+        - gradle copyDependencies --stacktrace
       status:
         - test -f instance-io.jar
   export_schema:
+      requires:
+        vars: [OPENBIS_SOURCE_USER, OPENBIS_SOURCE_PASSWORD]
       deps:
         - download_jar
       cmds:
-        - java -jar instance-io.jar dump https://openbis-empa-lab402.ethz.ch/ basi_admin ***REMOVED*** schema_402.json
+        - java -jar instance-io.jar dump https://openbis-empa-lab402.ethz.ch/ {OPENBIS_SOURCE_USER} {OPENBIS_SOURCE_PASSWORD} schema_402.json
       status:
         - test -f schema_402.json
   cleanup_schema:
