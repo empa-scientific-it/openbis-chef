@@ -13,7 +13,7 @@ repositories {
         name = "Empa Gitlab"
         credentials(HttpHeaderCredentials::class) {
             name = "Access"
-            value = gitLabPrivateToken ?: ciToken
+            value =  ciToken
         }
         authentication {
             create<HttpHeaderAuthentication>("header")
