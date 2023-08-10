@@ -26,7 +26,7 @@ tasks:
       deps:
         - download_jar
       cmds:
-        - java -jar instance-io.jar dump https://openbis-empa-lab402.ethz.ch/ {OPENBIS_SOURCE_USER} {OPENBIS_SOURCE_PASSWORD} schema_402.json
+        - java -jar instance-io.jar dump https://openbis-empa-lab402.ethz.ch/ ${OPENBIS_SOURCE_USER} ${OPENBIS_SOURCE_PASSWORD} schema_402.json
       status:
         - test -f schema_402.json
   cleanup_schema:
