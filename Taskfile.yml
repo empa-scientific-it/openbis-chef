@@ -6,7 +6,7 @@ dotenv:
 tasks:
   start_openbis:
       cmds:
-        - docker-compose up -d
+        - docker compose up -d
       status:
         - docker compose ps | grep openbis
   #TODO fix  this part
