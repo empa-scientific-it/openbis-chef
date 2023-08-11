@@ -2,7 +2,7 @@
   "name": "app",
   "private": true,
   "version": "0.0.0",
-  "type":"module",
+  "type": "module",
   "scripts": {
     "dev": "webpack-dev-server --hot --config webpack.config.cjs",
     "vite-dev": "vite dev",
@@ -13,7 +13,6 @@
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.22.5",
     "buffer": "^6.0.3",
-    "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "requirejs": "^2.3.6"
   },
@@ -47,6 +46,7 @@
     "jquery": "^3.7.0",
     "moment": "^2.29.4",
     "process": "^0.11.10",
+    "react": "^18.2.0",
     "react-flow": "^1.0.3",
     "react-fontawesome": "^1.7.1",
     "react-router-dom": "^6.14.2",

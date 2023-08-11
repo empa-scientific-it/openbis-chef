@@ -6,26 +6,33 @@ dotenv:
 tasks:
   start_openbis:
       cmds:
-        - docker-compose up -d
+        - docker compose up -d
       status:
         - docker compose ps | grep openbis
+        - wait_openbis
+  wait_openbis:
+      cmds:
+        - docker compose exec openbis bash -c "until curl -k https://localhost:${OPENBIS_PORT}/openbis/openbis; do sleep 1; done"
   #TODO fix  this part
   #If it does not work, just download the tool from here:
   #https://gitlab.empa.ch/openbis-tools/instance-io/-/packages/57 and place it in the root of the project with the name instance-io.jar
   download_jar:
-      requires:
-        vars: [TOKEN]
+      # requires:
+      #   vars: [TOKEN]
+      dir: ./utils
       cmds:
-        - "curl 'PRIVATE-TOKEN: ${TOKEN}' https://gitlab.empa.ch/api/v4/projects/1553/packages/generic/ch.empa.openbisio.app/0.1.0-SNAPSHOT/app.jar -O instance-io.jar"
+        - 'curl  -L -H "Private-Token: {{.TOKEN}}"  https://gitlab.empa.ch/api/v4/projects/1553/packages/maven/ch/empa/openbisio/app/0.1.3/app-0.1.3.jar --output instance-io.jar'
       status:
-        - test -f instance-io.jar
+        - test  ./utils/instance-io.jar
   export_schema:
+      requires:
+        vars: [OPENBIS_SOURCE_USER, OPENBIS_SOURCE_PASSWORD]
       deps:
         - download_jar
       cmds:
-        - java -jar instance-io.jar dump https://openbis-empa-lab402.ethz.ch/ basi_admin eiVo2lee schema_402.json
+        - java -jar ./utils/instance-io.jar dump  schema_402.json https://openbis-empa-lab402.ethz.ch/ {{.OPENBIS_SOURCE_USER}} {{.OPENBIS_SOURCE_PASSWORD}}  
       status:
-        - test -f schema_402.json
+        - test schema_402.json
   cleanup_schema:
       deps:
         - export_schema
@@ -34,14 +41,14 @@ tasks:
       generates:
         - schema_402_clean.json
       cmds:
-        - cat schema_402.json | jq 'del(.spaces[] | select(.code == "ADFIB_MATERIALS" or .code == "CHEMI_MATERIALS" or .code=="CHEMI_DANIELE.RONCUCCI_AT_EMPA.CH"))' > schema_402_clean.json
+        - cat schema_402.json | jq '.spaces |= map(select(.code | contains("POLPRO")))' | more > schema_402_clean.json
   ##TODO fix this part: improve the checking whether the schema is already imported
   import_schema:
       deps:
         - cleanup_schema
         - start_openbis
       cmds:
-        - java -jar instance-io.jar load https://localhost:${OPENBIS_PORT} admin changeit schema_402_clean.json
+        - java -jar ./utils/instance-io.jar load schema_402_clean.json https://localhost:${OPENBIS_PORT} admin changeit 
         - touch .schema_imported
       status:
         - test -f .schema_imported

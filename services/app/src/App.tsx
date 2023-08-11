@@ -8,20 +8,23 @@ import { Metagraph, walkGraph } from '@src/metagraph/metagraph';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
+import { useContext, useEffect } from 'react';
 library.add(fas, far)
 
 
 function RequireAuth({ children }: { children: JSX.Element }) {
-  let {loggedIn} = useLogin();
-  let location = useLocation();
-  let navigate = useNavigate();
-  if (!loggedIn) {
-    // Redirect them to the /login page, but save the current location they were
-    // trying to go to when they were redirected. This allows us to send them
-    // along to that page after they login, which is a nicer user experience
-    // than dropping them off on the home page.
-    return <Navigate to="login" state={{ from: location }} replace />;
-  }
+  const {loggedIn} = useContext(AuthContext);
+  const location = useLocation();
+  const navigate = useNavigate();
+  useEffect(() => {
+    console.log(loggedIn)
+    if (!loggedIn) {
+      navigate("/login")
+    }else{
+      //navigate(location.pathname)
+    }
+  } , [loggedIn, location])
+
 
   return children;
 }
@@ -58,11 +61,11 @@ function App() {
           <Routes>
             <Route path="login" element={<Login />} />
               <Route
-                index
+                path="/"
                 element={
-                  //<RequireAuth>
+                  <RequireAuth>
                     <Workflow metagraph={metagraph} />
-                  //</RequireAuth>
+                  </RequireAuth>
                 }
               />
           </Routes>
