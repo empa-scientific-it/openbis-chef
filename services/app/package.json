@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "webpack-dev-server --hot --config webpack.config.cjs",
     "vite-dev": "vite dev",
-    "tscheck": "tsc",
+    "tscheck": "tsc -p ./ --noEmit",
     "modules": "webpack --stats-modules-space 999",
     "generate-names": "node ./generate_names.js"
   },

@@ -19,6 +19,7 @@ const SampleSelector = ({ experiment, onSelect }) => {
   return (
     <div>
       <div>Experiment: {experiment.identifier.identifier}</div>
+      
       <label>Select sample:</label>
       <select onChange={onSelect}>
         {experiment.samples.map((sample: Sample) => <option key={sample.identifier.identifier} value={sample.identifier.identifier}>{sample.identifier.identifier}</option>)}

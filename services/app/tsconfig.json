@@ -11,7 +11,7 @@
     "module": "ESNext",
     "skipLibCheck": true,
     /* Bundler mode */
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
@@ -23,11 +23,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "typeRoots": [
-      "./src/types/index.d.ts",
-      "./src/types/openbis.d.ts",
+      "./src/types/",
       "node_modules/@types"
     ],
-    "types": ["core-js"],
+    "types": ["openbis"],
     "baseUrl": "./",
     "paths": {
       "v3api/*": [
@@ -42,9 +41,13 @@
     }
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.json",
-    "src/**/*.js"
+    "./src/**/*.ts",
+    "./src/**/*.tsx",
+    "./src/**/*.json",
+    "./src/**/*.js",
+    "./src/**/*.d.ts",
   ],
+  "files": [
+    "./src/types/openbis.d.ts"
+  ]
 }

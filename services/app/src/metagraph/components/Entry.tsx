@@ -1,9 +1,10 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { EntryNode } from '@src/metagraph/metagraph';
 import { AuthContext } from '@src/openbis/AuthContext';
-import { SampleType } from '@src/types/openbis';
+import { SampleType, SearchResult } from '@src/types/openbis';
 import OpenBisEntry from '@src/openbis/components/OpenBisEntry';
 import  {SampleTypeSearchCriteria, SampleTypeFetchOptions, SampleCreation, EntityTypePermId} from '@src/openbis/dto';
+
 
 
 type Props = {
@@ -11,7 +12,7 @@ type Props = {
 }
 
 function Entry({ node }: Props) {
-    const { token, setToken, loggedIn, setLoggedIn, login, service, loginAndThen, logout } = useContext(AuthContext)
+    const {  loggedIn, service } = useContext(AuthContext)
     const [inputValue, setInputValue] = useState('');
     const [entity, setEntity] = useState({} as SampleType);
     const [entityAvailable, setEntityAvailable] = useState(false);
@@ -22,7 +23,7 @@ function Entry({ node }: Props) {
         const sfo = new SampleTypeFetchOptions()
         sfo.withPropertyAssignments().withPropertyType()
         if (loggedIn) {
-            service.searchSampleTypes(ssc, sfo).then((res) => {
+            service.searchSampleTypes(ssc, sfo).then((res:SearchResult<SampleType>) => {
                 if (res.totalCount > 0) {
                     setEntity(() => res.objects[0])
                     setEntityAvailable(true)
