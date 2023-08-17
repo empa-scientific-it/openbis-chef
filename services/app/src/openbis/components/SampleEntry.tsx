@@ -43,7 +43,7 @@ function SampleEntry({ sample }: Props) {
                 <h3>Properties</h3>
                 <div className="properties-container">
                     {Object.entries(transformedSample.properties).map(([name, value], index) => {
-                        return <div className="property-entry"><div className="property-label">{name}</div><div className="property-value">{displayValue(value)}</div></div>
+                        return <div className="property-entry"><div className="property-label">{value.propertyType.label}</div><div className="property-value">{displayValue(value)}</div></div>
                     })
                     }
                 </div>

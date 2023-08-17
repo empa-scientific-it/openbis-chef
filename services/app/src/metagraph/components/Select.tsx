@@ -72,10 +72,10 @@ const Select = ({ node }: Props) => {
 
   return (
     <div>
+      <div>Select an existing object</div>
       {experimentAvailable ? <SampleSelector experiment={experiment} onSelect={handleSelection} /> : null}
       <hr className="node-divider" />
       {sampleAvailable ? <SampleEntry sample={sample} /> : null}
-
     </div>
   );
 };

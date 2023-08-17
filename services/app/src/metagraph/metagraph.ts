@@ -42,9 +42,13 @@ export interface VisualisationNode {
 
 export class Metagraph {
   nodes: MetagraphNode[];
+  name: string;
+  description: string;
 
-  constructor(nodes: MetagraphNode[]) {
+  constructor(nodes: MetagraphNode[], description: string, name: string) {
     this.nodes = nodes;
+    this.description = description;
+    this.name = name;
 
     // Validate the metagraph
     this.validateMetagraph();
@@ -193,9 +197,10 @@ export function getVisualisationNodes(g: Metagraph, mult: number): Visualisation
     return {
       id: node.id,
       data: node.data,
+      type: 'input',
       position: {
         y: node.depth * mult,
-        x: getRandomInt(node.depth)
+        x: getRandomInt(node.depth) * mult
       }
 
     }

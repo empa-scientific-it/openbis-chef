@@ -2,7 +2,7 @@
 
 import { SampleType, DataType } from "@src/types/openbis"
 import "./EntryForm.css"
-import {mapDataTypeToInputType} from "@src/openbis/typeMappers"
+import { mapDataTypeToInputType } from "@src/openbis/typeMappers"
 type Props = {
     objectType: SampleType
 }
@@ -31,7 +31,7 @@ function OpenBisEntry({ objectType }: Props) {
         <div>
             <form className="form-container">
 
-                {objectType.propertyAssignments.map((el) => <label className="form-label" key={el.propertyType.code}>{el.propertyType.code}<input className="form-input" type={mapDataTypeToInputType(el.propertyType.dataType)} /></label>)}
+                {objectType.propertyAssignments.map((el) => <label className="form-label" key={el.propertyType.label}>{el.propertyType.label}<input className="form-input" type={mapDataTypeToInputType(el.propertyType.dataType)} /></label>)}
 
             </form>
         </div>

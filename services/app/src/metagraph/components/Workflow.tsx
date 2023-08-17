@@ -7,6 +7,7 @@ import { AuthContext } from '@src/openbis/AuthContext';
 import { useList } from '../useList';
 import Summary from './Summary';
 import "./Node.css"
+import NodePage from './NodePage';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -21,15 +22,7 @@ const Workflow = ({ metagraph }: Props) => {
 
 
     // Construct components for each node type
-    const nodeComponents = walkGraph(metagraph, (node) => {
-        if (node.type === 'entry') {
-            return <Entry key={node.id} node={node} />;
-        } else if (node.type === 'select') {
-            return <Select key={node.id} node={node} />;
-        }
-        // Handle other node types if needed
-        return null;
-    });
+    const nodeComponents = walkGraph(metagraph, (node) => { return <NodePage key={node.id} node={node} />; });
 
     const { elem, next, previous, idx, finished, move } = useList(nodeComponents)
 
@@ -53,25 +46,44 @@ const Workflow = ({ metagraph }: Props) => {
     };
 
     const handleMove = (index: number) => {
-        return (ev: Event) =>{
+        return (ev: Event) => {
             ev.preventDefault()
             move(index)
         }
     }
 
-    //When finished, it should show a summary of the inputs and allow the user to run the workflow
+    const [start, setStart] = useState(false);
 
-    return (
-        <div className='node-container'>
-            <h1>Workflow</h1>
+    function workflowPages() {
+        return (<div>
+            <h1>Workflow: {metagraph.name}</h1>
             <hr className="node-divider" />
             {!finished ? elem : <div>Finished workflow, review your steps before submitting</div>}
             <hr className="node-divider" />
             {idx > 0 ? <button onClick={handlePreviousStep}>Previous step</button> : null}
             {!finished ? <button onClick={handleNextStep}>Next step</button> : <button onClick={handleSubmit}>Submit</button>}
             <div>Step {idx + 1} of {metagraph.nodes.length}</div>
-            {metagraph.nodes.map((nd, index) => <FontAwesomeIcon icon={(index > idx) ? "fa-regular fa-circle" : "fa-solid fa-circle"} onClick={handleMove(index)}/>)}
+            {metagraph.nodes.map((nd, index) => <FontAwesomeIcon icon={(index > idx) ? "fa-regular fa-circle" : "fa-solid fa-circle"} onClick={handleMove(index)} />)}
+        </div>)
+    }
+
+    function startPage() {
+        return (<div>
+            <h1>Workflow: {metagraph.name}</h1>
+            <Summary metagraph={metagraph} />
+            <hr className="node-divider" />
+            <div>Click start to begin</div>
+            <button onClick={() => setStart(true)}>Start</button>
+        </div>)
+    }
+
+    //When finished, it should show a summary of the inputs and allow the user to run the workflow
+
+    return (
+        <div className='node-container'>
+            {start ? workflowPages() : startPage()}
         </div>
+
     );
 };
 

@@ -49,7 +49,7 @@ const metagraph = new Metagraph([
     dependencies: ['Select compounder'],
     description: 'Enter the parameters for the compounder',
   },
-]);
+],"Create fiber", "Create fiber from compounder");
 
 
 

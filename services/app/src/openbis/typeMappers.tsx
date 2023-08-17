@@ -1,4 +1,4 @@
-import { DataType, Plugin, Sample } from "@src/types/openbis";
+import { DataType, Plugin, PropertyType, Sample } from "@src/types/openbis";
 import "react"
 import React from "react";
 
@@ -58,6 +58,7 @@ interface PropertyWithType {
     value: string;
     type: DataType;
     plugin: Plugin;
+    propertyType: PropertyType
 }
 
 export interface SampleWithTypes {
@@ -69,7 +70,7 @@ export function addTypesToSampleEntry(sampleEntry: Sample): SampleWithTypes {
 
     const mappedProperties = Object.fromEntries(Object.entries(sampleEntry.properties).map(([key, value]) => {
         const propType = sampleEntry.type.propertyAssignments.find((ass) => ass.propertyType.code == key)
-        return [key, { value: value, type: propType.propertyType.dataType, plugin: propType.plugin }]
+        return [key, { value: value, type: propType.propertyType.dataType, plugin: propType.plugin, propertyType: propType.propertyType }]
 
     }))
     return { sample: sampleEntry, properties: { ...mappedProperties } }

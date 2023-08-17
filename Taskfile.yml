@@ -30,25 +30,25 @@ tasks:
       deps:
         - download_jar
       cmds:
-        - java -jar ./utils/instance-io.jar dump  schema_402.json https://openbis-empa-lab402.ethz.ch/ {{.OPENBIS_SOURCE_USER}} {{.OPENBIS_SOURCE_PASSWORD}}  
+        - java -jar ./utils/instance-io.jar dump  ./schemas/schema_402.json https://openbis-empa-lab402.ethz.ch/ {{.OPENBIS_SOURCE_USER}} {{.OPENBIS_SOURCE_PASSWORD}}  
       status:
-        - test schema_402.json
+        - test ./schemas/schema_402.json
   cleanup_schema:
       deps:
         - export_schema
       sources:
-        - schema_402.json
+        - ./schemas/schema_402.json
       generates:
-        - schema_402_clean.json
+        - ./schemas/schema_402_clean.json
       cmds:
-        - cat schema_402.json | jq '.spaces |= map(select(.code | contains("POLPRO")))' | more > schema_402_clean.json
+        - cat ./schemas/schema_402.json | jq '.spaces |= map(select(.code | contains("POLPRO")))' | more > ./schemas/schema_402_clean.json
   ##TODO fix this part: improve the checking whether the schema is already imported
   import_schema:
       deps:
         - cleanup_schema
         - start_openbis
       cmds:
-        - java -jar ./utils/instance-io.jar load schema_402_clean.json https://localhost:${OPENBIS_PORT} admin changeit 
+        - java -jar ./utils/instance-io.jar load ./schemas/schema_402_clean.json https://localhost:${OPENBIS_PORT} admin changeit 
         - touch .schema_imported
       status:
         - test -f .schema_imported
@@ -63,3 +63,11 @@ tasks:
       dir: ./services/app
       cmds:
         - npm run vite-dev
+  dump_local_schema:
+      deps:
+        - download_jar
+        - start_openbis
+      cmds:
+        - java -jar ./utils/instance-io.jar dump  ./schemas/schema_402_local.json https://localhost:${OPENBIS_PORT} admin changeit
+      status:
+        - test ./schemas/schema_402_local.json

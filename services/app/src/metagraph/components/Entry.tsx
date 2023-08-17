@@ -44,7 +44,7 @@ function Entry({ node }: Props) {
     // Render input fields and entity settings
     return (
         <div>
-            <div>Create new entry of type {node.entityType}</div>
+            <div>This step will create a new sample of type {node.entityType} in collection {node.collection}</div>
             {entityAvailable ? <OpenBisEntry objectType={entity} /> : null}
             <button onClick={handleSave}>Save</button>
         </div>

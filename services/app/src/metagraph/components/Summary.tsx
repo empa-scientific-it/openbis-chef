@@ -16,21 +16,25 @@ type Props = {
 }
 
 function Summary({ metagraph }: Props) {
-    const [nodes, setNodes] = useNodesState(getVisualisationNodes(metagraph, 5));
+    const [nodes, setNodes] = useNodesState(getVisualisationNodes(metagraph, 400));
     const [edges, setEdges] = useEdgesState(getEdges(metagraph));
-    const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
-    const onInit = (reactFlowInstance) => console.log('flow loaded:', reactFlowInstance);
+    const onConnect = useCallback((params) => console.log("not possible"), []);
+    const onInit = (reactFlowInstance) => console.log('flow loaded:', nodes, edges);
+    const nodeTypes = nodes.map(node => node.type)
 
     return (
-        <div style={{ height: 800 }}>
+        <div>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
                 onConnect={onConnect}
                 onInit={onInit}
+                nodeTypes={nodeTypes}
                 fitView
                 attributionPosition="top-right"
             >
+                <MiniMap zoomable pannable />
+                <Controls />
             </ReactFlow>
         </div>
 
