@@ -1,0 +1,34 @@
+.sample-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    border: 1px solid #ccc;
+}
+
+.sample-entry {
+    border: 1px solid #ccc;
+}
+
+
+.properties-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    border: 1px solid #ccc;
+}
+
+
+.property-label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.property-label .property-entry  {
+    float: left;
+}
+
+.property-value {
+    border: 1px solid #ccc;
+    width: 100%;
+    overflow: auto;
+}

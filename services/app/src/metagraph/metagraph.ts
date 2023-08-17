@@ -1,3 +1,5 @@
+import type { SamplesCreationOperation } from '@src/types/openbis';
+
 export interface Node {
   id: string;
   entityType: string;
@@ -201,3 +203,22 @@ export function getVisualisationNodes(g: Metagraph, mult: number): Visualisation
   return nodesWithDepth;
 
 }
+
+interface MetagraphOperation{
+  operationId: string;
+}
+
+interface CreateOperation extends MetagraphOperation {
+  creation: SamplesCreationOperation
+
+}
+
+interface LinkOperation extends MetagraphOperation {
+  source: string;
+}
+
+
+type MetagraphOperations = CreateOperation | LinkOperation;
+
+
+
