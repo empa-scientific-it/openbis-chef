@@ -63,6 +63,7 @@ const Workflow = ({ metagraph }: Props) => {
             {idx > 0 ? <button onClick={handlePreviousStep}>Previous step</button> : null}
             {!finished ? <button onClick={handleNextStep}>Next step</button> : <button onClick={handleSubmit}>Submit</button>}
             <div>Step {idx + 1} of {metagraph.nodes.length}</div>
+            <button onClick={() => setStart(false)}>Restart</button>
             {metagraph.nodes.map((nd, index) => <FontAwesomeIcon icon={(index > idx) ? "fa-regular fa-circle" : "fa-solid fa-circle"} onClick={handleMove(index)} />)}
         </div>)
     }
