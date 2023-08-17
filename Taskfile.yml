@@ -50,6 +50,7 @@ tasks:
         - cleanup_schema
         - start_openbis
       cmds:
+        - until ./utils/check_openbis.sh https://localhost:${OPENBIS_PORT}; do sleep 1; done
         - java -jar ./utils/instance-io.jar load ./schemas/schema_402_clean.json https://localhost:${OPENBIS_PORT} admin changeit 
         - touch .schema_imported
       status:
