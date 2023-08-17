@@ -12,7 +12,7 @@ tasks:
         - wait_openbis
   wait_openbis:
       cmds:
-        - docker compose exec openbis bash -c "until curl -k https://localhost:${OPENBIS_PORT}/openbis/openbis; do sleep 1; done"
+        - until ./utils/check_openbis.sh https://localhost:${OPENBIS_PORT}; do sleep 1; done
   #TODO fix  this part
   #If it does not work, just download the tool from here:
   #https://gitlab.empa.ch/openbis-tools/instance-io/-/packages/57 and place it in ./utils/ of the project with the name instance-io.jar
