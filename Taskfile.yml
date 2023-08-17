@@ -16,6 +16,9 @@ tasks:
   #TODO fix  this part
   #If it does not work, just download the tool from here:
   #https://gitlab.empa.ch/openbis-tools/instance-io/-/packages/57 and place it in ./utils/ of the project with the name instance-io.jar
+  cleanup:
+      cmds:
+        - docker compose down -v
   download_jar:
       # requires:
       #   vars: [TOKEN]
