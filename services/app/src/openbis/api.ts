@@ -17,7 +17,11 @@ export class Facade {
     this.v3 = new openbis.openbis()
   }
 
-
+  checkSession(sessionToken: string) {
+    this.useSession(sessionToken);
+    console.log("Checking session");
+    return this.promise(this.getServerInformation())
+  }
 
   useSession(sessionToken: string) {
     this.v3._private.sessionToken = sessionToken

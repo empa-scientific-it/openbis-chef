@@ -1,0 +1,43 @@
+  .container {
+  width: 100%;
+  margin: auto;
+  padding: 10px;
+  display: grid;
+  align-items: top;
+  border: 1px solid #ccc;
+}
+
+.container .workflow-list{
+    width: 100%;
+    margin: auto;
+    border: 1px solid #ccc;
+}
+
+.workflow-list ul {
+    list-style-type:none
+}
+
+.workflow-list  li.clickable {
+    background-color: #ccc;
+}
+
+.workflow-list li.empty {
+    background-color: #fff;
+
+}
+
+.one {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    grid-row-start: 1;
+    grid-row-end: 3;
+}
+
+.two {
+    grid-column-start: 4;
+    grid-column-end: 6;
+    grid-row-start: 1;
+    grid-row-end: 3;
+}
+
+

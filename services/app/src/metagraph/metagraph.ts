@@ -209,21 +209,21 @@ export function getVisualisationNodes(g: Metagraph, mult: number): Visualisation
 
 }
 
-interface MetagraphOperation{
+export interface MetagraphOperation{
   operationId: string;
 }
 
-interface CreateOperation extends MetagraphOperation {
+export interface CreateOperation extends MetagraphOperation {
   creation: SamplesCreationOperation
 
 }
 
-interface LinkOperation extends MetagraphOperation {
+export interface LinkOperation extends MetagraphOperation {
   source: string;
 }
 
 
-type MetagraphOperations = CreateOperation | LinkOperation;
+export type MetagraphOperations = CreateOperation | LinkOperation;
 
 
 

@@ -29,5 +29,34 @@ export const useList = <T>(l: T[]) => {
         }
     }
 
-    return {elem, next, previous, finished, idx, move}
+    const find = (predicate : (elem: T) => boolean): T => {
+        return list.find(predicate)
+    }
+
+    const remove = (elem: T) => {
+        const newList = list.filter(e => e !== elem)
+        setList(newList)
+        if (idx >= newList.length) {
+            move(newList.length - 1)
+        }
+    }
+
+    const add = (elem: T) => {
+        setList([...list, elem])
+    }
+
+
+    const set = (elem: T, index: number) => {
+        if (index < 0 || index >= list.length) {
+            throw new Error("Index out of bounds")
+        }else{
+            const newList = [...list]
+            newList[index] = elem
+            setList(newList)
+        }
+
+    }
+
+
+    return {elem, next, previous, finished, idx, move, find, add, remove, set}
 }

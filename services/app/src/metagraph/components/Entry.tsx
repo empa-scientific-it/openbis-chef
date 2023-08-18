@@ -33,20 +33,13 @@ function Entry({ node }: Props) {
         }
     }, [node.entityType, loggedIn])
 
-    const handleSave = (event) => {
-        event.preventDefault()
-        const sample = new SampleCreation()
-        sample.setTypeId(new EntityTypePermId(node.entityType));
-        console.log(sample)
-    }
-        
+
 
     // Render input fields and entity settings
     return (
         <div>
             <div>This step will create a new sample of type {node.entityType} in collection {node.collection}</div>
             {entityAvailable ? <OpenBisEntry objectType={entity} /> : null}
-            <button onClick={handleSave}>Save</button>
         </div>
     );
 }

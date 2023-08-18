@@ -29,7 +29,7 @@ const NodePage = ({ node }:Props) => {
     // Render input fields and link settings
     return (
       <div>
-        <div>Current step: {node.description}</div>
+        <h1>Current step: {node.description}</h1>
         <hr className="node-divider" />
         {child}
       </div>

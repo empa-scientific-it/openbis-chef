@@ -16,6 +16,7 @@ export default defineConfig({
     server: {
         proxy: {
             '/openbis/': {
+                //You can use https://sgl01646:8443/ for remote development with the instance in SG. You can also use https://openbis-empa-lab402.ethz.ch/openbis/webapp/eln-lims/ but be careful with creating objects
                 target: 'https://localhost:8445/',
                 changeOrigin: false,
                 secure: false

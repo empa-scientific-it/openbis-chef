@@ -15,7 +15,7 @@ type Props = {
 
 
 
-const SampleSelector = ({ experiment, onSelect }) => {
+const SampleSelector = ({ experiment, onSelect }: {experiment: Experiment, onSelect: (event: React.ChangeEvent<HTMLSelectElement>) => void }) => {
   return (
     <div>
       <div>Experiment: {experiment.identifier.identifier}</div>

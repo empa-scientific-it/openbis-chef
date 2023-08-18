@@ -2,29 +2,45 @@
 import React, { useState, useContext } from 'react';
 import Entry from './Entry';
 import Select from './Select';
-import { Metagraph, walkGraph } from '@src/metagraph/metagraph';
+import { Metagraph, walkGraph, MetagraphOperations } from '@src/metagraph/metagraph';
 import { AuthContext } from '@src/openbis/AuthContext';
 import { useList } from '../useList';
 import Summary from './Summary';
+import "@src/App.css"
 import "./Node.css"
+import "./Workflow.css"
+import { useWorkflows } from '../useWorkflows';
+
 import NodePage from './NodePage';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Me } from '@src/types/openbis';
+
+import { Stepper } from './Stepper';
+
 
 type Props = {
-    metagraph: Metagraph
+    workflows: Metagraph[]
 }
 
-const Workflow = ({ metagraph }: Props) => {
+const Workflow = ({ workflows }: Props) => {
     //Get openbis service
     const { token, setToken, loggedIn, setLoggedIn, login, service } = useContext(AuthContext)
+    //Keep list of all available workflows
+    const { currentWorkflow, selectWorkflow } = useWorkflows(workflows);
+    const [workflowSelected, setWorkflowSelected] = useState(false)
+
     // Initialize user inputs state based on metagraph nodes
-
-
-    // Construct components for each node type
-    const nodeComponents = walkGraph(metagraph, (node) => { return <NodePage key={node.id} node={node} />; });
-
+    const nodeComponents = walkGraph(currentWorkflow, (node) => { return <NodePage key={node.id} node={node} />; });
+    //Keep track of the position in the workflow
     const { elem, next, previous, idx, finished, move } = useList(nodeComponents)
+
+
+    
+    //Initialise the list of workflowsteps
+    const {elem:workflowAction, set:setWorkflowAction} = useList(walkGraph(currentWorkflow, (node) => { return {} as MetagraphOperations }))
+
+
 
 
     // Run workflow function
@@ -34,6 +50,7 @@ const Workflow = ({ metagraph }: Props) => {
     };
 
     const handleNextStep = () => {
+        setWorkflowAction( {} as MetagraphOperations, idx)
         next()
     };
     const handlePreviousStep = () => {
@@ -46,43 +63,98 @@ const Workflow = ({ metagraph }: Props) => {
     };
 
     const handleMove = (index: number) => {
-        return (ev: Event) => {
-            ev.preventDefault()
-            move(index)
-        }
+        move(index)
     }
+
+    const handleWorkflowSelection = (ev: React.ChangeEvent<HTMLSelectElement>) => {
+        ev.preventDefault()
+        console.log("handleWorkflowSelection")
+        console.log(ev)
+        selectWorkflow(ev.target.textContent)
+        console.log(currentWorkflow)
+        setWorkflowSelected(() => true)
+    }
+
+
 
     const [start, setStart] = useState(false);
 
-    function workflowPages() {
+
+    const WorkflowEnd = (handleSubmit: () => void) => {
+        return (
+            <div>
+                <hr className="node-divider" />
+                <div>Finished workflow, review your steps before submitting</div>
+                <button className="clickable" onClick={handleSubmit}>Submit</button>
+                <hr className="node-divider" />
+            </div>
+
+        )
+
+    }
+
+
+    function WorkflowPages({ metagraph }: { metagraph: Metagraph }) {
         return (<div>
-            <h1>Workflow: {metagraph.name}</h1>
             <hr className="node-divider" />
-            {!finished ? elem : <div>Finished workflow, review your steps before submitting</div>}
+            {finished ? WorkflowEnd(handleSubmit) : elem}
             <hr className="node-divider" />
-            {idx > 0 ? <button onClick={handlePreviousStep}>Previous step</button> : null}
-            {!finished ? <button onClick={handleNextStep}>Next step</button> : <button onClick={handleSubmit}>Submit</button>}
+            <Stepper handleBack={handlePreviousStep} handleNext={handleNextStep} handleReset={() => { }} handleMove={handleMove} currentStep={idx} maxSteps={metagraph.nodes.length} />
+            {/* {idx > 0 ? <button className="clickable" onClick={handlePreviousStep}>Previous step</button> : null}
+            {!finished ? <button className="clickable" onClick={handleNextStep}>Next step</button> : <button className="clickable" onClick={handleSubmit}>Submit</button>}
             <div>Step {idx + 1} of {metagraph.nodes.length}</div>
-            <button onClick={() => setStart(false)}>Restart</button>
-            {metagraph.nodes.map((nd, index) => <FontAwesomeIcon icon={(index > idx) ? "fa-regular fa-circle" : "fa-solid fa-circle"} onClick={handleMove(index)} />)}
+            <button className="clickable" onClick={() => setStart(false)}>Restart</button>
+            <div>{metagraph.nodes.map((nd, index) => <FontAwesomeIcon icon={(index > idx) ? "fa-regular fa-circle" : "fa-solid fa-circle"} onClick={handleMove(index)} />)}</div> */}
         </div>)
     }
 
-    function startPage() {
+    function WorkflowDescription({ metagraph }: { metagraph: Metagraph }) {
         return (<div>
-            <h1>Workflow: {metagraph.name}</h1>
-            <Summary metagraph={metagraph} />
-            <hr className="node-divider" />
-            <div>Click start to begin</div>
-            <button onClick={() => setStart(true)}>Start</button>
+            <div className="workflow-list">
+                {<h3>Workflow summary</h3>}
+                {<h4>{metagraph.name}</h4>}
+                <Summary metagraph={metagraph} />
+            </div>
         </div>)
     }
+
+    function WorkflowSelection({ workflows, onSelect }: { workflows: Metagraph[], onSelect: (ev: React.MouseEvent<HTMLElement>) => void }) {
+
+        return (
+            <div className="workflow-list">
+                <h3>Available workflows</h3>
+                <ul>
+                    {workflows.map((workflow) => <li key={workflow.name} value={workflow.name} onClick={event => onSelect(event)} className={("currentWorkflow.name" == workflow.name) ? "clickable" : "empty"}>{workflow.name}</li>)}
+                </ul>
+            </div>
+        )
+
+    }
+
+
+    function WorkflowEntry({ metagraph }: { metagraph: Metagraph, onSelect: (ev: React.MouseEvent<HTMLElement>) => void }) {
+        return (
+            <div>
+                <h1>Workflow Selection</h1>
+                <div className="container">
+                    <div className="one"> <WorkflowSelection workflows={workflows} onSelect={handleWorkflowSelection} /></div>
+                    <div className="two"><WorkflowDescription metagraph={currentWorkflow} /></div>
+                </div>
+                <hr className="node-divider" />
+                <button className="clickable" onClick={() => setStart(true)}>Start workflow</button>
+            </div>
+
+        )
+    }
+
 
     //When finished, it should show a summary of the inputs and allow the user to run the workflow
 
     return (
         <div className='node-container'>
-            {start ? workflowPages() : startPage()}
+
+            {(!start) ? <WorkflowEntry metagraph={currentWorkflow} onSelect={handleWorkflowSelection} /> : ((workflowSelected && start) ? <WorkflowPages metagraph={currentWorkflow} /> : null)}
+
         </div>
 
     );
