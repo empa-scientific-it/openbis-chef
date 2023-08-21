@@ -42,6 +42,7 @@
     width: 100%;
     position: relative;
     margin-bottom: 35px;
+    padding: 0 5px;
 }
 
 .login-form-input label {
@@ -51,10 +52,10 @@
 
 .login-form-input input {
     display: inline-block;
-    width: 78%;
+    width: 77%;
     border-radius: 5px;
     border-width: 1px;
-    height: 20px;
+    height: 25px;
 }
 
 .login-form-button {
