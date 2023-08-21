@@ -1,6 +1,6 @@
 // Component for a LinkNode
 import React, { useState, useEffect, useContext } from "react";
-import { SelectNode } from "@src/metagraph/metagraph";
+import { MetagraphComponentProps, MetagraphOperations, SelectNode } from "@src/metagraph/metagraph";
 import NodePage from "./NodePage";
 import { AuthContext } from "@src/openbis/AuthContext";
 import type { SampleType, Sample, Experiment } from "@src/types/openbis";
@@ -9,13 +9,13 @@ import { ExperimentSearchCriteria, ExperimentFetchOptions, SampleTypeFetchOption
 import SampleEntry from "@src/openbis/components/SampleEntry";
 import "./Node.css"
 
-type Props = {
+type SelectNodeProps = MetagraphComponentProps & {
   node: SelectNode
 }
 
 
 
-const SampleSelector = ({ experiment, onSelect }: {experiment: Experiment, onSelect: (event: React.ChangeEvent<HTMLSelectElement>) => void }) => {
+const SampleSelector = ({ experiment, onSelect }: { experiment: Experiment, onSelect: (event: React.ChangeEvent<HTMLSelectElement>) => void }) => {
   return (
     <div>
       <div>Experiment: {experiment.identifier.identifier}</div>
@@ -29,22 +29,21 @@ const SampleSelector = ({ experiment, onSelect }: {experiment: Experiment, onSel
   )
 }
 
-const Select = ({ node }: Props) => {
+const Select = ({ node, onFinished }: SelectNodeProps) => {
   // Render input fields and link settings
   const { token, setToken, loggedIn, setLoggedIn, login, service, loginAndThen, logout } = useContext(AuthContext)
   const [inputValue, setInputValue] = useState('');
   const [experiment, setExperiment] = useState({} as Experiment);
   const [experimentAvailable, setExperimentAvailable] = useState(false);
   const [sampleAvailable, setSampleAvailable] = useState(false);
-
   const [sample, setSample] = useState({} as Sample);
-
+  const [currentCollection, setCurrentCollection] = useState(node.collection)
 
 
 
   useEffect(() => {
     const ssc = new ExperimentSearchCriteria()
-    ssc.withIdentifier().thatEquals(node.collection)
+    ssc.withIdentifier().thatEquals(currentCollection)
     const sfo: ExperimentFetchOptions = new ExperimentFetchOptions()
     const sto: SampleTypeFetchOptions = new SampleTypeFetchOptions()
     sto.withPropertyAssignments().withPropertyType()
@@ -65,10 +64,16 @@ const Select = ({ node }: Props) => {
 
   const handleSelection = (event: React.ChangeEvent<HTMLSelectElement>) => {
     event.preventDefault()
-    const sample = experiment.samples.find((sample: Sample) => sample.identifier.identifier === event.target.value)
-    setSample(() => sample)
+    const foundSample = experiment.samples.find((sample: Sample) => sample.identifier.identifier === event.target.value)
+    const op = { operationId: node.id, source: foundSample.identifier.identifier } as MetagraphOperations
+    console.log(foundSample)
+    setSample(() => foundSample)
     setSampleAvailable(() => true)
+    onFinished(op)
   }
+
+
+
 
   return (
     <div>

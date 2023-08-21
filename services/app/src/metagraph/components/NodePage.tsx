@@ -1,21 +1,18 @@
 // Component for a LinkNode
-import React from "react";
-import { MetagraphNode } from "@src/metagraph/metagraph";
+import React, {useState} from "react";
+import { MetagraphComponentProps, MetagraphNode, MetagraphOperations } from "@src/metagraph/metagraph";
 import Entry from "./Entry";
 import Select from "./Select";
 import "./Node.css" 
 
 
-type Props = {
-    node: MetagraphNode
-  }
 
 
-function selectEntryType(node: MetagraphNode) {
+function selectEntryType(node: MetagraphNode, handler: (event: MetagraphOperations) => void) {
   if (node.type === 'entry') {
-    return <Entry key={node.id} node={node} />;
+    return <Entry key={node.id} node={node}  onFinished={handler}/>;
 } else if (node.type === 'select') {
-    return <Select key={node.id} node={node} />;
+    return <Select key={node.id} node={node} onFinished={handler}/>;
 }
 // Handle other node types if needed
 return null;
@@ -23,15 +20,28 @@ return null;
 
 
 
-const NodePage = ({ node }:Props) => {
+const NodePage = ({ node, onFinished }:MetagraphComponentProps) => {
 
-  const child = selectEntryType(node)
+  const [localOperation, setLocalOperation] = useState({} as MetagraphOperations)
+
+  const localOnFinished = (event: MetagraphOperations) => {
+    // Update userInputs state
+    setLocalOperation(event)
+  }
+
+  const handleFinish = () => {
+    onFinished(localOperation)
+  }
+  
+
+  const child = selectEntryType(node, localOnFinished)
     // Render input fields and link settings
     return (
       <div>
         <h1>Current step: {node.description}</h1>
         <hr className="node-divider" />
         {child}
+        <button className='clickable' onClick={handleFinish}>Save</button>
       </div>
     );
   };
