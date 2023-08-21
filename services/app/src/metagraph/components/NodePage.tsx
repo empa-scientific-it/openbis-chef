@@ -8,11 +8,11 @@ import "./Node.css"
 
 
 
-function selectEntryType(node: MetagraphNode, handler: (event: MetagraphOperations) => void) {
+function selectEntryType(node: MetagraphNode) {
   if (node.type === 'entry') {
-    return <Entry key={node.id} node={node}  onFinished={handler}/>;
+    return <Entry key={node.id} node={node}/>;
 } else if (node.type === 'select') {
-    return <Select key={node.id} node={node} onFinished={handler}/>;
+    return <Select key={node.id} node={node}/>;
 }
 // Handle other node types if needed
 return null;
@@ -20,7 +20,7 @@ return null;
 
 
 
-const NodePage = ({ node, onFinished }:MetagraphComponentProps) => {
+const NodePage = ({ node }:MetagraphComponentProps) => {
 
   const [localOperation, setLocalOperation] = useState({} as MetagraphOperations)
 
@@ -30,11 +30,10 @@ const NodePage = ({ node, onFinished }:MetagraphComponentProps) => {
   }
 
   const handleFinish = () => {
-    onFinished(localOperation)
-  }
-  
 
-  const child = selectEntryType(node, localOnFinished)
+  }
+
+  const child = selectEntryType(node)
     // Render input fields and link settings
     return (
       <div>

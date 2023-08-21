@@ -1,4 +1,6 @@
-import type { SamplesCreationOperation } from '@src/types/openbis';
+import { Facade } from '@src/openbis/api';
+import { SampleTypeFetchOptions, SampleTypeSearchCriteria, CreateSamplesOperation, SampleCreation, ExperimentIdentifier, Sample } from '@src/openbis/dto';
+import type { Sample as ST, SampleType, CreateSamplesOperation, SampleCreation as ScT, SampleUpdate  } from '@src/types/openbis';
 
 export interface Node {
   id: string;
@@ -93,7 +95,7 @@ export class Metagraph {
  * @param transform 
  * @returns 
  */
-export function walkGraph<T>(g: Metagraph, transform: (Node) => T): T[] {
+export function walkGraph<T>(g: Metagraph, transform: (v:MetagraphNode) => T): T[] {
   //Perform BFS on the graph
   const visited = new Set();
   const queue = [];
@@ -211,14 +213,16 @@ export function getVisualisationNodes(g: Metagraph, mult: number): Visualisation
 
 export interface MetagraphOperation{
   operationId: string;
+  originObject: ST;
+  type: "create" | "link"
 }
 
 export interface CreateOperation extends MetagraphOperation {
-  creation: SamplesCreationOperation
+  type: "create"
 }
 
 export interface LinkOperation extends MetagraphOperation {
-  source: string;
+  type: "link"
 }
 
 
@@ -226,8 +230,40 @@ export type MetagraphOperations = CreateOperation | LinkOperation;
 
 
 export interface MetagraphComponentProps {
-  operation: MetagraphOperations;
-  onFinished: (operation: MetagraphOperations) => void;
+  node: MetagraphNode;
+}
+
+
+
+export async function getSampleType(code: string, service: Facade): Promise<SampleType>{
+  const ssc = new SampleTypeSearchCriteria()
+  ssc.withCode().thatEquals(code)
+  const sfo = new SampleTypeFetchOptions()
+  sfo.withPropertyAssignments().withPropertyType();
+
+  const res = await service.searchSampleTypes(ssc, sfo);
+  if(res.totalCount === 1){
+    return res.objects[0];
+  }
+  
+}
+
+
+export async function nodeToOperation(node: MetagraphNode, service: Facade): Promise<MetagraphOperations>{
+  if(node.type === 'entry'){
+    const sampleType = await getSampleType(node.entityType, service);
+    const originObject: ST = new Sample();
+    originObject.setExperiment(new ExperimentIdentifier(node.collection));
+    originObject.setType(sampleType);
+    return {operationId: node.id, originObject: originObject, type: "create"};
+  }
+  else if(node.type === 'select'){
+    const sampleType = await getSampleType(node.entityType, service);
+    const originObject: ST = new Sample();
+    originObject.setExperiment(new ExperimentIdentifier(node.collection));
+    originObject.setType(sampleType);
+    return {operationId: node.id, originObject: originObject, type: "link"};
+  }
 }
 
 

@@ -10,6 +10,10 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
 import WorkflowSelection from '@src/metagraph/components/WorkflowSelection';
 import { useContext, useEffect } from 'react';
+import { useOperations } from './metagraph/useOperations';
+import { OperationContext } from './metagraph/OperationContext';
+import { useWorkflows } from './metagraph/useWorkflows';
+import { useList } from './metagraph/useList';
 //Add icons
 library.add(fas, far)
 
@@ -18,8 +22,6 @@ function RequireAuth({ children }: { children: JSX.Element }) {
   const { loggedIn } = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
-
-  console.log(`Logged in state ${loggedIn}`)
   if (!loggedIn) {
     <Navigate
       to="/login"
@@ -73,15 +75,38 @@ new Metagraph([
 ];
 
 
+function CounterComponent() {
+  // Initialize the list with numbers from 1 to 10
+  const initialData = Array.from({ length: 10 }, (_, index) => index + 1);
+
+  // Use the useList hook to manage the list of numbers
+  const { elem, next, previous, finished, add, idx, list, clear } = useList(initialData);
+
+  return (
+    <div>
+      <div>Current Number: {elem}</div>
+      <div>Index: {idx}</div>
+      <button onClick={previous} disabled={idx === 0}>Previous</button>
+      <button onClick={next} disabled={idx === list.length - 1}>Next</button>
+      <button onClick={() => add(elem + 1)} disabled={idx < list.length - 1}>Add next number</button>
+      <button onClick={clear}>Clear</button>
+      {finished && <div>Finished</div>}
+    </div>
+  );
+}
+
+
 
 function App() {
   const ob = useLogin()
-
+  const ops = useOperations();
 
   return (
     <>
+    {/* <CounterComponent></CounterComponent> */}
       <Router>
         <AuthContext.Provider value={ob}>
+        <OperationContext.Provider value={ops}>
           <Routes>
             <Route path="login" element={<Login />} />
             <Route
@@ -93,6 +118,7 @@ function App() {
               }
             />
           </Routes>
+          </OperationContext.Provider>
         </AuthContext.Provider>
       </Router>
     </>

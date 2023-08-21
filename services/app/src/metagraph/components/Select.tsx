@@ -29,7 +29,7 @@ const SampleSelector = ({ experiment, onSelect }: { experiment: Experiment, onSe
   )
 }
 
-const Select = ({ node, onFinished }: SelectNodeProps) => {
+const Select = ({ node }: SelectNodeProps) => {
   // Render input fields and link settings
   const { token, setToken, loggedIn, setLoggedIn, login, service, loginAndThen, logout } = useContext(AuthContext)
   const [inputValue, setInputValue] = useState('');
@@ -69,7 +69,6 @@ const Select = ({ node, onFinished }: SelectNodeProps) => {
     console.log(foundSample)
     setSample(() => foundSample)
     setSampleAvailable(() => true)
-    onFinished(op)
   }
 
 

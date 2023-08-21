@@ -4,6 +4,7 @@ import { AuthContext } from '@src/openbis/AuthContext';
 import type { Sample, SampleType, SearchResult } from '@src/types/openbis';
 import OpenBisEntry, { ObjectEntry } from '@src/openbis/components/OpenBisEntry';
 import { SampleTypeSearchCriteria, SampleTypeFetchOptions, EntityTypePermId, ExperimentIdentifier, SampleCreation } from '@src/openbis/dto';
+import { OperationContext } from '../OperationContext';
 
 
 
@@ -14,11 +15,13 @@ type EntryNodeProps = MetagraphComponentProps & {
 
 
 
-function Entry({ node, onFinished }: EntryNodeProps) {
+function Entry({ node }: EntryNodeProps) {
     const { loggedIn, service } = useContext(AuthContext)
     const [inputValue, setInputValue] = useState('');
     const [entity, setEntity] = useState({} as SampleType);
     const [entityAvailable, setEntityAvailable] = useState(false);
+
+    const workflowOperations = useContext(OperationContext);
 
     useEffect(() => {
         const ssc = new SampleTypeSearchCriteria()
@@ -37,15 +40,6 @@ function Entry({ node, onFinished }: EntryNodeProps) {
     }, [node.entityType, loggedIn])
 
 
-    const handleSampleChange = (newSample: ObjectEntry) => {
-        const sample = new SampleCreation() as typeof SampleCreation
-        sample.setTypeId(newSample.type.permId)
-        sample.setExperimentId(new ExperimentIdentifier(node.collection))
-        sample.setProperties(newSample.properties)
-        const op = { operationId: node.id, creation: sample } as MetagraphOperations
-        onFinished(op)
-    }
-
 
 
 
@@ -54,7 +48,7 @@ function Entry({ node, onFinished }: EntryNodeProps) {
     return (
         <div>
             <div>This step will create a new sample of type {node.entityType} in collection {node.collection}</div>
-            {entityAvailable ? <OpenBisEntry objectType={entity} onChange={handleSampleChange} /> : null}
+            {entityAvailable ? <OpenBisEntry objectType={entity} /> : null}
         </div>
     );
 }

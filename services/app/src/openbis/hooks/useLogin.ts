@@ -28,7 +28,7 @@ export function useLogin() {
 
     const loginAndThen = (username: string, password: string, then: () => void) => {
         service.login(username, password).then((token) => {
-            setToken("token", () => token);
+            setToken("token", () => token as string);
             setLoggedIn(() => true);
             then();
         });
