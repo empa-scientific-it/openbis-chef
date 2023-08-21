@@ -215,7 +215,6 @@ export interface MetagraphOperation{
 
 export interface CreateOperation extends MetagraphOperation {
   creation: SamplesCreationOperation
-
 }
 
 export interface LinkOperation extends MetagraphOperation {
@@ -225,5 +224,10 @@ export interface LinkOperation extends MetagraphOperation {
 
 export type MetagraphOperations = CreateOperation | LinkOperation;
 
+
+export interface MetagraphComponentProps {
+  operation: MetagraphOperations;
+  onFinished: (operation: MetagraphOperations) => void;
+}
 
 

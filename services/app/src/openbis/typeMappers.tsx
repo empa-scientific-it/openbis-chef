@@ -78,7 +78,6 @@ export function addTypesToSampleEntry(sampleEntry: Sample): SampleWithTypes {
 
 
 export function displayValue(entry: PropertyWithType): React.JSX.Element{
-    console.log(entry)
     switch(entry.type){
         case "HYPERLINK":
             return  <a href={entry.value}>{entry.value}</a> 

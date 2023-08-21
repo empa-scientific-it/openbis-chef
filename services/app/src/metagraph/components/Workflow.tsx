@@ -30,17 +30,26 @@ const Workflow = ({ workflows }: Props) => {
     const { currentWorkflow, selectWorkflow } = useWorkflows(workflows);
     const [workflowSelected, setWorkflowSelected] = useState(false)
 
-    // Initialize user inputs state based on metagraph nodes
-    const nodeComponents = walkGraph(currentWorkflow, (node) => { return <NodePage key={node.id} node={node} />; });
-    //Keep track of the position in the workflow
-    const { elem, next, previous, idx, finished, move } = useList(nodeComponents)
 
 
-    
     //Initialise the list of workflowsteps
-    const {elem:workflowAction, set:setWorkflowAction} = useList(walkGraph(currentWorkflow, (node) => { return {} as MetagraphOperations }))
+    const { elem: workflowAction, set: setWorkflowAction, idx: workflowStepIndex, list: workflowSteps } = useList(walkGraph(currentWorkflow, (node) => { return {} as MetagraphOperations }))
 
+    const handleWorkflowStep = (event: MetagraphOperations) => {
+                // Move to next step
+                next()
+        // Update userInputs state
+        console.log(event, idx)
+        setWorkflowAction(event, idx)
+        console.log(event, workflowSteps)
+        
 
+    };
+
+    // Initialize user inputs state based on metagraph nodes
+    const initialNodeComponents = walkGraph(currentWorkflow, (node) => { return <NodePage key={node.id} node={node} onFinished={handleWorkflowStep} />; });
+    //Keep track of the position in the workflow
+    const { elem, next, previous, idx, finished, move, set, list: nodeComponents } = useList(initialNodeComponents)
 
 
     // Run workflow function
@@ -50,7 +59,6 @@ const Workflow = ({ workflows }: Props) => {
     };
 
     const handleNextStep = () => {
-        setWorkflowAction( {} as MetagraphOperations, idx)
         next()
     };
     const handlePreviousStep = () => {
@@ -63,6 +71,7 @@ const Workflow = ({ workflows }: Props) => {
     };
 
     const handleMove = (index: number) => {
+        setWorkflowAction({} as MetagraphOperations, index)
         move(index)
     }
 
@@ -94,7 +103,7 @@ const Workflow = ({ workflows }: Props) => {
     }
 
 
-    function WorkflowPages({ metagraph }: { metagraph: Metagraph }) {
+    function WorkflowPages({ metagraph, handleSubmit, elem }: { metagraph: Metagraph, handleSubmit: () => void, elem: JSX.Element }) {
         return (<div>
             <hr className="node-divider" />
             {finished ? WorkflowEnd(handleSubmit) : elem}
@@ -138,7 +147,7 @@ const Workflow = ({ workflows }: Props) => {
                 <h1>Workflow Selection</h1>
                 <div className="container">
                     <div className="one"> <WorkflowSelection workflows={workflows} onSelect={handleWorkflowSelection} /></div>
-                    <div className="two"><WorkflowDescription metagraph={currentWorkflow} /></div>
+                    <div className="two"><WorkflowDescription metagraph={metagraph} /></div>
                 </div>
                 <hr className="node-divider" />
                 <button className="clickable" onClick={() => setStart(true)}>Start workflow</button>
@@ -153,7 +162,7 @@ const Workflow = ({ workflows }: Props) => {
     return (
         <div className='node-container'>
 
-            {(!start) ? <WorkflowEntry metagraph={currentWorkflow} onSelect={handleWorkflowSelection} /> : ((workflowSelected && start) ? <WorkflowPages metagraph={currentWorkflow} /> : null)}
+            {(!start) ? <WorkflowEntry metagraph={currentWorkflow} onSelect={handleWorkflowSelection} /> : ((workflowSelected && start) ? <WorkflowPages elem={elem} metagraph={currentWorkflow} handleSubmit={handleSubmit} /> : null)}
 
         </div>
 
