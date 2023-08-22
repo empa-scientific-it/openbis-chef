@@ -19,9 +19,9 @@ type Props = {
 function OpenBisEntry({ objectType }: Props) {
 
     const workflowOperations = useContext(OperationContext);
-    const [currentObject, setCurrentObject] = useState(workflowOperations.currentOperation.originObject);
-    //const [objectEntry, setObjectEntry] = useState(objectType)
-    const [properties, setProperties] = useState<{ [key: string]: string }>(currentObject.properties)
+    // const [currentObject, setCurrentObject] = useState(workflowOperations.currentOperation.originObject);
+    const [objectEntry, setObjectEntry] = useState(objectType)
+    const [properties, setProperties] = useState<{ [key: string]: string }>({});
 
     function handleInput(propertyCode: string) {
         return (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,7 +46,7 @@ function OpenBisEntry({ objectType }: Props) {
         <div>
             <form className="form-container">
                 {
-                    currentObject.type.propertyAssignments.map((el) => {
+                    objectEntry.propertyAssignments.map((el) => {
                         return (
                             <label className="form-label" key={el.propertyType.label}>{el.propertyType.label}
                                 <input className="form-input" type={mapDataTypeToInputType(el.propertyType.dataType)} onInput={handleInput(el.propertyType.code)} />    

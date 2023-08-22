@@ -6,9 +6,9 @@ export const useList = <T>(initialData: T[]) => {
     const [elem, setElem] = useState(initialData[idx]);
     const [finished, setFinished] = useState(false);
 
-    // useEffect(() => {
-    //     setList(initialData);
-    // }, [initialData]);
+    useEffect(() => {
+        console.log('List', list);
+    }, [list]);
 
     // // Update the element when the list or index changes
     // useEffect(() => {
@@ -59,6 +59,8 @@ export const useList = <T>(initialData: T[]) => {
 
     const add = (elem: T) => {
         setList((oldList) => [...oldList, elem]);
+        setIdx((oldIdx) => oldIdx + 1);
+        setElem(()=>elem);
     };
 
     const setElement = (newElem: T, newIndex: number) => {
@@ -81,5 +83,5 @@ export const useList = <T>(initialData: T[]) => {
         setFinished(()=>false);
     };
 
-    return { elem, next, previous, finished, idx, move, find, remove, add, set: setElement, list, clear };
+    return { elem, next, previous, finished, idx, move, find, remove, add, set: setElement, list, setList, clear };
 };
