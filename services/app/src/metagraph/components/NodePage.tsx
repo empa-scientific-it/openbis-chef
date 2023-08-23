@@ -3,9 +3,6 @@ import React, {useState} from "react";
 import { MetagraphComponentProps, MetagraphNode, MetagraphOperations } from "@src/metagraph/metagraph";
 import Entry from "./Entry";
 import Select from "./Select";
-import "./Node.css" 
-
-
 
 
 function selectEntryType(node: MetagraphNode, handler: (event: MetagraphOperations) => void) {
@@ -39,7 +36,6 @@ const NodePage = ({ node, onFinished }:MetagraphComponentProps) => {
     return (
       <div>
         <h1>Current step: {node.description}</h1>
-        <hr className="node-divider" />
         {child}
         <button className='clickable' onClick={handleFinish}>Save</button>
       </div>

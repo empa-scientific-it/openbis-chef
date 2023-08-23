@@ -3,40 +3,29 @@ import './Login.css'
 import { useState, useContext } from 'react'
 
 import { AuthContext } from '@src/openbis/AuthContext'
-// import { SampleType } from '@src/types/api-openbis-java';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 function Login() {
     const [user, setUser] = useState("")
     const [password, setPassword] = useState("")
-    // const [search, setSearch] = useState(false)
-    // const [sent, setSent] = useState(false)
-    // const [entry, setEntry] = useState({ code: "A", propertyAssignments: [] } as SampleType)
-    // const { token, setToken, loggedIn, setLoggedIn, login, service, loginAndThen, logout } = useContext(AuthContext)
-    const useContextResult = useContext(AuthContext)
+    const { loginAndThen } = useContext(AuthContext)
 
     let navigate = useNavigate();
     let location = useLocation();
 
-    function handleLogout(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault()
-        useContextResult.logout()
-
-    }
-
     function handleSubmit() {
         const from = location.state?.from?.pathname || "/";
-        useContextResult.loginAndThen(user, password, () => {
+        loginAndThen(user, password, () => {
             navigate(from, { replace: true });
         })
     }
 
     return (
         <div className="App">
-            <div className="login-container">
-                <div className="login-card">
+            <div className="app-container">
+                <div className="login-container">
                     <form className="login-form" onSubmit={(event) => { event.preventDefault(); handleSubmit() }}>
-                        <h1 className="login-form-title">Login to openBIS instance</h1>
+                        <h1 className="container-title">Login to openBIS instance</h1>
 
                         <div className="login-form-input">
                             <label htmlFor="username">Username:</label>
@@ -47,9 +36,7 @@ function Login() {
                             <input name="password" id="password" type="password" value={password} onChange={event => setPassword(event.target.value)} />
                         </div>
 
-                        <button className="login-form-button" name='Login' type="submit">Login</button>
-                        <br/>
-                        <button name='Logout' onSubmit={() => handleLogout}>Logout</button>
+                        <button className="clickable-button" name="Login" type="submit">Login</button>
                     </form>
                 </div>
             </div>

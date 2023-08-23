@@ -1,22 +1,4 @@
-.App {
-    width: 100%;
-    margin: 0 auto;
-}
-
 .login-container {
-    min-height: 100vh;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -moz-box;
-    display: -ms-flexbox;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    background: #f2f2f2;
-}
-
-.login-card {
     width: 410px;
     background: #fff;
     border-radius: 10px;
@@ -31,11 +13,6 @@
 
 .login-form {
     width: 100%;
-}
-
-.login-form-title {
-    text-align: center;
-    margin-bottom: 40px;
 }
 
 .login-form-input {
@@ -56,16 +33,4 @@
     border-radius: 5px;
     border-width: 1px;
     height: 25px;
-}
-
-.login-form-button {
-    background-color: #7595d7;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 25px;
-    font-size: 16px;
-    cursor: pointer;
-    display: block;
-    margin: auto;
 }

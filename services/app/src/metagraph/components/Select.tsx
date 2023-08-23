@@ -7,7 +7,6 @@ import type { SampleType, Sample, Experiment } from "@src/types/openbis";
 import { ExperimentSearchCriteria, ExperimentFetchOptions, SampleTypeFetchOptions, SampleFetchOptions } from "@src/openbis/dto";
 
 import SampleEntry from "@src/openbis/components/SampleEntry";
-import "./Node.css"
 
 type SelectNodeProps = MetagraphComponentProps & {
   node: SelectNode
@@ -79,7 +78,6 @@ const Select = ({ node, onFinished }: SelectNodeProps) => {
     <div>
       <div>Select an existing object</div>
       {experimentAvailable ? <SampleSelector experiment={experiment} onSelect={handleSelection} /> : null}
-      <hr className="node-divider" />
       {sampleAvailable ? <SampleEntry sample={sample} /> : null}
     </div>
   );

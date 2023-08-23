@@ -18,7 +18,6 @@ function NodePage({ node, index }: Props) {
     return (
         <div>
         <h1>Workflow Step {index}</h1>
-        <hr className="node-divider" />
         <div>{node.description}</div>
         </div>
     );

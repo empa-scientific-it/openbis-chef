@@ -1,43 +1,67 @@
-  .container {
-  width: 100%;
-  margin: auto;
-  padding: 10px;
-  display: grid;
-  align-items: top;
-  border: 1px solid #ccc;
+.logout-button {
+    background-color: #8c8c8c; 
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 25px;
+    font-size: 16px;
+    cursor: pointer;
+    display: block;
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
 
-.container .workflow-list{
-    width: 100%;
-    margin: auto;
+.logout-button:hover {
+    background-color: #737373;
+}
+
+.workflow-container {
+    width: 80%;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 50px;
+    box-shadow: 0 5px 10px 0 rgba(0,0,0,.1);
+    -moz-box-shadow: 0 5px 10px 0 rgba(0,0,0,.1);
+    -webkit-box-shadow: 0 5px 10px 0 rgba(0,0,0,.1);
+    -o-box-shadow: 0 5px 10px 0 rgba(0,0,0,.1);
+    -ms-box-shadow: 0 5px 10px 0 rgba(0,0,0,.1);
+}
+
+.workflow-selection-title {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.workflow-selection-container {
+    margin-bottom: 30px;
+    padding: 10px;
+    display: flex;
     border: 1px solid #ccc;
+    border-radius: 10px;
 }
 
-.workflow-list ul {
-    list-style-type:none
+.workflow-selection-container-one {
+    width: 50%;
+    padding: 10px;
 }
 
-.workflow-list  li.clickable {
-    background-color: #ccc;
+.workflow-selection-container-two {
+    width: 50%;
+    padding: 10px;
+    border-left: 1px solid #ccc;
 }
 
-.workflow-list li.empty {
-    background-color: #fff;
-
+.workflow-selection-item {
+    margin-top: 10px;
+    padding: 5px;
+    cursor: pointer;
+    display: table;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
-.one {
-    grid-column-start: 1;
-    grid-column-end: 3;
-    grid-row-start: 1;
-    grid-row-end: 3;
+.workflow-selection-item-selected {
+    border: 2px solid #4d77cb;
 }
-
-.two {
-    grid-column-start: 4;
-    grid-column-end: 6;
-    grid-row-start: 1;
-    grid-row-end: 3;
-}
-
-
