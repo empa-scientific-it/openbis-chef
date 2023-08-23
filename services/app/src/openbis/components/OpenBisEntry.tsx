@@ -1,9 +1,10 @@
 
 
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { SampleType, DataType, Sample, PropertyType } from "@src/types/openbis"
 import "./EntryForm.css"
 import { mapDataTypeToInputType } from "@src/openbis/typeMappers"
+import { OperationContext } from "@src/metagraph/OperationContext";
 
 export interface ObjectEntry {
     type: SampleType;
@@ -12,14 +13,15 @@ export interface ObjectEntry {
 
 type Props = {
     objectType: SampleType
-    onChange: (newSample: ObjectEntry) => void
 }
 
 
-function OpenBisEntry({ objectType, onChange }: Props) {
+function OpenBisEntry({ objectType }: Props) {
 
+    const workflowOperations = useContext(OperationContext);
+    // const [currentObject, setCurrentObject] = useState(workflowOperations.currentOperation.originObject);
     const [objectEntry, setObjectEntry] = useState(objectType)
-    const [properties, setProperties] = useState<{ [key: string]: string }>({})
+    const [properties, setProperties] = useState<{ [key: string]: string }>({});
 
     function handleInput(propertyCode: string) {
         return (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,7 +30,6 @@ function OpenBisEntry({ objectType, onChange }: Props) {
             if (property) {
                 const newObjectEntry = { type: objectType, properties: { ...properties, [propertyCode]: value } } as ObjectEntry
                 setProperties(newObjectEntry.properties)
-                onChange(newObjectEntry)
             }
         }
     }
