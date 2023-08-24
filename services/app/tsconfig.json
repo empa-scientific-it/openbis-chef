@@ -46,6 +46,7 @@
     "./src/**/*.json",
     "./src/**/*.js",
     "./src/**/*.d.ts",
+    "./tests/**/*.ts",
   ],
   "files": [
     "./src/types/openbis.d.ts"

@@ -6,21 +6,6 @@ export const useList = <T>(initialData: T[]) => {
     const [elem, setElem] = useState(initialData[idx]);
     const [finished, setFinished] = useState(false);
 
-    useEffect(() => {
-        console.log('List', list);
-    }, [list]);
-
-    // // Update the element when the list or index changes
-    // useEffect(() => {
-    //     if (list.length > 0) {
-    //         setElem(list[idx]);
-    //         setFinished(false);
-    //     }
-    // }, [list, idx]);
-
-    useEffect(() => {
-        console.log('List', list);
-    }, [list]);
 
     const move = (newIdx: number) => {
         if (newIdx < list.length && newIdx >= 0) {
@@ -39,7 +24,7 @@ export const useList = <T>(initialData: T[]) => {
     };
 
     const previous = () => {
-        if (idx > 0) {
+        if (idx >= 0) {
             move(idx - 1);
             setFinished(false);
         }
@@ -54,13 +39,17 @@ export const useList = <T>(initialData: T[]) => {
         setList(() => newList);
         if (idx >= newList.length) {
             move(newList.length - 1);
-        }
+        }   
     };
 
     const add = (elem: T) => {
         setList((oldList) => [...oldList, elem]);
-        setIdx((oldIdx) => oldIdx + 1);
+        setIdx(() => list.length + 1);
         setElem(()=>elem);
+    };
+
+    const setCurrent = (newElem: T) => {
+        setElement(newElem, idx);
     };
 
     const setElement = (newElem: T, newIndex: number) => {
@@ -83,5 +72,5 @@ export const useList = <T>(initialData: T[]) => {
         setFinished(()=>false);
     };
 
-    return { elem, next, previous, finished, idx, move, find, remove, add, set: setElement, list, setList, clear };
+    return { elem, next, previous, finished, idx, move, find, remove, add, set: setElement, setCurrent, list, setList, clear };
 };
