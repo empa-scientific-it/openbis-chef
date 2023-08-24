@@ -1,46 +1,38 @@
-import React, { useState, useContext, useEffect } from "react";
-import Entry from "./Entry";
-import Select from "./Select";
+import React, { useState, useContext } from "react";
 import {
   Metagraph,
   walkGraph,
-  MetagraphOperations,
   nodeToOperation,
 } from "@src/metagraph/metagraph";
 import { AuthContext } from "@src/openbis/AuthContext";
 import { useList } from "../useList";
 import Summary from "./Summary";
 import "@src/App.css";
-import "./Node.css";
 import "./Workflow.css";
 import { useWorkflows } from "../useWorkflows";
-
 import NodePage from "./NodePage";
-
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Me } from "@src/types/openbis";
-
 import { Stepper } from "./Stepper";
 import { OperationContext } from "../OperationContext";
 import { useOperations } from "../useOperations";
+
 
 type Props = {
   workflows: Metagraph[];
 };
 
 const Workflow = ({ workflows }: Props) => {
-  //Get openbis service
-  const { token, setToken, loggedIn, setLoggedIn, login, service } =
-    useContext(AuthContext);
-  //Keep list of all available workflows
+  // Get openbis service
+  const { token, setToken, loggedIn, setLoggedIn, login, logout, service } = useContext(AuthContext);
+  // Keep list of all available workflows
   const { currentWorkflow, selectWorkflow } = useWorkflows(workflows);
-  //Keep track of the workflow selected
+  // Keep track of the workflow selected
   const [workflowSelected, setWorkflowSelected] = useState(false);
-  //Create the context to store the workflow operations an pass it down to the components
+  // Create the context to store the workflow operations an pass it down to the components
   const workflowOps = useOperations([]);
-
-  //Store the start of the workflow
+  // Store the start of the workflow
   const [start, setStart] = useState(false);
+  // Store the selected workflow
+  const [selected, setSelected] = useState('');
 
   const {
     elem: currentNode,
@@ -52,6 +44,11 @@ const Workflow = ({ workflows }: Props) => {
     set,
     list: nodes,
   } = useList(walkGraph(currentWorkflow, (node) => node));
+
+  function handleLogout(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    logout();
+  }
 
   // Initialise one component for each graph node
   const nodeComponents = nodes.map((node, index) => (
@@ -70,6 +67,7 @@ const Workflow = ({ workflows }: Props) => {
     next();
     workflowOps.nextOperation();
   };
+
   const handlePreviousStep = () => {
     previous();
     workflowOps.previousOperation();
@@ -85,6 +83,8 @@ const Workflow = ({ workflows }: Props) => {
   };
 
   const handleWorkflowSelection = (wf: Metagraph) => {
+    console.log(wf.name);
+    setSelected(wf.name);
     selectWorkflow(wf.name);
     setWorkflowSelected(() => true);
     workflowOps.clearOperations();
@@ -97,12 +97,10 @@ const Workflow = ({ workflows }: Props) => {
   const WorkflowEnd = (handleSubmit: () => void) => {
     return (
       <div>
-        <hr className="node-divider" />
         <div>Finished workflow, review your steps before submitting</div>
         <button className="clickable" onClick={handleSubmit}>
           Submit
         </button>
-        <hr className="node-divider" />
       </div>
     );
   };
@@ -122,9 +120,7 @@ const Workflow = ({ workflows }: Props) => {
   }) {
     return (
       <div>
-        <hr className="node-divider" />
         {finished ? WorkflowEnd(handleSubmit) : elem}
-        <hr className="node-divider" />
         <Stepper
           handleBack={handlePreviousStep}
           handleNext={handleNextStep}
@@ -139,13 +135,10 @@ const Workflow = ({ workflows }: Props) => {
 
   function WorkflowDescription({ metagraph }: { metagraph: Metagraph }) {
     return (
-      <div>
         <div className="workflow-list">
-          {<h3>Workflow summary</h3>}
-          {<h4>{metagraph.name}</h4>}
+          {<h3>Workflow summary: {metagraph.name}</h3>}
           <Summary metagraph={metagraph} />
         </div>
-      </div>
     );
   }
 
@@ -160,24 +153,25 @@ const Workflow = ({ workflows }: Props) => {
 
     const handleWorkflowSelect = (workflow: Metagraph) => {
       setSelectedWorkflow(workflow);
+      console.log(selectedWorkflow);
       onSelect(workflow);
     };
 
     return (
-      <div className="workflow-list">
-        <h3>Available workflows</h3>
-        <ul>
-          {workflows.map((workflow) => (
-            <li
+      <div>
+        <h2>Available workflows:</h2>
+        {
+          workflows.map((workflow) =>
+            <div
               key={workflow.name}
-              value={workflow.name}
+              id={workflow.name}
               onClick={() => handleWorkflowSelect(workflow)}
-              className={selectedWorkflow?.name === workflow.name ? "clickable" : "empty"}
+              className={"workflow-selection-item" + (selected === workflow.name ? " workflow-selection-item-selected" : "")}
             >
               {workflow.name}
-            </li>
-          ))}
-        </ul>
+            </div>
+          )
+        }
       </div>
     );
   }
@@ -192,48 +186,50 @@ const Workflow = ({ workflows }: Props) => {
     onStart: (ev: React.MouseEvent<HTMLElement>) => void;
   }) {
     return (
-      <section>
-        <header>
-          <h1>Workflow Selection</h1>
-        </header>
-        <main>
-          <div className="container">
-            <div className="one">
-              <WorkflowSelection workflows={workflows} onSelect={onSelect} />
-            </div>
-            <div className="two">
-              <WorkflowDescription metagraph={metagraph} />
-            </div>
+      <div>
+        <h1 className="container-title">Workflow Selection</h1>
+        <div className="workflow-selection-container">
+          <div className="workflow-selection-container-one">
+            <WorkflowSelection workflows={workflows} onSelect={onSelect} />
           </div>
-        </main>
-        <hr className="node-divider" />
-        <button className="clickable" onClick={onStart}>
+          <div className="workflow-selection-container-two">
+            <WorkflowDescription metagraph={metagraph} />
+          </div>
+        </div>
+        <button className="clickable-button" name="Start workflow" onClick={onStart}>
           Start workflow
         </button>
-      </section>
+      </div>
     );
   }
 
-  //When finished, it should show a summary of the inputs and allow the user to run the workflow
-
+  // When finished, it should show a summary of the inputs and allow the user to run the workflow
   return (
     <OperationContext.Provider value={workflowOps}>
-      <div className="node-container">
-        {!start ? (
-          <WorkflowEntry
-            metagraph={currentWorkflow}
-            onSelect={handleWorkflowSelection}
-            onStart={(ev: React.MouseEvent<HTMLElement>) => setStart(() => true)}
-          />
-        ) : workflowSelected && start ? (
-          <WorkflowPages
-            elem={nodeComponents}
-            idx={nodeIndex}
-            handleMove={handleMove}
-            metagraph={currentWorkflow}
-            handleSubmit={handleSubmit}
-          />
-        ) : null}
+      <div className="App">        
+        <div className="app-container">
+          <button className="logout-button" name="Logout" onSubmit={() => handleLogout}>
+            Logout
+          </button>
+
+          <div className="workflow-container">
+            {!start ? (
+                <WorkflowEntry
+                  metagraph={currentWorkflow}
+                  onSelect={handleWorkflowSelection}
+                  onStart={(ev: React.MouseEvent<HTMLElement>) => setStart(() => true)}
+                />
+              ) : workflowSelected && start ? (
+                <WorkflowPages
+                  elem={nodeComponents}
+                  idx={nodeIndex}
+                  handleMove={handleMove}
+                  metagraph={currentWorkflow}
+                  handleSubmit={handleSubmit}
+                />
+              ) : null}
+          </div>
+        </div>
       </div>
     </OperationContext.Provider>
   );
