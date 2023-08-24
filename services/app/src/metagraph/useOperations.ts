@@ -49,7 +49,7 @@ export const useOperations = (init: MetagraphOperations[]) => {
     const updateOperationOriginObject = ( originObject: Sample) => {
         const operation = operationList.elem
         operation.originObject = originObject
-        operationList.set(operation, operationList.idx)
+        operationList.setCurrent(operation)
     }
 
 
