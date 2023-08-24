@@ -83,7 +83,6 @@ const Workflow = ({ workflows }: Props) => {
   };
 
   const handleWorkflowSelection = (wf: Metagraph) => {
-    console.log(wf.name);
     setSelected(wf.name);
     selectWorkflow(wf.name);
     setWorkflowSelected(() => true);
@@ -153,7 +152,6 @@ const Workflow = ({ workflows }: Props) => {
 
     const handleWorkflowSelect = (workflow: Metagraph) => {
       setSelectedWorkflow(workflow);
-      console.log(selectedWorkflow);
       onSelect(workflow);
     };
 
