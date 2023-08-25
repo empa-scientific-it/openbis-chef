@@ -19,12 +19,11 @@ type Props = {
 };
 
 function NodePage({ node, index }: Props) {
-  // Render input fields and link settings
-  return (
-    <div>
-      <h1>Workflow Step {index}</h1>
-      <hr className="node-divider" />
-      <div>{node.description}</div>
-    </div>
-  );
+    // Render input fields and link settings
+    return (
+        <div>
+        <h1>Workflow Step {index}</h1>
+        <div>{node.description}</div>
+        </div>
+    );
 }

@@ -7,7 +7,6 @@ import {
 } from "@src/metagraph/metagraph";
 import Entry from "./Entry";
 import Select from "./Select";
-import "./Node.css";
 import { OperationContext } from "../OperationContext";
 
 function selectEntryType(node: MetagraphNode) {
@@ -28,7 +27,6 @@ const NodePage = ({ node }: MetagraphComponentProps) => {
   return (
     <div>
       <h1>Current step: {node.description}</h1>
-      <hr className="node-divider" />
       {child}
     </div>
   );

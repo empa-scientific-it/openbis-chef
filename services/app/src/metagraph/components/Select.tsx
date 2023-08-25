@@ -74,8 +74,9 @@ const Select = () => {
   return (
     <div>
       <div>Select an existing object</div>
-      {<SampleSelector experiment={experiment} onSelect={handleSelection} />}
-      <hr className="node-divider" />
+      {(
+        <SampleSelector experiment={experiment} onSelect={handleSelection} />
+      )}
       {/* {currentSample && <SampleEntry sample={currentSample} />} */}
     </div>
   );
