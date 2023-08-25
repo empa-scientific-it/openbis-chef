@@ -57,20 +57,26 @@ tasks:
         - test -f .schema_imported
   dev-install:
       dir: ./services/app
+      sources:
+        - "./services/app/package.json"
+      generates:
+        - "./services/app/package.json.lock"
       cmds:
-        - npm install
+        - yarn install
+      run:
+        "when_changed"
   dev:
       deps:
         - dev-install
         - import_schema
       dir: ./services/app
       cmds:
-        - npm run vite-dev
+        - yarn run vite-dev
   dump_local_schema:
       deps:
         - download_jar
         - start_openbis
       cmds:
-        - java -jar ./utils/instance-io.jar dump  ./schemas/schema_402_local.json https://localhost:${OPENBIS_PORT} admin changeit
+        - java -jar ./utils/instance-io.jar dump  ./schemas/schema_402_local.json https://localhost:${OPENBIS_PORT} admin {{.OPENBIS_PASSWORD}}
       status:
         - test ./schemas/schema_402_local.json
