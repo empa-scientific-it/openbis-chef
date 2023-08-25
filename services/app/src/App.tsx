@@ -62,7 +62,7 @@ const workflows = [
       },
     ],
     "Create fiber",
-    "Create fiber from compounder"
+    "Create fiber from compounder",
   ),
   new Metagraph(
     [
@@ -84,7 +84,7 @@ const workflows = [
       },
     ],
     "Create another fiber",
-    "Create fiber from fiber"
+    "Create fiber from fiber",
   ),
 ];
 

@@ -1,6 +1,19 @@
-import { Facade } from '@src/openbis/api';
-import { SampleTypeFetchOptions, SampleTypeSearchCriteria, CreateSamplesOperation, SampleCreation, ExperimentIdentifier, Sample } from '@src/openbis/dto';
-import type { Sample as ST, SampleType, CreateSamplesOperation, SampleCreation as ScT, SampleUpdate } from '@src/types/openbis';
+import { Facade } from "@src/openbis/api";
+import {
+  SampleTypeFetchOptions,
+  SampleTypeSearchCriteria,
+  CreateSamplesOperation,
+  SampleCreation,
+  ExperimentIdentifier,
+  Sample,
+} from "@src/openbis/dto";
+import type {
+  Sample as ST,
+  SampleType,
+  CreateSamplesOperation,
+  SampleCreation as ScT,
+  SampleUpdate,
+} from "@src/types/openbis";
 
 export interface Node {
   id: string;
@@ -11,7 +24,7 @@ export interface Node {
 
 export interface EntryNode extends Node {
   id: string;
-  type: 'entry';
+  type: "entry";
   entityType: string;
   collection: string;
   dependencies: string[]; // IDs of nodes this node depends on
@@ -19,14 +32,13 @@ export interface EntryNode extends Node {
 
 export interface SelectNode extends Node {
   id: string;
-  type: 'select';
+  type: "select";
   entityType: string;
   collection: string;
   dependencies: string[]; // IDs of nodes this node depends on
 }
 
 export type MetagraphNode = EntryNode | SelectNode;
-
 
 /**
  * Represents a metagraph that describes the workflow steps.
@@ -43,9 +55,8 @@ export interface VisualisationNode {
   position: {
     x: number;
     y: number;
-  }
+  };
 }
-
 
 export class Metagraph {
   nodes: MetagraphNode[];
@@ -64,17 +75,14 @@ export class Metagraph {
   private validateMetagraph() {
     // Define validation functions
     const checkUniqueIds = (nodes: MetagraphNode[]) =>
-      new Set(nodes.map(node => node.id)).size === nodes.length;
+      new Set(nodes.map((node) => node.id)).size === nodes.length;
 
     const checkValidDependencies = (nodes: MetagraphNode[]) =>
-      nodes.every(node =>
-        node.dependencies.every(depId =>
-          nodes.some(n => n.id === depId)
-        )
+      nodes.every((node) =>
+        node.dependencies.every((depId) => nodes.some((n) => n.id === depId)),
       );
 
     //TODO check for circular dependencies
-
 
     // Combine validation functions
     const validations = [
@@ -84,45 +92,44 @@ export class Metagraph {
     ];
 
     // Perform validations
-    if (!validations.every(validation => validation(this.nodes))) {
-      throw new Error('Metagraph validation failed');
+    if (!validations.every((validation) => validation(this.nodes))) {
+      throw new Error("Metagraph validation failed");
     }
   }
 }
 
-
-
-
-
 /**
  * Walk the graph in a BFS form and apply a transformation to each visited node
- * @param g 
- * @param transform 
- * @returns 
+ * @param g
+ * @param transform
+ * @returns
  */
-export function walkGraph<T>(g: Metagraph, transform: (v: MetagraphNode) => T): T[] {
+export function walkGraph<T>(
+  g: Metagraph,
+  transform: (v: MetagraphNode) => T,
+): T[] {
   //Perform BFS on the graph
   const visited = new Set();
   const queue = [];
   const result = [];
   //TODO use a functional / immutable style instead
   //For each node that has not been visited yet, perform BFS
-  g.nodes.forEach(node => {
+  g.nodes.forEach((node) => {
     if (!visited.has(node.id)) {
       queue.push(node);
       while (queue.length > 0) {
         const currentNode = queue.shift();
         visited.add(currentNode.id);
         result.push(transform(currentNode));
-        currentNode.dependencies.forEach(depId => {
-          const depNode = g.nodes.find(n => n.id === depId);
+        currentNode.dependencies.forEach((depId) => {
+          const depNode = g.nodes.find((n) => n.id === depId);
           if (!visited.has(depNode.id)) {
             queue.push(depNode);
           }
-        })
+        });
       }
     }
-  })
+  });
   return result;
 }
 
@@ -133,54 +140,51 @@ interface Edge {
 }
 
 export function getEdges(g: Metagraph): Edge[] {
-
-  return g.nodes.flatMap(node => {
-    return node.dependencies.map(depId => {
+  return g.nodes.flatMap((node) => {
+    return node.dependencies.map((depId) => {
       return { source: node.id, target: depId, id: `${node.id}-${depId}` };
-    })
-  })
+    });
+  });
 }
-
-
 
 export function findRootNodes(g: Metagraph): MetagraphNode[] {
   //A root node is a node that does not appear as a dependency in any other
   //node
-  return g.nodes.filter(node => {
-    return !g.nodes.some(n => n.dependencies.includes(node.id))
-  })
+  return g.nodes.filter((node) => {
+    return !g.nodes.some((n) => n.dependencies.includes(node.id));
+  });
 }
-
 
 function getDepth(node: Node, g: Metagraph): number {
   //If the node never appears in a chain of dependencies, its depth is 0
-  if (!g.nodes.some(n => n.dependencies.includes(node.id))) {
+  if (!g.nodes.some((n) => n.dependencies.includes(node.id))) {
     return 0;
   }
   //Otherwise, we check for a chain of dependencies
   else {
-    return g.nodes.filter(n => n.dependencies.includes(node.id))
-      .map(n => 1 + getDepth(n, g))
+    return g.nodes
+      .filter((n) => n.dependencies.includes(node.id))
+      .map((n) => 1 + getDepth(n, g))
       .reduce((a, b) => Math.max(a, b));
   }
-
 }
-
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
-/** 
+/**
  * Transform a metagraph to a graph that can be visualised
  * using react-flow
- * 
-*/
-export function getVisualisationNodes(g: Metagraph, mult: number): VisualisationNode[] {
+ *
+ */
+export function getVisualisationNodes(
+  g: Metagraph,
+  mult: number,
+): VisualisationNode[] {
   //Place the node hierarchically
-  const nodes = walkGraph(g, node => node);
+  const nodes = walkGraph(g, (node) => node);
   const edges = getEdges(g);
-
 
   //TODO place the nodes hierarchically. To do so, we walk the graph using BFS
   //and keep track of the depth of each node. Then we can place the nodes
@@ -189,87 +193,92 @@ export function getVisualisationNodes(g: Metagraph, mult: number): Visualisation
     depth: number;
     dependencies: string[];
   }
-  const initGraph = g.nodes.map(node => {
+  const initGraph = g.nodes.map((node) => {
     return {
       id: node.id,
       data: node,
       depth: getDepth(node, g),
-      dependencies: node.dependencies
-    }
-  })
+      dependencies: node.dependencies,
+    };
+  });
 
-  //Once we have the depth of each node, we can place the nodes hierarchically 
+  //Once we have the depth of each node, we can place the nodes hierarchically
   // by setting y = depth and x = index of node in the depth level
-  const nodesWithDepth = initGraph.map(node => {
+  const nodesWithDepth = initGraph.map((node) => {
     return {
       id: node.id,
       data: node.data,
-      type: 'input',
+      type: "input",
       position: {
         y: node.depth * mult,
-        x: getRandomInt(node.depth) * mult
-      }
-
-    }
-  })
+        x: getRandomInt(node.depth) * mult,
+      },
+    };
+  });
   return nodesWithDepth;
-
 }
 
 export interface MetagraphOperation {
   operationId: string;
   originObject: ST;
   collection: string;
-  type: "create" | "link"
+  type: "create" | "link";
 }
 
 export interface CreateOperation extends MetagraphOperation {
-  type: "create"
+  type: "create";
 }
 
 export interface LinkOperation extends MetagraphOperation {
-  type: "link"
+  type: "link";
 }
 
-
 export type MetagraphOperations = CreateOperation | LinkOperation;
-
 
 export interface MetagraphComponentProps {
   node: MetagraphNode;
 }
 
-
-
-export async function getSampleType(code: string, service: Facade): Promise<SampleType> {
-  const ssc = new SampleTypeSearchCriteria()
-  ssc.withCode().thatEquals(code)
-  const sfo = new SampleTypeFetchOptions()
+export async function getSampleType(
+  code: string,
+  service: Facade,
+): Promise<SampleType> {
+  const ssc = new SampleTypeSearchCriteria();
+  ssc.withCode().thatEquals(code);
+  const sfo = new SampleTypeFetchOptions();
   sfo.withPropertyAssignments().withPropertyType();
 
   const res = await service.searchSampleTypes(ssc, sfo);
   if (res.totalCount === 1) {
     return res.objects[0];
   }
-
 }
 
-
-export async function nodeToOperation(node: MetagraphNode, service: Facade): Promise<MetagraphOperations> {
-  if (node.type === 'entry') {
+export async function nodeToOperation(
+  node: MetagraphNode,
+  service: Facade,
+): Promise<MetagraphOperations> {
+  if (node.type === "entry") {
     const sampleType = await getSampleType(node.entityType, service);
     const originObject: ST = new Sample();
     originObject.setExperiment(new ExperimentIdentifier(node.collection));
     originObject.setType(sampleType);
-    return { operationId: node.id, originObject: originObject, type: "create", collection: node.collection };
-  }
-  else if (node.type === 'select') {
+    return {
+      operationId: node.id,
+      originObject: originObject,
+      type: "create",
+      collection: node.collection,
+    };
+  } else if (node.type === "select") {
     const sampleType = await getSampleType(node.entityType, service);
     const originObject: ST = new Sample();
     originObject.setExperiment(new ExperimentIdentifier(node.collection));
     originObject.setType(sampleType);
-    return { operationId: node.id, originObject: originObject, type: "link", collection: node.collection };
+    return {
+      operationId: node.id,
+      originObject: originObject,
+      type: "link",
+      collection: node.collection,
+    };
   }
 }
-
-

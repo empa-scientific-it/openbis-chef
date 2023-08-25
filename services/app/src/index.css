@@ -1,5 +1,5 @@
 :root {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   color: #333;
   background-color: #f4f4f4;
   text-rendering: optimizeLegibility;
@@ -10,7 +10,10 @@
 /* Common styles for clickable elements */
 .clickable {
   cursor: pointer;
-  transition: color 0.25s, border-color 0.25s, background-color 0.25s;
+  transition:
+    color 0.25s,
+    border-color 0.25s,
+    background-color 0.25s;
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
@@ -55,8 +58,6 @@ a:hover {
 .icon:hover {
   /* Add additional styling for hovered icons if needed */
 }
-
-
 
 @media (prefers-color-scheme: light) {
   :root {

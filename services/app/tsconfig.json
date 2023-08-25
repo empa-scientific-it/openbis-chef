@@ -3,11 +3,7 @@
     "noEmit": true,
     "target": "esnext",
     "useDefineForClassFields": true,
-    "lib": [
-      "ES2020",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
     /* Bundler mode */
@@ -22,22 +18,13 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "typeRoots": [
-      "./src/types/",
-      "node_modules/@types"
-    ],
+    "typeRoots": ["./src/types/", "node_modules/@types"],
     "types": ["openbis"],
     "baseUrl": "./",
     "paths": {
-      "v3api/*": [
-        "./lib/v3api/js/*"
-      ],
-      "as/*": [
-        "./lib/v3/as/*"
-      ],
-      "@src/*": [
-        "./src/*"
-      ],
+      "v3api/*": ["./lib/v3api/js/*"],
+      "as/*": ["./lib/v3/as/*"],
+      "@src/*": ["./src/*"]
     }
   },
   "include": [
@@ -46,9 +33,7 @@
     "./src/**/*.json",
     "./src/**/*.js",
     "./src/**/*.d.ts",
-    "./tests/**/*.ts",
+    "./tests/**/*.ts"
   ],
-  "files": [
-    "./src/types/openbis.d.ts"
-  ]
+  "files": ["./src/types/openbis.d.ts"]
 }

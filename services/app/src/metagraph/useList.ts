@@ -1,76 +1,90 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export const useList = <T>(initialData: T[]) => {
-    const [list, setList] = useState<T[]>(initialData);
-    const [idx, setIdx] = useState(0);
-    const [elem, setElem] = useState(initialData[idx]);
-    const [finished, setFinished] = useState(false);
+  const [list, setList] = useState<T[]>(initialData);
+  const [idx, setIdx] = useState(0);
+  const [elem, setElem] = useState(initialData[idx]);
+  const [finished, setFinished] = useState(false);
 
+  const move = (newIdx: number) => {
+    if (newIdx < list.length && newIdx >= 0) {
+      setIdx(() => newIdx);
+      setElem(() => list[newIdx]);
+      setFinished(false);
+    }
+  };
 
-    const move = (newIdx: number) => {
-        if (newIdx < list.length && newIdx >= 0) {
-            setIdx(() => newIdx);
-            setElem(()=>list[newIdx]);
-            setFinished(false);
-        }
-    };
+  const next = () => {
+    if (idx < list.length - 1) {
+      move(idx + 1);
+    } else {
+      setFinished(true);
+    }
+  };
 
-    const next = () => {
-        if (idx < list.length - 1) {
-            move(idx + 1);
-        } else {
-            setFinished(true);
-        }
-    };
+  const previous = () => {
+    if (idx >= 0) {
+      move(idx - 1);
+      setFinished(false);
+    }
+  };
 
-    const previous = () => {
-        if (idx >= 0) {
-            move(idx - 1);
-            setFinished(false);
-        }
-    };
+  const find = (predicate: (elem: T) => boolean): T | undefined => {
+    return list.find(predicate);
+  };
 
-    const find = (predicate: (elem: T) => boolean): T | undefined => {
-        return list.find(predicate);
-    };
+  const remove = (elem: T) => {
+    const newList = list.filter((e) => e !== elem);
+    setList(() => newList);
+    if (idx >= newList.length) {
+      move(newList.length - 1);
+    }
+  };
 
-    const remove = (elem: T) => {
-        const newList = list.filter(e => e !== elem);
-        setList(() => newList);
-        if (idx >= newList.length) {
-            move(newList.length - 1);
-        }   
-    };
+  const add = (elem: T) => {
+    setList((oldList) => [...oldList, elem]);
+    setIdx(() => list.length + 1);
+    setElem(() => elem);
+  };
 
-    const add = (elem: T) => {
-        setList((oldList) => [...oldList, elem]);
-        setIdx(() => list.length + 1);
-        setElem(()=>elem);
-    };
+  const setCurrent = (newElem: T) => {
+    setElement(newElem, idx);
+  };
 
-    const setCurrent = (newElem: T) => {
-        setElement(newElem, idx);
-    };
+  const setElement = (newElem: T, newIndex: number) => {
+    if (newIndex < 0 || newIndex >= list.length) {
+      throw new Error("Index out of bounds");
+    } else {
+      setList((prevList) => {
+        const newList = [...prevList];
+        newList[newIndex] = newElem;
+        move(newIndex); // Update the current element
+        return newList;
+      });
+    }
+  };
 
-    const setElement = (newElem: T, newIndex: number) => {
-        if (newIndex < 0 || newIndex >= list.length) {
-            throw new Error('Index out of bounds');
-        } else {
-            setList(prevList => {
-                const newList = [...prevList];
-                newList[newIndex] = newElem;
-                move(newIndex); // Update the current element
-                return newList;
-            });
-        }
-    };
+  const clear = () => {
+    setList(() => []);
+    setElem(() => null as T);
+    setIdx(() => 0);
+    setFinished(() => false);
+  };
 
-    const clear = () => {
-        setList(()=>[]);
-        setElem(()=>null as T);
-        setIdx(()=>0);
-        setFinished(()=>false);
-    };
-
-    return { elem, next, previous, finished, idx, move, find, remove, add, set: setElement, setCurrent, list, setList, clear };
+  return {
+    elem,
+    next,
+    previous,
+    finished,
+    idx,
+    move,
+    find,
+    remove,
+    add,
+    set: setElement,
+    setCurrent,
+    list,
+    setList,
+    clear,
+  };
 };

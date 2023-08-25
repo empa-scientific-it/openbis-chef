@@ -3,16 +3,30 @@ import SampleEntry from "@src/openbis/components/SampleEntry";
 import { AuthContext } from "@src/openbis/AuthContext";
 import { OperationContext } from "../OperationContext";
 import { Experiment } from "@src/types/openbis";
-import { ExperimentFetchOptions, ExperimentSearchCriteria, SampleFetchOptions, SampleTypeFetchOptions } from "@src/openbis/dto";
+import {
+  ExperimentFetchOptions,
+  ExperimentSearchCriteria,
+  SampleFetchOptions,
+  SampleTypeFetchOptions,
+} from "@src/openbis/dto";
 
-const SampleSelector = ({ experiment, onSelect }: {experiment: Experiment }) => {
+const SampleSelector = ({
+  experiment,
+  onSelect,
+}: {
+  experiment: Experiment;
+  onSelect: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+}) => {
   return (
     <div>
       <div>Experiment: {experiment.identifier.identifier}</div>
       <label>Select sample:</label>
       <select onChange={onSelect}>
         {experiment.samples.map((sample) => (
-          <option key={sample.identifier.identifier} value={sample.identifier.identifier}>
+          <option
+            key={sample.identifier.identifier}
+            value={sample.identifier.identifier}
+          >
             {sample.identifier.identifier}
           </option>
         ))}
@@ -30,7 +44,9 @@ const Select = () => {
   useEffect(() => {
     if (loggedIn) {
       const ssc = new ExperimentSearchCriteria();
-      ssc.withIdentifier().thatEquals(workflowOperations.currentOperation.collection);
+      ssc
+        .withIdentifier()
+        .thatEquals(workflowOperations.currentOperation.collection);
       const sfo: ExperimentFetchOptions = new ExperimentFetchOptions();
       const sto: SampleTypeFetchOptions = new SampleTypeFetchOptions();
       sto.withPropertyAssignments().withPropertyType();
@@ -47,10 +63,10 @@ const Select = () => {
     }
   }, [loggedIn, service, workflowOperations.currentOperation]);
 
-  const handleSelection = (event) => {
+  const handleSelection = (event: React.ChangeEvent<HTMLSelectElement>) => {
     event.preventDefault();
     const foundSample = experiment.samples.find(
-      (sample) => sample.identifier.identifier === event.target.value 
+      (sample) => sample.identifier.identifier === event.target.value,
     );
     workflowOperations.updateOperationOriginObject(foundSample);
   };
@@ -58,9 +74,7 @@ const Select = () => {
   return (
     <div>
       <div>Select an existing object</div>
-      {(
-        <SampleSelector experiment={experiment} onSelect={handleSelection} />
-      )}
+      {<SampleSelector experiment={experiment} onSelect={handleSelection} />}
       <hr className="node-divider" />
       {/* {currentSample && <SampleEntry sample={currentSample} />} */}
     </div>

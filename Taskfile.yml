@@ -58,13 +58,14 @@ tasks:
   dev-install:
       dir: ./services/app
       sources:
-        - "./services/app/package.json"
+        - ./services/app/package.json
       generates:
-        - "./services/app/package.json.lock"
+        - ./services/app/yarn.lock
       cmds:
         - yarn install
-      run:
-        "when_changed"
+      status:
+        -  test ./services/app/yarn.lock
+      run: once
   dev:
       deps:
         - dev-install
