@@ -1,0 +1,97 @@
+=== Front-End Architecture ===
+
+==== Building Block View
+
+===== Scope and context
+
+[plantuml, target=diagram-system-context, format=png]
+....
+actor User
+actor Admin
+component App
+component OpenBIS
+
+App -- OpenBIS
+User -- App
+Admin -- App
+Admin -- OpenBIS
+
+....
+
+
+==== Level 1
+
+[plantuml, target=diagram-components, format=png]
+....
+component OpenBIS
+actor User
+component App <<component>>{
+    component Workflow <<component>>
+    component Login <<component>>
+}
+
+Workflow .. Login
+User .. Login
+User .. Workflow
+OpenBIS .. Workflow
+Login .. Workflow
+
+
+
+....
+
+==== Level 2
+We represent the components of the react app as a tree of components represented as UML classes. All the objects with the stereotype `+<<component>>+` are react functional components. The association lines represent the parent component including the children component.
+
+
+[plantuml, target=diagram-classes, format=png]   
+....
+class useLogin <<provider>>
+class App <<component>>
+class Login <<component>> <<consumer>>
+class Workflow <<component>>
+class WorkflowEntry <<component>>
+class WorkflowSelection <<component>>
+class WorkflowDescription <<component>>
+class WorkflowPages <<component>>
+class Stepper <<component>>
+class useWorkflows <<provider>>
+class NodePage <<component>>
+class Entry <<component>>
+class Select <<component>>
+class OpenbisEntry <<component>>
+class SampleSelector <<component>>
+class operationContext <<provider>>
+
+note "Depending on step type" as N1
+note "Depending on login status" as N2
+note "Depending if workflow is selected" as N3
+
+
+useLogin *-- App
+App *-- Workflow
+App *-- Login
+Login .. useLogin : consumes
+Workflow .. useLogin : consumes
+N2 .. Login
+N2 .. Workflow
+Workflow *-- WorkflowEntry
+Workflow *-- operationContext
+operationContext *-- WorkflowPages 
+WorkflowEntry *-- WorkflowSelection
+WorkflowEntry *-- WorkflowDescription
+WorkflowPages *-- Stepper
+useWorkflows .. Workflow: consumes
+WorkflowPages *-- NodePage
+NodePage *-- Entry
+NodePage *-- Select
+Select *-- SampleSelector
+N1 .. Entry 
+N1 .. Select 
+N3 .. WorkflowEntry
+N3 .. WorkflowPages
+Entry *-- OpenbisEntry
+
+hide <<component>> circle
+hide <<provider>> circle
+....
