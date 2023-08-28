@@ -111,7 +111,7 @@ const Workflow = ({ workflows }: Props) => {
   }: {
     metagraph: Metagraph;
     handleSubmit: () => void;
-    elem: JSX.Element;
+    elem: JSX.Element[];
     idx: number;
     handleMove: (index: number) => void;
     handlePreviousStep: () => void;
@@ -219,7 +219,7 @@ const Workflow = ({ workflows }: Props) => {
                 onStart={(ev: React.MouseEvent<HTMLElement>) => setStart(() => true)}
               />
             ) : workflowSelected && start ? (
-              <WorkflowPages
+                <WorkflowPages
                 elem={nodeComponents}
                 idx={nodeIndex}
                 handleMove={handleMove}
@@ -228,6 +228,7 @@ const Workflow = ({ workflows }: Props) => {
                 handleNextStep={handleNextStep}
                 handlePreviousStep={handlePreviousStep}
               />
+            
             ) : null}
           </div>
         </div>

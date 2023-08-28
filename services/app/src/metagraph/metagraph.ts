@@ -6,14 +6,16 @@ import {
   SampleCreation,
   ExperimentIdentifier,
   Sample,
+  SampleType
 } from "@src/openbis/dto";
-import type {
-  Sample as ST,
-  SampleType,
-  CreateSamplesOperation,
-  SampleCreation as ScT,
-  SampleUpdate,
-} from "@src/types/openbis";
+import { Sample } from "@src/types/openbis";
+// import type {
+//   Sample as ST,
+//   SampleType,
+//   CreateSamplesOperation,
+//   SampleCreation as ScT,
+//   SampleUpdate,
+// } from "@src/types/openbis";
 
 export interface Node {
   id: string;
@@ -220,7 +222,7 @@ export function getVisualisationNodes(
 
 export interface MetagraphOperation {
   operationId: string;
-  originObject: ST;
+  originObject: typeof Sample; // The openbis object to be used as a parent or to be created
   collection: string;
   type: "create" | "link";
 }
@@ -242,7 +244,7 @@ export interface MetagraphComponentProps {
 export async function getSampleType(
   code: string,
   service: Facade,
-): Promise<SampleType> {
+): Promise<typeof SampleType> {
   const ssc = new SampleTypeSearchCriteria();
   ssc.withCode().thatEquals(code);
   const sfo = new SampleTypeFetchOptions();
@@ -260,7 +262,7 @@ export async function nodeToOperation(
 ): Promise<MetagraphOperations> {
   if (node.type === "entry") {
     const sampleType = await getSampleType(node.entityType, service);
-    const originObject: ST = new Sample();
+    const originObject = new Sample();
     originObject.setExperiment(new ExperimentIdentifier(node.collection));
     originObject.setType(sampleType);
     return {

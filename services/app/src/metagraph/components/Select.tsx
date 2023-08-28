@@ -19,10 +19,10 @@ const SampleSelector = ({
 }) => {
   return (
     <div>
-      <div>Experiment: {experiment.identifier.identifier}</div>
+      {/* <div>Experiment: {experiment.identifier.identifier}</div> */}
       <label>Select sample:</label>
       <select onChange={onSelect}>
-        {experiment.samples.map((sample) => (
+        {experiment?.samples.map((sample) => (
           <option
             key={sample.identifier.identifier}
             value={sample.identifier.identifier}
@@ -42,11 +42,14 @@ const Select = () => {
   const currentSample = workflowOperations.currentOperation.originObject;
 
   useEffect(() => {
+    
     if (loggedIn) {
+      //Perform the search for all the objects in the experiment/collection
       const ssc = new ExperimentSearchCriteria();
       ssc
         .withIdentifier()
         .thatEquals(workflowOperations.currentOperation.collection);
+      
       const sfo: ExperimentFetchOptions = new ExperimentFetchOptions();
       const sto: SampleTypeFetchOptions = new SampleTypeFetchOptions();
       sto.withPropertyAssignments().withPropertyType();
@@ -54,10 +57,12 @@ const Select = () => {
       sso.withProperties();
       sso.withTypeUsing(sto);
       sfo.withSamplesUsing(sso);
+      console.log("Performing search")
       service.searchExperiments(ssc, sfo).then((res) => {
         if (res.totalCount > 0) {
+          console.log(`search result: ${res.objects[0]}`);
           console.log(res.objects[0]);
-          setExperiment(res.objects[0]);
+          setExperiment(() => res.objects[0]);
         }
       });
     }
@@ -65,10 +70,10 @@ const Select = () => {
 
   const handleSelection = (event: React.ChangeEvent<HTMLSelectElement>) => {
     event.preventDefault();
-    const foundSample = experiment.samples.find(
-      (sample) => sample.identifier.identifier === event.target.value,
-    );
-    workflowOperations.updateOperationOriginObject(foundSample);
+    // const foundSample = experiment.samples.find(
+    //   (sample) => sample.identifier.identifier === event.target.value,
+    // );
+    // workflowOperations.updateOperationOriginObject(foundSample);
   };
 
   return (
