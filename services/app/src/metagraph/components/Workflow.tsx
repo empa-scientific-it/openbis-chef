@@ -1,9 +1,5 @@
 import React, { useState, useContext } from "react";
-import {
-  Metagraph,
-  walkGraph,
-  nodeToOperation,
-} from "@src/metagraph/metagraph";
+import { Metagraph, walkGraph, nodeToOperation } from "@src/metagraph/metagraph";
 import { AuthContext } from "@src/openbis/AuthContext";
 import { useList } from "../useList";
 import Summary from "./Summary";
@@ -15,14 +11,14 @@ import { Stepper } from "./Stepper";
 import { OperationContext } from "../OperationContext";
 import { useOperations } from "../useOperations";
 
-
 type Props = {
   workflows: Metagraph[];
 };
 
 const Workflow = ({ workflows }: Props) => {
   // Get openbis service
-  const { token, setToken, loggedIn, setLoggedIn, login, logout, service } = useContext(AuthContext);
+  const { token, setToken, loggedIn, setLoggedIn, login, logout, service } =
+    useContext(AuthContext);
   // Keep list of all available workflows
   const { currentWorkflow, selectWorkflow } = useWorkflows(workflows);
   // Keep track of the workflow selected
@@ -32,7 +28,7 @@ const Workflow = ({ workflows }: Props) => {
   // Store the start of the workflow
   const [start, setStart] = useState(false);
   // Store the selected workflow
-  const [selected, setSelected] = useState('');
+  const [selected, setSelected] = useState("");
 
   const {
     elem: currentNode,
@@ -110,12 +106,16 @@ const Workflow = ({ workflows }: Props) => {
     elem,
     idx,
     handleMove,
+    handlePreviousStep,
+    handleNextStep,
   }: {
     metagraph: Metagraph;
     handleSubmit: () => void;
     elem: JSX.Element;
     idx: number;
     handleMove: (index: number) => void;
+    handlePreviousStep: () => void;
+    handleNextStep: () => void;
   }) {
     return (
       <div>
@@ -134,10 +134,10 @@ const Workflow = ({ workflows }: Props) => {
 
   function WorkflowDescription({ metagraph }: { metagraph: Metagraph }) {
     return (
-        <div className="workflow-list">
-          {<h3>Workflow summary: {metagraph.name}</h3>}
-          <Summary metagraph={metagraph} />
-        </div>
+      <div className="workflow-list">
+        {<h3>Workflow summary: {metagraph.name}</h3>}
+        <Summary metagraph={metagraph} />
+      </div>
     );
   }
 
@@ -158,18 +158,19 @@ const Workflow = ({ workflows }: Props) => {
     return (
       <div>
         <h2>Available workflows:</h2>
-        {
-          workflows.map((workflow) =>
-            <div
-              key={workflow.name}
-              id={workflow.name}
-              onClick={() => handleWorkflowSelect(workflow)}
-              className={"workflow-selection-item" + (selected === workflow.name ? " workflow-selection-item-selected" : "")}
-            >
-              {workflow.name}
-            </div>
-          )
-        }
+        {workflows.map((workflow) => (
+          <div
+            key={workflow.name}
+            id={workflow.name}
+            onClick={() => handleWorkflowSelect(workflow)}
+            className={
+              "workflow-selection-item" +
+              (selected === workflow.name ? " workflow-selection-item-selected" : "")
+            }
+          >
+            {workflow.name}
+          </div>
+        ))}
       </div>
     );
   }
@@ -204,7 +205,7 @@ const Workflow = ({ workflows }: Props) => {
   // When finished, it should show a summary of the inputs and allow the user to run the workflow
   return (
     <OperationContext.Provider value={workflowOps}>
-      <div className="App">        
+      <div className="App">
         <div className="app-container">
           <button className="logout-button" name="Logout" onSubmit={() => handleLogout}>
             Logout
@@ -212,20 +213,22 @@ const Workflow = ({ workflows }: Props) => {
 
           <div className="workflow-container">
             {!start ? (
-                <WorkflowEntry
-                  metagraph={currentWorkflow}
-                  onSelect={handleWorkflowSelection}
-                  onStart={(ev: React.MouseEvent<HTMLElement>) => setStart(() => true)}
-                />
-              ) : workflowSelected && start ? (
-                <WorkflowPages
-                  elem={nodeComponents}
-                  idx={nodeIndex}
-                  handleMove={handleMove}
-                  metagraph={currentWorkflow}
-                  handleSubmit={handleSubmit}
-                />
-              ) : null}
+              <WorkflowEntry
+                metagraph={currentWorkflow}
+                onSelect={handleWorkflowSelection}
+                onStart={(ev: React.MouseEvent<HTMLElement>) => setStart(() => true)}
+              />
+            ) : workflowSelected && start ? (
+              <WorkflowPages
+                elem={nodeComponents}
+                idx={nodeIndex}
+                handleMove={handleMove}
+                metagraph={currentWorkflow}
+                handleSubmit={handleSubmit}
+                handleNextStep={handleNextStep}
+                handlePreviousStep={handlePreviousStep}
+              />
+            ) : null}
           </div>
         </div>
       </div>

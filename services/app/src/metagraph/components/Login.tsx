@@ -40,18 +40,7 @@ function Login() {
                     </form>
                 </div>
             </div>
-
-            <button className="login-form-button" name="Login" type="submit">
-              Login
-            </button>
-            <br />
-            <button name="Logout" onSubmit={() => handleLogout}>
-              Logout
-            </button>
-          </form>
         </div>
-      </div>
-    </div>
   );
 }
 
