@@ -10,6 +10,7 @@ import type {
   ExperimentTypeUpdate,
   MaterialFetchOptions,
   MaterialTypeFetchOptions,
+  OpenBIS,
   PersonFetchOptions,
   PluginFetchOptions,
   ProjectFetchOptions,
@@ -58,6 +59,7 @@ import type {
   VocabularyTermSearchCriteria,
   PersonSearchCriteria,
   PropertyAssignmentSearchCriteria,
+  OperationExecutionFetchOptions,
   SampleTypeSearchCriteria,
   ExperimentTypeSearchCriteria,
   DataSetTypeSearchCriteria,
@@ -69,9 +71,8 @@ import type {
   QueryExecutionOptions,
   SqlExecutionOptions,
   IOperationExecutionOptions,
-  OpenBIS
 } from "@src/types/openbis";
-import {openbis} from "v3api/V3API.esm";
+import openbis from "v3api/V3API.esm";
 import {
   ExecuteCustomASServiceOperation,
   AsynchronousOperationExecutionOptions,
@@ -97,7 +98,7 @@ interface V3 extends OpenBIS {
 export class Facade {
   v3: V3;
   constructor() {
-    this.v3 = new openbis();
+    this.v3 = new openbis.openbis();
   }
 
   checkSession(sessionToken: string) {
@@ -285,7 +286,7 @@ export class Facade {
 
   getOperationExecutions(
     ids: IOperationExecutionId[],
-    fo: typeof OperationExecutionFetchOptions,
+    fo: OperationExecutionFetchOptions,
   ) {
     return this.promise(this.v3.getOperationExecutions(ids, fo));
   }
@@ -403,7 +404,7 @@ export class Facade {
     return this.promise(this.v3.executeQuery(id, options));
   }
 
-  executeSql(sql: string, options: SqlExecutionOptions) {
+  executeSql(sql: String, options: SqlExecutionOptions) {
     return this.promise(this.v3.executeSql(sql, options));
   }
 
