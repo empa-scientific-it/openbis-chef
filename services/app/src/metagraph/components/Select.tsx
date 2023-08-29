@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from "react";
-import SampleEntry from "@src/openbis/components/SampleEntry";
 import { AuthContext } from "@src/openbis/AuthContext";
 import { OperationContext } from "../OperationContext";
 import { Experiment } from "@src/types/openbis";
@@ -9,6 +8,9 @@ import {
   SampleFetchOptions,
   SampleTypeFetchOptions,
 } from "@src/openbis/dto";
+import {
+  MetagraphComponentProps,
+} from "@src/metagraph/metagraph";
 
 const SampleSelector = ({
   experiment,
@@ -22,7 +24,7 @@ const SampleSelector = ({
       {/* <div>Experiment: {experiment.identifier.identifier}</div> */}
       <label>Select sample:</label>
       <select onChange={onSelect}>
-        {experiment?.samples.map((sample) => (
+        {experiment.samples?.map((sample) => (
           <option
             key={sample.identifier.identifier}
             value={sample.identifier.identifier}
@@ -35,28 +37,29 @@ const SampleSelector = ({
   );
 };
 
-const Select = () => {
+const Select  = () =>  {
   const workflowOperations = useContext(OperationContext);
   const { loggedIn, service } = useContext(AuthContext);
   const [experiment, setExperiment] = useState({} as Experiment);
   const currentSample = workflowOperations.currentOperation.originObject;
 
-  useEffect(() => {
-    
+  useEffect(() => {    
     if (loggedIn) {
       //Perform the search for all the objects in the experiment/collection
       const ssc = new ExperimentSearchCriteria();
       ssc
         .withIdentifier()
         .thatEquals(workflowOperations.currentOperation.collection);
-      
-      const sfo: ExperimentFetchOptions = new ExperimentFetchOptions();
-      const sto: SampleTypeFetchOptions = new SampleTypeFetchOptions();
+
+      const sfo: typeof ExperimentFetchOptions = new ExperimentFetchOptions();
+      const sto: typeof SampleTypeFetchOptions = new SampleTypeFetchOptions();      
+      const sso: typeof SampleFetchOptions = new SampleFetchOptions();
+
       sto.withPropertyAssignments().withPropertyType();
-      const sso = new SampleFetchOptions();
       sso.withProperties();
       sso.withTypeUsing(sto);
       sfo.withSamplesUsing(sso);
+
       console.log("Performing search")
       service.searchExperiments(ssc, sfo).then((res) => {
         if (res.totalCount > 0) {

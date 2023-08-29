@@ -57,6 +57,7 @@ export function Stepper({
         {Array.from({ length: maxSteps }, (value, index) => index).map(
           (index) => (
             <div
+              key={index}
               className={`step-indicator clickable ${
                 index <= localStep ? "completed" : "inactive"
               }`}

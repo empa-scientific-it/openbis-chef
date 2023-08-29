@@ -2,20 +2,10 @@ import { Facade } from "@src/openbis/api";
 import {
   SampleTypeFetchOptions,
   SampleTypeSearchCriteria,
-  CreateSamplesOperation,
-  SampleCreation,
   ExperimentIdentifier,
   Sample,
   SampleType
 } from "@src/openbis/dto";
-import { Sample } from "@src/types/openbis";
-// import type {
-//   Sample as ST,
-//   SampleType,
-//   CreateSamplesOperation,
-//   SampleCreation as ScT,
-//   SampleUpdate,
-// } from "@src/types/openbis";
 
 export interface Node {
   id: string;
@@ -273,7 +263,7 @@ export async function nodeToOperation(
     };
   } else if (node.type === "select") {
     const sampleType = await getSampleType(node.entityType, service);
-    const originObject: ST = new Sample();
+    const originObject: typeof Sample = new Sample();
     originObject.setExperiment(new ExperimentIdentifier(node.collection));
     originObject.setType(sampleType);
     return {

@@ -62,6 +62,10 @@
     border-radius: 5px;
 }
 
-.workflow-selection-item-selected {
+.workflow-selection-item:hover {
+    border: 1px solid #666;
+}
+
+.workflow-selection-item-selected, .workflow-selection-item-selected:hover {
     border: 2px solid #4d77cb;
 }
