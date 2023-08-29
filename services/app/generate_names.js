@@ -1,7 +1,9 @@
+import fs from "fs/promises";
+
 // Define the list of names
 
 import names from "./moduleNames.json" assert { type: "json" };
-import  fs from "fs";
+import { type } from "os";
 
 // Output file
 const outputFilePath = "dto.ts";
@@ -26,8 +28,8 @@ const typeImports = names.names
   .map((name) => `import {${name}} from '@src/types/openbis';`)
   .join("\n");
 
-const constOut = `// Auto-generated file\nimport * as V3API from 'v3api/V3API.esm'\n;${typeImports}\n${allImports}\n\nexport {\n${allExports}\n}\n`;
+const constOut = `// Auto-generated file\nimport V3API from 'v3api/V3API.esm'\n;${typeImports}\n${allImports}\n\nexport {\n${allExports}\n}\n`;
 
 // Start writing to the output file
 
-await fs.writeFileSync(outputFilePath, constOut);
+await fs.writeFile(outputFilePath, constOut);
