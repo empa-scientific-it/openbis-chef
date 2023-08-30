@@ -1,7 +1,7 @@
 /* tslint:disable */
 /* eslint-disable */
 // Generated using typescript-generator version 3.2.1263 on 2023-08-25 08:31:26.
-
+declare module "v3api/V3API.esm"{
 export interface OpenBIS {
   sessionToken: string;
   sessionInformation: SessionInformation;
@@ -22478,3 +22478,4 @@ export type FastDownloadParameter =
   | "DOWNLOAD_STREAM_ID_PARAMETER"
   | "DOWNLOAD_SESSION_ID_PARAMETER"
   | "USER_SESSION_ID_PARAMETER";
+}
