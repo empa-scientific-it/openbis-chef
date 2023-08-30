@@ -33,8 +33,7 @@
     "./src/**/*.json",
     "./src/**/*.js",
     "./src/**/*.d.ts",
-    "./tests/**/*.ts",
-    "./lib/v3api/js/**/*.js",
+    "./tests/**/*.ts"
   ],
   "files": ["./src/types/openbis.d.ts"]
 }

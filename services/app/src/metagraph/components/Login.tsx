@@ -1,9 +1,9 @@
-import "@src/App.css";
-import "./Login.css";
 import { useState, useContext } from "react";
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '@src/openbis/AuthContext'
-import { useLocation, useNavigate } from 'react-router-dom';
+import "@src/App.css";
+import "./Login.css";
 
 function Login() {
     const [user, setUser] = useState("")

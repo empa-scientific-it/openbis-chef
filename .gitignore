@@ -6,3 +6,4 @@
 .schema_imported
 utils/instance-io.jar
 **/package-lock.json
+**yarn.lock

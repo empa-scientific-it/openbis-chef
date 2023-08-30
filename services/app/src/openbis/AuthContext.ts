@@ -1,9 +1,4 @@
 import { createContext } from "react";
-import Openbis from "@src/openbis/openbis";
-import { SampleTypeFetchOptions } from "@src/types/api-openbis-java";
-import { SampleTypeSearchCriteria } from "@src/types/api-openbis-java";
-import { SearchResult } from "@src/types/api-openbis-java";
-import { SampleType } from "@src/types/api-openbis-java";
 import { Facade } from "./api";
 
 export interface AuthContextInterface {

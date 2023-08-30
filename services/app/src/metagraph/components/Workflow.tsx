@@ -17,8 +17,7 @@ type Props = {
 
 const Workflow = ({ workflows }: Props) => {
   // Get openbis service
-  const { token, setToken, loggedIn, setLoggedIn, login, logout, service } =
-    useContext(AuthContext);
+  const { logout, service } = useContext(AuthContext);
   // Keep list of all available workflows
   const { currentWorkflow, selectWorkflow } = useWorkflows(workflows);
   // Keep track of the workflow selected
