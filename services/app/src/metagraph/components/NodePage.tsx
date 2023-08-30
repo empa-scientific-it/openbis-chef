@@ -6,7 +6,6 @@ import {
 } from "@src/metagraph/metagraph";
 import Entry from "./Entry";
 import Select from "./Select";
-import { OperationContext } from "../OperationContext";
 
 function selectEntryType(node: MetagraphNode) {
   if (node.type === "entry") {
@@ -19,7 +18,6 @@ function selectEntryType(node: MetagraphNode) {
 }
 
 const NodePage = ({ node }: MetagraphComponentProps) => {
-  const workflowOperations = useContext(OperationContext);
   const child = selectEntryType(node);
 
   // Render input fields and link settings

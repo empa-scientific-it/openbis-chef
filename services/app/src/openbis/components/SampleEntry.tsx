@@ -48,7 +48,7 @@ function SampleEntry({ sample }: Props) {
         <h2>Object: {sample.code}</h2>
         <h3>Properties</h3>
         <div className="properties-container">
-          {Object.entries(transformedSample.properties).map(
+          {Object.entries(transformedSample?.properties).map(
             ([name, value], index) => {
               return (
                 <div className="property-entry">

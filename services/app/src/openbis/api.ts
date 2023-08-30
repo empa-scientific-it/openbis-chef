@@ -1,5 +1,6 @@
 
-import {
+import type {
+  Sample,
   AuthorizationGroupFetchOptions,
   DataSetFetchOptions,
   DataSetSearchCriteria,
@@ -62,24 +63,39 @@ import {
   VocabularySearchCriteria,
   VocabularyTermFetchOptions,
   VocabularyTermSearchCriteria,
-  OpenBIS,
-  openbis
-} from "./dto";
+  IOperationExecutionResults,
+  CustomASServiceExecutionOptions,
+  ICustomASServiceId,
+  PluginEvaluationOptions,
+  PluginSearchCriteria,
+  PersonalAccessTokenFetchOptions,
+  PersonalAccessTokenSearchCriteria,
+  EventFetchOptions,
+  EventSearchCriteria,
+  SynchronousOperationExecutionResults,
+  AsynchronousOperationExecutionResults,
+} from "@src/types/openbis";
 
-interface V3 extends OpenBIS {
+import {ExecuteCustomASServiceOperation, AsynchronousOperationExecutionOptions, OperationExecutionFetchOptions} from './dto'
+
+import { openbis } from "v3api/V3API.esm";
+
+import type {  OpenBIS  as OpenBISInterface} from "@src/types/openbis";
+
+interface V3 extends OpenBISInterface {
   _private: {
     sessionToken: string;
   };
   executeOperations(
     token: string,
-    operations: IOperation[],
-    options: IOperationExecutionOptions,
-  ): Promise<any>;
+    operations:  IOperation[],
+    options:  IOperationExecutionOptions,
+  ): Promise<AsynchronousOperationExecutionResults>;
   //This is needed to be able to use the executeService method in the facade
   executeOperations(
-    operations: IOperation[],
-    options: IOperationExecutionOptions,
-  ): Promise<any>;
+    operations:  IOperation[],
+    options:  IOperationExecutionOptions,
+  ): Promise<AsynchronousOperationExecutionResults>;
 }
 
 export class Facade {
@@ -180,11 +196,11 @@ export class Facade {
     return this.promise(this.v3.searchPropertyTypes(criteria, fo));
   }
 
-  searchPlugins(criteria: any, fo: PluginFetchOptions) {
+  searchPlugins(criteria: PluginSearchCriteria, fo: PluginFetchOptions) {
     return this.promise(this.v3.searchPlugins(criteria, fo));
   }
 
-  searchPersonalAccessTokens(criteria: any, fo: any) {
+  searchPersonalAccessTokens(criteria: PersonalAccessTokenSearchCriteria, fo: PersonalAccessTokenFetchOptions) {
     return this.promise(this.v3.searchPersonalAccessTokens(criteria, fo));
   }
 
@@ -247,7 +263,7 @@ export class Facade {
     return this.promise(this.v3.searchPropertyAssignments(criteria, fo));
   }
 
-  searchEvents(criteria: any, fo: any) {
+  searchEvents(criteria: EventSearchCriteria, fo: EventFetchOptions) {
     return this.promise(this.v3.searchEvents(criteria, fo));
   }
 
@@ -273,7 +289,7 @@ export class Facade {
 
   getOperationExecutions(
     ids: IOperationExecutionId[],
-    fo: typeof OperationExecutionFetchOptions,
+    fo:  typeof OperationExecutionFetchOptions,
   ) {
     return this.promise(this.v3.getOperationExecutions(ids, fo));
   }
@@ -347,12 +363,12 @@ export class Facade {
     return this.promise(this.v3.deleteMaterialTypes(ids, options));
   }
 
-  evaluatePlugin(options: any) {
+  evaluatePlugin(options: PluginEvaluationOptions) {
     return this.promise(this.v3.evaluatePlugin(options));
   }
 
-  async executeService(id: any, options: any) {
-    const scheduleResult = await this.executeOperations(
+  async executeService(id: ICustomASServiceId, options: CustomASServiceExecutionOptions) {
+    const scheduleResult: AsynchronousOperationExecutionResults = await this.executeOperations(
       [new ExecuteCustomASServiceOperation(id, options)],
       new AsynchronousOperationExecutionOptions(),
     );
@@ -395,7 +411,7 @@ export class Facade {
     return this.promise(this.v3.executeSql(sql, options));
   }
 
-  executeOperations(operations, options: IOperationExecutionOptions) {
+  executeOperations(operations: IOperation[], options: IOperationExecutionOptions) {
     return this.promise(this.v3.executeOperations(operations, options));
   }
 
@@ -412,3 +428,5 @@ export class Facade {
     });
   }
 }
+
+

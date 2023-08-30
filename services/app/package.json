@@ -6,7 +6,7 @@
   "scripts": {
     "vite-dev": "vite dev",
     "tscheck": "tsc -p ./ --noEmit",
-    "generate-names": "node ./generate_names.js",
+    "generate-names": "npx tsx ./generate_names.ts",
     "test": "vitest",
     "build": "vite build",
     "format": "npx prettier . --write"

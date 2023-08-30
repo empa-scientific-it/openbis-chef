@@ -7,10 +7,12 @@ import {
   ExperimentSearchCriteria,
   SampleFetchOptions,
   SampleTypeFetchOptions,
+  Sample
 } from "@src/openbis/dto";
 import {
   MetagraphComponentProps,
 } from "@src/metagraph/metagraph";
+import SampleEntry from "@src/openbis/components/SampleEntry";
 
 const SampleSelector = ({
   experiment,
@@ -41,7 +43,7 @@ const Select  = () =>  {
   const workflowOperations = useContext(OperationContext);
   const { loggedIn, service } = useContext(AuthContext);
   const [experiment, setExperiment] = useState({} as Experiment);
-  const currentSample = workflowOperations.currentOperation.originObject;
+  const [currentSample, setSample] = useState(new Sample());
 
   useEffect(() => {    
     if (loggedIn) {
@@ -50,11 +52,10 @@ const Select  = () =>  {
       ssc
         .withIdentifier()
         .thatEquals(workflowOperations.currentOperation.collection);
-
       const sfo: typeof ExperimentFetchOptions = new ExperimentFetchOptions();
       const sto: typeof SampleTypeFetchOptions = new SampleTypeFetchOptions();      
       const sso: typeof SampleFetchOptions = new SampleFetchOptions();
-
+      debugger
       sto.withPropertyAssignments().withPropertyType();
       sso.withProperties();
       sso.withTypeUsing(sto);
@@ -73,10 +74,10 @@ const Select  = () =>  {
 
   const handleSelection = (event: React.ChangeEvent<HTMLSelectElement>) => {
     event.preventDefault();
-    // const foundSample = experiment.samples.find(
-    //   (sample) => sample.identifier.identifier === event.target.value,
-    // );
-    // workflowOperations.updateOperationOriginObject(foundSample);
+    const foundSample = experiment.samples.find(
+      (sample) => sample.identifier.identifier === event.target.value,
+    );
+    setSample(foundSample);
   };
 
   return (
@@ -85,7 +86,7 @@ const Select  = () =>  {
       {(
         <SampleSelector experiment={experiment} onSelect={handleSelection} />
       )}
-      {/* {currentSample && <SampleEntry sample={currentSample} />} */}
+      {currentSample !== null ? <SampleEntry sample={currentSample}/> : null}
     </div>
   );
 };
