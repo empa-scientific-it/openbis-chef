@@ -3,13 +3,12 @@ import { MetagraphOperations } from "./metagraph";
 import { useList } from "./useList";
 
 export const useOperations = (init: MetagraphOperations[]) => {
-  //console.log("Operations", operations)
-  const operationList = useList(init);
 
-  // useEffect(() => {
-  //     // After the state has been updated, move to the first element
-  //     console.log("Operations", operationList)}
-  // , [operationList])
+
+  const operationList = useList(init);
+  useEffect(() => {
+    console.log("Operations", operationList.list);
+  }, [operationList.list]);
 
   const addOperation = (operation: MetagraphOperations) => {
     operationList.add(operation);
@@ -43,10 +42,28 @@ export const useOperations = (init: MetagraphOperations[]) => {
     operationList.set(operation, index);
   };
 
-  const updateOperationOriginObject = (originObject: Sample) => {
-    const operation = operationList.elem;
-    operation.originObject = originObject;
-    operationList.setCurrent(operation);
+  const setCollection = (collection: string) => {
+    const newOperation = operationList.elem;
+    if (newOperation.type === "create") {
+      newOperation.collectionIdentifier = collection;
+      operationList.set(newOperation, operationList.idx);
+    }
+  };
+
+  const setProperties = (properties: { [key: string]: string }) => {
+    const newOperation = operationList.elem;
+    if (newOperation.type === "create") {
+      newOperation.objectProperties = properties;
+      operationList.set(newOperation, operationList.idx);
+    }
+  };
+
+  const setIdentifier = (identifier: string) => {
+    const newOperation = operationList.elem;
+    if (newOperation.type === "link") {
+      newOperation.objectIdentifier = identifier;
+      operationList.set(newOperation, operationList.idx);
+    }
   };
 
   return {
@@ -61,6 +78,8 @@ export const useOperations = (init: MetagraphOperations[]) => {
     clearOperations,
     setOperation,
     goToOperation,
-    updateOperationOriginObject,
+    setCollection,
+    setProperties,
+    setIdentifier,
   };
 };

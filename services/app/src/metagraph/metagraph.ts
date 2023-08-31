@@ -212,19 +212,20 @@ export function getVisualisationNodes(
 
 export interface MetagraphOperation {
   operationId: string;
-  originObject: typeof Sample; // The openbis object to be used as a parent or to be created
-  collection: string;
   type: "create" | "link";
 }
 
 export interface CreateOperation extends MetagraphOperation {
   type: "create";
-  properties: { [key: string]: string };
+  objectType: string;
+  collectionIdentifier: string;
+  objectProperties: { [key: string]: string };
 }
 
 export interface LinkOperation extends MetagraphOperation {
   type: "link";
-  identifier: string;
+  collectionIdentifier: string;
+  objectIdentifier: string;
 }
 
 export type MetagraphOperations = CreateOperation | LinkOperation;
@@ -248,31 +249,23 @@ export async function getSampleType(
   }
 }
 
-export async function nodeToOperation(
+export function nodeToOperation(
   node: MetagraphNode,
-  service: Facade,
-): Promise<MetagraphOperations> {
+): MetagraphOperations {
   if (node.type === "entry") {
-    const sampleType = await getSampleType(node.entityType, service);
-    const originObject = new Sample();
-    originObject.setExperiment(new ExperimentIdentifier(node.collection));
-    originObject.setType(sampleType);
     return {
       operationId: node.id,
-      originObject: originObject,
       type: "create",
-      collection: node.collection,
+      objectType: node.entityType,
+      collectionIdentifier: node.collection,
+      objectProperties: {},
     };
   } else if (node.type === "select") {
-    const sampleType = await getSampleType(node.entityType, service);
-    const originObject: typeof Sample = new Sample();
-    originObject.setExperiment(new ExperimentIdentifier(node.collection));
-    originObject.setType(sampleType);
     return {
+      collectionIdentifier: node.collection,
       operationId: node.id,
-      originObject: originObject,
       type: "link",
-      collection: node.collection,
+      objectIdentifier: ""
     };
   }
 }

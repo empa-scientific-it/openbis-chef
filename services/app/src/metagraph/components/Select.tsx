@@ -47,16 +47,15 @@ const Select  = () =>  {
   const [sampleComponent, setSampleComponent] = useState(<div></div>);
 
   useEffect(() => {    
-    if (loggedIn) {
+    if (loggedIn && service && workflowOperations.currentOperation.type === "link") {
       //Perform the search for all the objects in the experiment/collection
       const ssc = new ExperimentSearchCriteria();
       ssc
         .withIdentifier()
-        .thatEquals(workflowOperations.currentOperation.collection);
+        .thatEquals(workflowOperations.currentOperation.collectionIdentifier);
       const sfo: typeof ExperimentFetchOptions = new ExperimentFetchOptions();
       const sto: typeof SampleTypeFetchOptions = new SampleTypeFetchOptions();      
       const sso: typeof SampleFetchOptions = new SampleFetchOptions();
-      debugger
       sto.withPropertyAssignments().withPropertyType();
       sso.withProperties();
       sso.withTypeUsing(sto);
@@ -79,6 +78,8 @@ const Select  = () =>  {
       (sample) => sample.identifier.identifier === event.target.value,
     );
     setSample(foundSample);
+    workflowOperations.setIdentifier(foundSample?.identifier.identifier);
+    debugger
   };
 
   useEffect(() => {
