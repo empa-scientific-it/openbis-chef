@@ -11,7 +11,7 @@ type Props = {
   sample: Sample;
 };
 
-function displaySampleMetadata(sample: Sample) {
+function displaySampleMetadata(sample: Sample | null) {
   const sampleMetadata = {
     Code: sample.code,
     Type: sample.type.code,
@@ -45,7 +45,7 @@ function SampleEntry({ sample }: Props) {
     <div>
       {/* Show properties of the sample */}
       <div className="sample-container">
-        <h2>Object: {sample.code}</h2>
+        <h2>Object: {sample?.code}</h2>
         <h3>Properties</h3>
         <div className="properties-container">
           {Object.entries(transformedSample?.properties).map(
@@ -62,7 +62,7 @@ function SampleEntry({ sample }: Props) {
           )}
         </div>
         <h3>Metadata</h3>
-        {displaySampleMetadata(sample)}
+        {sample !== null ? displaySampleMetadata(sample) : null}
       </div>
     </div>
   );

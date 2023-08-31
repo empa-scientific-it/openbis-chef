@@ -44,6 +44,7 @@ const Select  = () =>  {
   const { loggedIn, service } = useContext(AuthContext);
   const [experiment, setExperiment] = useState({} as Experiment);
   const [currentSample, setSample] = useState(new Sample());
+  const [sampleComponent, setSampleComponent] = useState(<div></div>);
 
   useEffect(() => {    
     if (loggedIn) {
@@ -80,13 +81,21 @@ const Select  = () =>  {
     setSample(foundSample);
   };
 
+  useEffect(() => {
+    if (currentSample.identifier) {
+      setSampleComponent(
+        <SampleEntry sample={currentSample} />
+      );
+    }
+  }, [currentSample])
+
   return (
     <div>
       <div>Select an existing object</div>
       {(
         <SampleSelector experiment={experiment} onSelect={handleSelection} />
       )}
-      {currentSample !== null ? <SampleEntry sample={currentSample}/> : null}
+      {sampleComponent}
     </div>
   );
 };

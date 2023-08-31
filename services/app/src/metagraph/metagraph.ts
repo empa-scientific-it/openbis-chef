@@ -219,10 +219,12 @@ export interface MetagraphOperation {
 
 export interface CreateOperation extends MetagraphOperation {
   type: "create";
+  properties: { [key: string]: string };
 }
 
 export interface LinkOperation extends MetagraphOperation {
   type: "link";
+  identifier: string;
 }
 
 export type MetagraphOperations = CreateOperation | LinkOperation;
