@@ -99,8 +99,13 @@ const Workflow = ({ workflows }: Props) => {
   const WorkflowEnd = (handleSubmit: () => void) => {
     return (
       <div>
-        <div>Finished workflow, review your steps before submitting</div>
-        <button className="clickable" onClick={handleSubmit}>
+        <h1 className="container-title">
+          Finished workflow
+        </h1>
+        <h3 className="container-title">
+          Please, review your steps before submitting.
+        </h3>
+        <button className="clickable-button submit-button" onClick={handleSubmit}>
           Submit
         </button>
       </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export const useList = <T>(initialData: T[]) => {
   const [list, setList] = useState<T[]>(initialData);
@@ -7,25 +7,24 @@ export const useList = <T>(initialData: T[]) => {
   const [finished, setFinished] = useState(false);
 
   const move = (newIdx: number) => {
-    if (newIdx < list.length && newIdx >= 0) {
-      setIdx(() => newIdx);
-      setElem(() => list[newIdx]);
-      setFinished(false);
+    setIdx(() => newIdx);
+    setElem(() => list[newIdx]);
+    setFinished(false);
+
+    if (newIdx == list.length) {
+      setFinished(true);
     }
   };
 
   const next = () => {
-    if (idx < list.length - 1) {
+    if (idx <= list.length ) {
       move(idx + 1);
-    } else {
-      setFinished(true);
     }
   };
 
   const previous = () => {
     if (idx >= 0) {
       move(idx - 1);
-      setFinished(false);
     }
   };
 

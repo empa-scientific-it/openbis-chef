@@ -26,10 +26,18 @@
     background-color: #7595d7;
 }
 
+.step-indicator:hover {
+  background-color: #4d77cb;
+}
+
 .step-indicator.inactive {
   background-color: #bfbfbf;
 }
 
 .step-indicator.completed {
   background-color: #00cc44;
+}
+
+.step-indicator.completed:hover {
+  background-color: #009933;
 }
