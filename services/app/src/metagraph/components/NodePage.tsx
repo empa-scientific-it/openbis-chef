@@ -1,10 +1,7 @@
-// Component for a LinkNode
-import { useContext } from "react";
 import {
   MetagraphComponentProps,
   MetagraphNode,
 } from "@src/metagraph/metagraph";
-import { OperationContext } from "../OperationContext";
 import Select from "./Select";
 import Entry from "./Entry";
 import "@src/App.css";
@@ -20,7 +17,6 @@ function selectEntryType(node: MetagraphNode) {
 }
 
 const NodePage = ({ node }: MetagraphComponentProps) => {
-  const workflowOperations = useContext(OperationContext);
   const child = selectEntryType(node);
 
   // Render input fields and link settings

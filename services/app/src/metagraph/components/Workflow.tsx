@@ -1,5 +1,9 @@
 import React, { useState, useContext } from "react";
-import { Metagraph, walkGraph, nodeToOperation } from "@src/metagraph/metagraph";
+import {
+  Metagraph,
+  walkGraph,
+  nodeToOperation,
+} from "@src/metagraph/metagraph";
 import { AuthContext } from "@src/openbis/AuthContext";
 import { useList } from "../useList";
 import Summary from "./Summary";
@@ -47,7 +51,10 @@ const Workflow = ({ workflows }: Props) => {
 
   // Initialise one component for each graph node
   const nodeComponents = nodes.map((node, index) => (
-    <div key={index} style={{ display: nodeIndex === index ? "block" : "none" }}>
+    <div
+      key={index}
+      style={{ display: nodeIndex === index ? "block" : "none" }}
+    >
       <NodePage key={node.id} node={node} />{" "}
     </div>
   ));
@@ -82,9 +89,10 @@ const Workflow = ({ workflows }: Props) => {
     selectWorkflow(wf.name);
     setWorkflowSelected(() => true);
     workflowOps.clearOperations();
-    walkGraph(currentWorkflow, (node) =>
-      nodeToOperation(node, service).then((op) => workflowOps.addOperation(op))
-    );
+    walkGraph(currentWorkflow, (node) => {
+      const op = nodeToOperation(node);
+      workflowOps.addOperation(op);
+    });
     console.log(workflowOps.operations);
   };
 
@@ -147,7 +155,9 @@ const Workflow = ({ workflows }: Props) => {
     workflows: Metagraph[];
     onSelect: (selectedWorkflow: Metagraph) => void;
   }) {
-    const [selectedWorkflow, setSelectedWorkflow] = useState<Metagraph | null>(null);
+    const [selectedWorkflow, setSelectedWorkflow] = useState<Metagraph | null>(
+      null
+    );
 
     const handleWorkflowSelect = (workflow: Metagraph) => {
       setSelectedWorkflow(workflow);
@@ -164,7 +174,9 @@ const Workflow = ({ workflows }: Props) => {
             onClick={() => handleWorkflowSelect(workflow)}
             className={
               "workflow-selection-item" +
-              (selected === workflow.name ? " workflow-selection-item-selected" : "")
+              (selected === workflow.name
+                ? " workflow-selection-item-selected"
+                : "")
             }
           >
             {workflow.name}
@@ -194,7 +206,12 @@ const Workflow = ({ workflows }: Props) => {
             <WorkflowDescription metagraph={metagraph} />
           </div>
         </div>
-        <button className="clickable-button" name="Start workflow" onClick={onStart} disabled={!selected}>
+        <button
+          className="clickable-button"
+          name="Start workflow"
+          onClick={onStart}
+          disabled={!selected}
+        >
           Start workflow
         </button>
       </div>
@@ -206,7 +223,11 @@ const Workflow = ({ workflows }: Props) => {
     <OperationContext.Provider value={workflowOps}>
       <div className="App">
         <div className="app-container">
-          <button className="logout-button" name="Logout" onSubmit={() => handleLogout}>
+          <button
+            className="logout-button"
+            name="Logout"
+            onSubmit={() => handleLogout}
+          >
             Logout
           </button>
 
@@ -215,10 +236,12 @@ const Workflow = ({ workflows }: Props) => {
               <WorkflowEntry
                 metagraph={currentWorkflow}
                 onSelect={handleWorkflowSelection}
-                onStart={(ev: React.MouseEvent<HTMLElement>) => setStart(() => true)}
+                onStart={(ev: React.MouseEvent<HTMLElement>) =>
+                  setStart(() => true)
+                }
               />
             ) : workflowSelected && start ? (
-                <WorkflowPages
+              <WorkflowPages
                 elem={nodeComponents}
                 idx={nodeIndex}
                 handleMove={handleMove}
@@ -227,7 +250,6 @@ const Workflow = ({ workflows }: Props) => {
                 handleNextStep={handleNextStep}
                 handlePreviousStep={handlePreviousStep}
               />
-            
             ) : null}
           </div>
         </div>
