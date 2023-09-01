@@ -70,6 +70,11 @@ body {
   background-color: #4d77cb;
 }
 
+.clickable-button:disabled {
+  background-color: #bfbfbf;
+  cursor: not-allowed;
+}
+
 /* Media Queries for Responsive Design */
 @media screen and (max-width: 768px) {
   .nav {

@@ -4,9 +4,10 @@ import {
   MetagraphComponentProps,
   MetagraphNode,
 } from "@src/metagraph/metagraph";
-import Entry from "./Entry";
-import Select from "./Select";
 import { OperationContext } from "../OperationContext";
+import Select from "./Select";
+import Entry from "./Entry";
+import "@src/App.css";
 
 function selectEntryType(node: MetagraphNode) {
   if (node.type === "entry") {
@@ -25,7 +26,7 @@ const NodePage = ({ node }: MetagraphComponentProps) => {
   // Render input fields and link settings
   return (
     <div>
-      <h1>Current step: {node.description}</h1>
+      <h1 className="container-title">{node.description}</h1>
       {child}
     </div>
   );

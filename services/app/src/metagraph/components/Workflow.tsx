@@ -194,7 +194,7 @@ const Workflow = ({ workflows }: Props) => {
             <WorkflowDescription metagraph={metagraph} />
           </div>
         </div>
-        <button className="clickable-button" name="Start workflow" onClick={onStart}>
+        <button className="clickable-button" name="Start workflow" onClick={onStart} disabled={!selected}>
           Start workflow
         </button>
       </div>

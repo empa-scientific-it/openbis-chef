@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useState } from "react";
 import "./Stepper.css";
+import "@src/App.css";
 
 type Props = {
   handleNext: () => void;
@@ -33,41 +33,31 @@ export function Stepper({
 
   const handleLocalMove = (index: number) => {
     return (ev: Event) => {
-      console.log(index);
       ev.preventDefault();
-      console.log("handleLocalMove");
       handleMove(index);
       setLocalStep(index);
     };
   };
 
   return (
-    <div className="step-container">
-      {localStep > 0 ? (
-        <button className="clickable" onClick={handlePreviousStep}>
-          Previous step
-        </button>
-      ) : null}
-      {localStep < maxSteps ? (
-        <button className="clickable" onClick={handleNextStep}>
-          Next step
-        </button>
-      ) : null}
-      <div className="step-indicators">
-        {Array.from({ length: maxSteps }, (value, index) => index).map(
+    <div className="stepper-container">
+      <button className="clickable-button stepper-button" onClick={handlePreviousStep} disabled={localStep < 1}>
+        Previous step
+      </button>
+      <button className="clickable-button stepper-button" onClick={handleNextStep} disabled={localStep >= maxSteps}>
+        Next step
+      </button>
+
+      <div className="step-indicators-container">
+        {Array.from({ length: maxSteps + 1 }, (value, index) => index).map(
           (index) => (
             <div
               key={index}
-              className={`step-indicator clickable ${
-                index <= localStep ? "completed" : "inactive"
-              }`}
+              className={"step-indicator" + (index < localStep ? " completed" : (index > localStep ? " inactive" : ""))}
               onClick={handleLocalMove(index)}
             />
           ),
         )}
-      </div>
-      <div className="step-info">
-        Step {currentStep + 1} of {maxSteps}
       </div>
     </div>
   );
