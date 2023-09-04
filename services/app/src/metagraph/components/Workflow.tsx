@@ -42,6 +42,7 @@ import {
   SamplePermId,
 } from "@src/types/openbis";
 import { LoggerInterface, useLog } from "../useLog";
+import Log from "./Log";
 
 type Props = {
   workflows: Metagraph[];
@@ -91,8 +92,10 @@ const Workflow = ({ workflows }: Props) => {
     // Use userInputs to perform workflow actions
     // Make API calls based on the metagraph and user inputs
     const operations = workflowOps.operations;
+    logger.append("Starting workflow");
     // Create a list of promises to be executed
     const promises = operations.map((op) => {
+      logger.append(`Adding operation ${op.operationId}`);
       if (op.type === "create") {
         const sampleCreation = new SampleCreation();
         sampleCreation.setTypeId(new EntityTypePermId(op.objectType));
@@ -114,8 +117,9 @@ const Workflow = ({ workflows }: Props) => {
     // them to the corresponding operations
     const opts = new SynchronousOperationExecutionOptions();
     opts.executeInOrder = true;
-    logger.append("Performing object creations")
+    logger.append("Performing object creations");
     const res = await service.executeOperations(promises, opts);
+    logger.append("Object creations finished");
 
     const resultWithOperations = res.results.map((result, index) => {
       return { result: result, operation: operations[index] };
@@ -137,7 +141,7 @@ const Workflow = ({ workflows }: Props) => {
       }
     });
     //Now that we have the pair [operations, created ids], we can create the links by walking the graph
-    console.log(currentWorkflow);
+    logger.append("Performing linking")
     const linkOps = walkGraph(currentWorkflow, (node) => {
       //The operation that created the current node
       const currentOp = operationResults.find((op) => op.operation === node.id);
@@ -156,7 +160,7 @@ const Workflow = ({ workflows }: Props) => {
       }
     });
     const linkResult = await service.executeOperations(linkOps, opts);
-    logger.append(linkResult.results.flatMap((it) => it?.message).join("\n"));
+    linkResult.results.flatMap((it) => logger.append(it?.message));
   };
 
   const handleNextStep = () => {
@@ -178,8 +182,17 @@ const Workflow = ({ workflows }: Props) => {
     workflowOps.goToOperation(index);
   };
 
+  const handleWorkflowStart = () => {
+    if (selected === "") {
+      alert("Please select a workflow");
+    } else {
+      setStart(() => true);
+      logger.reset();
+    }
+  };
+
   const handleWorkflowSelection = (wf: Metagraph) => {
-    // setSelected(wf.name);
+    setSelected(wf.name);
     selectWorkflow(wf.name);
     setWorkflowSelected(true);
     workflowOps.clearOperations();
@@ -220,19 +233,21 @@ const Workflow = ({ workflows }: Props) => {
   };
 
   const WorkflowEnd = (handleSubmit: () => void, logger: LoggerInterface) => {
-    const ops = useContext(OperationContext)
+    const ops = useContext(OperationContext);
+    const entries = logger.logEntries();
     return (
       <div>
-        <div>Finished workflow, review your steps before submitting</div>
+        <h3>Finished workflow, here are the current steps</h3>
         <ul>
           {ops.operations.map((op) => (
             <li>{OperationInfo(op)}</li>
           ))}
         </ul>
-        <span>{logger.format()}</span>
         <button className="clickable" onClick={handleSubmit}>
           Submit
         </button>
+        <h3>Log</h3>
+        <Log entries={entries} />
       </div>
     );
   };
@@ -245,7 +260,7 @@ const Workflow = ({ workflows }: Props) => {
     handleMove,
     handlePreviousStep,
     handleNextStep,
-    logger
+    logger,
   }: {
     metagraph: Metagraph;
     handleSubmit: () => void;
@@ -355,7 +370,7 @@ const Workflow = ({ workflows }: Props) => {
               <WorkflowEntry
                 metagraph={currentWorkflow}
                 onSelect={handleWorkflowSelection}
-                onStart={(ev: React.MouseEvent<HTMLElement>) => setStart(() => true)}
+                onStart={handleWorkflowStart}
               />
             ) : workflowSelected && start ? (
               <WorkflowPages

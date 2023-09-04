@@ -1,6 +1,6 @@
 import { useList } from "./useList";
 
-interface LogEntry {
+export interface LogEntry {
   timestamp: Date;
   message: string;
 }
@@ -10,6 +10,7 @@ export interface LoggerInterface{
     append: (message: string) => void;
     format: () => string;
     reset: () => void;
+    logEntries: () => LogEntry[];
 }
 
 export const useLog = () => {
@@ -28,5 +29,7 @@ export const useLog = () => {
 
   const reset = () => {messages.clear()};
 
-  return { append, format, reset };
+  const logEntries = () => messages.list;
+
+  return { append, format, reset, logEntries };
 };
