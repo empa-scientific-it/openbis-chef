@@ -41,8 +41,8 @@ const Select = () => {
   const [currentSample, setSample] = useState(null);
   const [sampleComponent, setSampleComponent] = useState(<div>Your sample will appear here</div>);
 
-  useEffect(() => {
-    if (loggedIn && service && workflowOperations.currentOperation.type === "link") {
+  useEffect(() => {    
+    if (loggedIn && service && workflowOperations?.currentOperation?.type === "link") {
       //Perform the search for all the objects in the experiment/collection
       const ssc = new ExperimentSearchCriteria();
       ssc

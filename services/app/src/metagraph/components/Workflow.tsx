@@ -237,13 +237,13 @@ const Workflow = ({ workflows }: Props) => {
     const entries = logger.logEntries();
     return (
       <div>
-        <h3>Finished workflow, here are the current steps</h3>
+        <h3 className="container-title">Finished workflow, here are the current steps</h3>
         <ul>
           {ops.operations.map((op) => (
             <li>{OperationInfo(op)}</li>
           ))}
         </ul>
-        <button className="clickable" onClick={handleSubmit}>
+        <button className="clickable-button submit-button" onClick={handleSubmit}>
           Submit
         </button>
         <h3>Log</h3>
@@ -349,7 +349,12 @@ const Workflow = ({ workflows }: Props) => {
             <WorkflowDescription metagraph={metagraph} />
           </div>
         </div>
-        <button className="clickable-button" name="Start workflow" onClick={onStart}>
+        <button
+          className="clickable-button"
+          name="Start workflow"
+          onClick={onStart}
+          disabled={!selected}
+        >
           Start workflow
         </button>
       </div>

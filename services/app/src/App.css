@@ -70,6 +70,19 @@ body {
   background-color: #4d77cb;
 }
 
+.clickable-button:disabled {
+  background-color: #bfbfbf;
+  cursor: not-allowed;
+}
+
+.submit-button {
+  background-color: #00cc44;
+}
+
+.submit-button:hover {
+  background-color: #009933;
+}
+
 /* Media Queries for Responsive Design */
 @media screen and (max-width: 768px) {
   .nav {
