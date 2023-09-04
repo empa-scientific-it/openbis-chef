@@ -79,7 +79,6 @@ const Select  = () =>  {
     );
     setSample(foundSample);
     workflowOperations.setIdentifier(foundSample?.identifier.identifier);
-    debugger
   };
 
   useEffect(() => {

@@ -5,9 +5,7 @@ import {
   MetagraphOperations,
 } from "@src/metagraph/metagraph";
 import { AuthContext } from "@src/openbis/AuthContext";
-import OpenBisEntry, {
-  ObjectEntry,
-} from "@src/openbis/components/OpenBisEntry";
+import OpenBisEntry, { ObjectEntry } from "@src/openbis/components/OpenBisEntry";
 import {
   SampleTypeSearchCriteria,
   SampleTypeFetchOptions,
@@ -24,13 +22,24 @@ type EntryNodeProps = MetagraphComponentProps & {
 
 function Entry({ node }: EntryNodeProps) {
   const { loggedIn, service } = useContext(AuthContext);
-  const [inputValue, setInputValue] = useState("");
   const [entity, setEntity] = useState({} as typeof SampleType);
   const [entityAvailable, setEntityAvailable] = useState(false);
+  const [properties, setProperties] = useState<{ [key: string]: string }>({});
 
   const workflowOperations = useContext(OperationContext);
 
+  function handleEntry(objectEntry: ObjectEntry) {
+    console.log("handleEntry", objectEntry);
+    setProperties(objectEntry.properties);
+  }
+
+  function handleSave(event: React.FormEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    workflowOperations.setProperties(properties);
+  }
+
   useEffect(() => {
+    console.log("Node change");
     const ssc = new SampleTypeSearchCriteria();
     ssc.withCode().thatEquals(node.entityType);
     const sfo = new SampleTypeFetchOptions();
@@ -49,10 +58,13 @@ function Entry({ node }: EntryNodeProps) {
   return (
     <div>
       <div>
-        This step will create a new sample of type {node.entityType} in
-        collection {node.collection}
+        This step will create a new sample of type {node.entityType} in collection{" "}
+        {node.collection}
       </div>
-      {entityAvailable ? <OpenBisEntry objectType={entity} /> : null}
+      {entityAvailable ? (
+        <OpenBisEntry objectType={entity} onEntry={handleEntry} />
+      ) : null}
+      <button onClick={handleSave}>Save</button>
     </div>
   );
 }

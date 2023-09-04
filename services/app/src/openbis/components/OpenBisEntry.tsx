@@ -11,10 +11,11 @@ export interface ObjectEntry {
 
 type Props = {
   objectType: SampleType;
+  onEntry: (objectEntry: ObjectEntry) => void;
 };
 
-function OpenBisEntry({ objectType }: Props) {
-  const workflowOperations = useContext(OperationContext);
+function OpenBisEntry({ objectType, onEntry }: Props) {
+  // const workflowOperations = useContext(OperationContext);
   // const [currentObject, setCurrentObject] = useState(workflowOperations.currentOperation.originObject);
   const [objectEntry, setObjectEntry] = useState(objectType);
   const [properties, setProperties] = useState<{ [key: string]: string }>({});
@@ -31,18 +32,12 @@ function OpenBisEntry({ objectType }: Props) {
           properties: { ...properties, [propertyCode]: value },
         } as ObjectEntry;
         setProperties(newObjectEntry.properties);
+        onEntry(newObjectEntry);
       }
     };
   }
 
-  function findPropertyValue(propertyCode: string) {
-    const property = objectEntry.propertyAssignments.find(
-      (el) => el.propertyType.code == propertyCode,
-    );
-    if (property) {
-      return properties[propertyCode];
-    }
-  }
+
 
   return (
     <div>

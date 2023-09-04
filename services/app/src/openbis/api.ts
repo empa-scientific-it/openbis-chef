@@ -90,12 +90,12 @@ interface V3 extends OpenBISInterface {
     token: string,
     operations:  IOperation[],
     options:  IOperationExecutionOptions,
-  ): Promise<AsynchronousOperationExecutionResults>;
+  ): Promise<SynchronousOperationExecutionResults>;
   //This is needed to be able to use the executeService method in the facade
   executeOperations(
     operations:  IOperation[],
     options:  IOperationExecutionOptions,
-  ): Promise<AsynchronousOperationExecutionResults>;
+  ): Promise<SynchronousOperationExecutionResults>;
 }
 
 export class Facade {
