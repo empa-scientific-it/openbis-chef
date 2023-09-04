@@ -7,7 +7,7 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
 } from "reactflow";
-
+import "reactflow/dist/style.css";
 import { Metagraph, getEdges, getVisualisationNodes } from "../metagraph";
 
 type Props = {
@@ -15,28 +15,27 @@ type Props = {
 };
 
 function Summary({ metagraph }: Props) {
-  const [nodes, setNodes] = useNodesState(
-    getVisualisationNodes(metagraph, 400),
+  const [nodes, setNodes, onNodesChange] = useNodesState(
+    getVisualisationNodes(metagraph)
   );
-  const [edges, setEdges] = useEdgesState(getEdges(metagraph));
+  const [edges, setEdges, onEdgesChange] = useEdgesState(getEdges(metagraph));
   const onConnect = useCallback((params) => console.log("not possible"), []);
-  const onInit = (reactFlowInstance) =>
-    console.log("flow loaded:", nodes, edges);
-  const nodeTypes = nodes.map((node) => node.type);
+  const onInit = (reactFlowInstance) => console.log("flow loaded:", nodes, edges);
 
   return (
-    <div>
+    <div className="flow" style={{ width: "100%", height: "100%" }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onConnect={onConnect}
         onInit={onInit}
-        nodeTypes={nodeTypes}
-        fitView
         attributionPosition="top-right"
+        maxZoom={1}
+        minZoom={0.2}
+        fitView
       >
-        <MiniMap zoomable pannable />
         <Controls />
+        <MiniMap />
       </ReactFlow>
     </div>
   );

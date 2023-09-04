@@ -49,31 +49,33 @@ const workflows = [
         dependencies: ["Select compounder"],
         description: "Enter the parameters for the compounder",
       },
-    ],
-    "Create compounder",
-    "Create compounder",
-  ),
-  new Metagraph(
-    [
       {
         id: "Select godet",
-        collection: "/POLPRO_EQUIPMENT/EXTRUSION/EXTRUDER_EXP_4",
+        collection: "/POLPRO_EQUIPMENT/EXTRUSION/EXTRUSION_EXP_4",
         type: "select",
         entityType: "GODET",
         dependencies: [],
         description: "Select the godet",
       },
       {
-        id: "Fiber Parameter",
-        collection: "/POLPRO_EQUIPMENT/EXTRUSION/EXTRUDER_EXP_4",
+        id: "Godet parameter",
+        collection: "/POLPRO_EQUIPMENT/EXTRUSION/EXTRUSION_EXP_4",
         type: "entry",
         entityType: "PARAMETER_GODET",
         dependencies: ["Select godet"],
         description: "Enter the parameters for the godet",
       },
+      {
+        id: "Expreiment",
+        collection: "/POLPRO_EQUIPMENT/EXTRUSION/EXTRUSION_EXP_4",
+        type: "entry",
+        entityType: "ENTRY",
+        dependencies: ["Godet parameter", "Compounder Parameter"],
+        description: "Finish the cretion of the fiber",
+      }
     ],
-    "Create godet",
-    "Create godet",
+    "Create fiber",
+    "Create fiber",
   ),
 ];
 

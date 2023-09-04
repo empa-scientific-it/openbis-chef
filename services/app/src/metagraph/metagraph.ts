@@ -4,7 +4,7 @@ import {
   SampleTypeSearchCriteria,
   ExperimentIdentifier,
   Sample,
-  SampleType
+  SampleType,
 } from "@src/openbis/dto";
 
 export interface Node {
@@ -44,6 +44,7 @@ export interface Metagraph {
 export interface VisualisationNode {
   id: string;
   data: Node;
+  type: "default";
   position: {
     x: number;
     y: number;
@@ -71,7 +72,7 @@ export class Metagraph {
 
     const checkValidDependencies = (nodes: MetagraphNode[]) =>
       nodes.every((node) =>
-        node.dependencies.every((depId) => nodes.some((n) => n.id === depId)),
+        node.dependencies.every((depId) => nodes.some((n) => n.id === depId))
       );
 
     //TODO check for circular dependencies
@@ -96,10 +97,7 @@ export class Metagraph {
  * @param transform
  * @returns
  */
-export function walkGraph<T>(
-  g: Metagraph,
-  transform: (v: MetagraphNode) => T,
-): T[] {
+export function walkGraph<T>(g: Metagraph, transform: (v: MetagraphNode) => T): T[] {
   //Perform BFS on the graph
   const visited = new Set();
   const queue = [];
@@ -134,7 +132,7 @@ interface Edge {
 export function getEdges(g: Metagraph): Edge[] {
   return g.nodes.flatMap((node) => {
     return node.dependencies.map((depId) => {
-      return { source: node.id, target: depId, id: `${node.id}-${depId}` };
+      return { source: depId, target: node.id, id: `${node.id}-${depId}`, type: 'step' };
     });
   });
 }
@@ -170,12 +168,9 @@ function getRandomInt(max) {
  * using react-flow
  *
  */
-export function getVisualisationNodes(
-  g: Metagraph,
-  mult: number,
-): VisualisationNode[] {
+export function getVisualisationNodes(g: Metagraph, mult: {x: number, y: number} = {x: 200, y: 100}): VisualisationNode[] {
   //Place the node hierarchically
-  const nodes = walkGraph(g, (node) => node);
+  const nodes = walkGraph(g, (node) => node); 
   const edges = getEdges(g);
 
   //TODO place the nodes hierarchically. To do so, we walk the graph using BFS
@@ -190,21 +185,25 @@ export function getVisualisationNodes(
       id: node.id,
       data: node,
       depth: getDepth(node, g),
+      type: "default",
       dependencies: node.dependencies,
     };
   });
+  const maxDepth = initGraph.sort((node)=> node.dependencies.length).map((node) => node.depth).reduce((a, b) => Math.max(a, b));
 
   //Once we have the depth of each node, we can place the nodes hierarchically
   // by setting y = depth and x = index of node in the depth level
   const nodesWithDepth = initGraph.map((node) => {
     return {
       id: node.id,
-      data: node.data,
-      type: "input",
+      data: { label: node.data.id },
+      type: "default",
       position: {
-        y: node.depth * mult,
-        x: getRandomInt(node.depth) * mult,
+        y: (maxDepth - node.depth) * mult.y,
+        x: getRandomInt(node.depth) * mult.x,
       },
+      parentNode: node.dependencies[0],
+
     };
   });
   return nodesWithDepth;
@@ -236,7 +235,7 @@ export interface MetagraphComponentProps {
 
 export async function getSampleType(
   code: string,
-  service: Facade,
+  service: Facade
 ): Promise<typeof SampleType> {
   const ssc = new SampleTypeSearchCriteria();
   ssc.withCode().thatEquals(code);
@@ -249,9 +248,7 @@ export async function getSampleType(
   }
 }
 
-export function nodeToOperation(
-  node: MetagraphNode,
-): MetagraphOperations {
+export function nodeToOperation(node: MetagraphNode): MetagraphOperations {
   if (node.type === "entry") {
     return {
       operationId: node.id,
@@ -265,7 +262,7 @@ export function nodeToOperation(
       collectionIdentifier: node.collection,
       operationId: node.id,
       type: "link",
-      objectIdentifier: ""
+      objectIdentifier: "",
     };
   }
 }

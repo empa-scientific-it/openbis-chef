@@ -119,7 +119,8 @@ const Workflow = ({ workflows }: Props) => {
     opts.executeInOrder = true;
     logger.append("Performing object creations");
     const res = await service.executeOperations(promises, opts);
-    logger.append("Object creations finished");
+    logger.append("Object creations finished, the operations are:");
+    res.results.flatMap((it) => logger.append(it?.message));
 
     const resultWithOperations = res.results.map((result, index) => {
       return { result: result, operation: operations[index] };
@@ -288,7 +289,7 @@ const Workflow = ({ workflows }: Props) => {
 
   function WorkflowDescription({ metagraph }: { metagraph: Metagraph }) {
     return (
-      <div className="workflow-list">
+      <div className="workflow-graph">
         {<h3>Workflow summary: {metagraph.name}</h3>}
         <Summary metagraph={metagraph} />
       </div>
