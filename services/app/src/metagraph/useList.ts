@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const useList = <T>(initialData: T[]) => {
   const [list, setList] = useState<T[]>(initialData);
   const [idx, setIdx] = useState(0);
   const [elem, setElem] = useState(initialData[idx]);
   const [finished, setFinished] = useState(false);
+
+  useEffect(() => {
+    setElem(() => list[idx]);
+  }, [idx, list]);
 
   const move = (newIdx: number) => {
     setIdx(() => newIdx);
@@ -17,7 +21,7 @@ export const useList = <T>(initialData: T[]) => {
   };
 
   const next = () => {
-    if (idx <= list.length ) {
+    if (idx <= list.length) {
       move(idx + 1);
     }
   };
@@ -42,8 +46,8 @@ export const useList = <T>(initialData: T[]) => {
 
   const add = (elem: T) => {
     setList((oldList) => [...oldList, elem]);
-    setIdx(() => list.length + 1);
-    setElem(() => elem);
+    // setIdx(() => list.length + 1);
+    // setElem(() => elem);
   };
 
   const setCurrent = (newElem: T) => {
@@ -57,7 +61,7 @@ export const useList = <T>(initialData: T[]) => {
       setList((prevList) => {
         const newList = [...prevList];
         newList[newIndex] = newElem;
-        move(newIndex); // Update the current element
+        // move(newIndex); // Update the current element
         return newList;
       });
     }

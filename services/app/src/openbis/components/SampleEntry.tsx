@@ -6,6 +6,7 @@ import {
   prepareValueForDisplay,
   displayValue,
 } from "@src/openbis/typeMappers";
+import { useEffect } from "react";
 
 type Props = {
   sample: Sample;
@@ -39,6 +40,9 @@ function displaySampleMetadata(sample: Sample | null) {
 }
 
 function SampleEntry({ sample }: Props) {
+  useEffect(() => {
+    console.log("I was briefly rendered");
+  })
   const transformedSample = addTypesToSampleEntry(sample);
 
   return (

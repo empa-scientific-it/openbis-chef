@@ -8,89 +8,98 @@ import {
   SampleFetchOptions,
   SampleTypeFetchOptions,
   Sample,
+  SampleSearchCriteria,
+  CodeSearchCriteria,
 } from "@src/openbis/dto";
 import { MetagraphComponentProps } from "@src/metagraph/metagraph";
 import SampleEntry from "@src/openbis/components/SampleEntry";
 
 const SampleSelector = ({
-  experiment,
+  samples,
   onSelect,
 }: {
-  experiment: Experiment;
+  samples: (typeof Sample)[] | null;
   onSelect: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }) => {
+  function localOnSelect(event: React.ChangeEvent<HTMLSelectElement>) {
+    setSelectedValue(() => event.target.value);
+    onSelect(event);
+  }
+  const [selectedValue, setSelectedValue] = useState("");
   return (
-    <div>
+    <form>
       {/* <div>Experiment: {experiment.identifier.identifier}</div> */}
-      <label>Select sample:</label>
-      <select onChange={onSelect}>
-        {experiment.samples?.map((sample) => (
-          <option key={sample.identifier.identifier} value={sample.identifier.identifier}>
-            {sample.identifier.identifier}
-          </option>
-        ))}
-      </select>
-    </div>
+      <label htmlFor="select-sample">Select sample:</label>
+      {samples !== undefined ? (
+        <select id="select-sample" value={selectedValue} onChange={localOnSelect}>
+          {samples?.map((sample) => (
+            <option
+              key={sample.identifier.identifier}
+              value={sample.identifier.identifier}
+            >
+              {sample.identifier.identifier}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <h3>No Samples</h3>
+      )}
+    </form>
   );
 };
 
 const Select = () => {
   const workflowOperations = useContext(OperationContext);
   const { loggedIn, service } = useContext(AuthContext);
-  const [experiment, setExperiment] = useState({} as Experiment);
-  const [currentSample, setSample] = useState(null);
-  const [sampleComponent, setSampleComponent] = useState(<div>Your sample will appear here</div>);
+  const [samples, setSamples] = useState(null as (typeof Sample)[]);
+  const [currentSample, setSample] = useState(null as typeof Sample);
+  const currentCollection = workflowOperations.currentOperation.collectionIdentifier;
 
-  useEffect(() => {    
-    if (loggedIn && service && workflowOperations?.currentOperation?.type === "link") {
+  useEffect(() => {
+    if (loggedIn) {
+      console.log(currentCollection);
       //Perform the search for all the objects in the experiment/collection
-      const ssc = new ExperimentSearchCriteria();
+      const ssc = new SampleSearchCriteria();
       ssc
+        .withExperiment()
         .withIdentifier()
         .thatEquals(workflowOperations.currentOperation.collectionIdentifier);
-      const sfo: typeof ExperimentFetchOptions = new ExperimentFetchOptions();
+      ssc
+        .withType()
+        .withCode()
+        .thatEquals(workflowOperations.currentOperation.objectType);
+      const sfo = new SampleFetchOptions();
       const sto: typeof SampleTypeFetchOptions = new SampleTypeFetchOptions();
       const sso: typeof SampleFetchOptions = new SampleFetchOptions();
       sto.withPropertyAssignments().withPropertyType();
       sso.withProperties();
       sso.withTypeUsing(sto);
-      sfo.withSamplesUsing(sso);
-      service.searchExperiments(ssc, sfo).then((res) => {
+
+      service.searchSamples(ssc, sfo).then((res) => {
         if (res.totalCount > 0) {
-          setExperiment(() => res.objects[0]);
+          setSamples(() => res.objects);
         }
       });
     }
-  }, [loggedIn, service]);
+  }, [currentCollection]);
 
   const handleSelection = (event: React.ChangeEvent<HTMLSelectElement>) => {
     event.preventDefault();
-    const foundSample = experiment.samples.find(
+    const foundSample = samples.find(
       (sample) => sample.identifier.identifier === event.target.value
     );
-    setSample(foundSample);
+    console.log(foundSample);
+    setSample(() => foundSample);
     workflowOperations.setIdentifier(foundSample?.identifier.identifier);
-    if (foundSample){
-      console.log (foundSample)
-      // setSampleComponent(() => <SampleEntry sample={foundSample} />);
-    }
   };
-
-  // useEffect(() => {
-  //   console.log(currentSample)
-  //   if (currentSample) {
-  //     console.log(currentSample);
-  //     setSampleComponent(<SampleEntry sample={currentSample} />);
-  //   }
-  // }, [currentSample]);
 
   return (
     <div>
-      <div>Select an existing object</div>
-      {<SampleSelector experiment={experiment} onSelect={handleSelection} />}
-      <h2>Selected sample</h2>
-      <h2>{currentSample?.identifier?.identifier}</h2>
-      {sampleComponent}
+      <h3>Select an existing object</h3>
+      {<SampleSelector samples={samples} onSelect={handleSelection} />}
+      <h3>Selected sample</h3>
+      <h3>{currentSample?.identifier?.identifier}</h3>
+      {currentSample !== null ? <SampleEntry sample={currentSample} /> : null}
     </div>
   );
 };

@@ -142,7 +142,7 @@ const Workflow = ({ workflows }: Props) => {
       }
     });
     //Now that we have the pair [operations, created ids], we can create the links by walking the graph
-    logger.append("Performing linking")
+    logger.append("Performing linking");
     const linkOps = walkGraph(currentWorkflow, (node) => {
       //The operation that created the current node
       const currentOp = operationResults.find((op) => op.operation === node.id);
@@ -165,13 +165,13 @@ const Workflow = ({ workflows }: Props) => {
   };
 
   const handleNextStep = () => {
-    next();
     workflowOps.nextOperation();
+    next();
   };
 
   const handlePreviousStep = () => {
-    previous();
     workflowOps.previousOperation();
+    previous();
   };
 
   const handleSubmit = () => {
@@ -179,8 +179,8 @@ const Workflow = ({ workflows }: Props) => {
   };
 
   const handleMove = (index: number) => {
-    move(index);
     workflowOps.goToOperation(index);
+    move(index);
   };
 
   const handleWorkflowStart = () => {
@@ -201,6 +201,8 @@ const Workflow = ({ workflows }: Props) => {
       const op = nodeToOperation(node);
       workflowOps.addOperation(op);
     });
+    workflowOps.goToOperation(0);
+    console.log(workflowOps.operations);
   };
 
   const OperationInfo = (op: MetagraphOperations) => {
@@ -226,7 +228,7 @@ const Workflow = ({ workflows }: Props) => {
         <ul>
           <li>Operation type: {op.type}</li>
           <li>Collection: {op.collectionIdentifier}</li>
-          <li>Operation entity: {op.objectIdentifier}</li>
+          <li>selected entity: {op.objectIdentifier}</li>
         </ul>
       );
     };
@@ -236,15 +238,26 @@ const Workflow = ({ workflows }: Props) => {
   const WorkflowEnd = (handleSubmit: () => void, logger: LoggerInterface) => {
     const ops = useContext(OperationContext);
     const entries = logger.logEntries();
+    const [submitted, setSubmitted] = useState(false);
+    function handleSubmitLocal() {
+      setSubmitted(() => true);
+
+      handleSubmit();
+    }
     return (
-      <div>
-        <h3 className="container-title">Finished workflow, here are the current steps</h3>
-        <ul>
-          {ops.operations.map((op) => (
-            <li>{OperationInfo(op)}</li>
-          ))}
-        </ul>
-        <button className="clickable-button submit-button" onClick={handleSubmit}>
+      <div className="operations-summary">
+        <div hidden={submitted}>
+          <h3 className="container-title">
+            Finished workflow, here are the current steps
+          </h3>
+          <ul>
+            {ops.operations.map((op) => (
+              <li>{OperationInfo(op)}</li>
+            ))}
+          </ul>
+        </div>
+
+        <button className="clickable-button submit-button" onClick={handleSubmitLocal}>
           Submit
         </button>
         <h3>Log</h3>

@@ -81,6 +81,11 @@
     border: 2px solid #4d77cb;
 }
 
+.operations-summary{
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    display: flexbox;
+}
 
 ul > li {
     margin-left: 10px;

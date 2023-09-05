@@ -10,7 +10,7 @@ function selectEntryType(node: MetagraphNode) {
   if (node.type === "entry") {
     return <Entry key={node.id} node={node} />;
   } else if (node.type === "select") {
-    return <Select key={node.id} node={node} />;
+    return <Select key={node.id}/>;
   }
   // Handle other node types if needed
   return null;

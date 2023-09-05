@@ -16,11 +16,9 @@ import {
 } from "@src/openbis/dto";
 import { OperationContext } from "../OperationContext";
 
-type EntryNodeProps = MetagraphComponentProps & {
-  node: EntryNode;
-};
 
-function Entry({ node }: EntryNodeProps) {
+
+function Entry() {
   const { loggedIn, service } = useContext(AuthContext);
   const [entity, setEntity] = useState({} as typeof SampleType);
   const [entityAvailable, setEntityAvailable] = useState(false);
@@ -39,9 +37,8 @@ function Entry({ node }: EntryNodeProps) {
   }
 
   useEffect(() => {
-    console.log("Node change");
     const ssc = new SampleTypeSearchCriteria();
-    ssc.withCode().thatEquals(node.entityType);
+    ssc.withCode().thatEquals(workflowOperations.currentOperation.objectType);
     const sfo = new SampleTypeFetchOptions();
     sfo.withPropertyAssignments().withPropertyType();
     if (loggedIn) {
@@ -52,14 +49,14 @@ function Entry({ node }: EntryNodeProps) {
         }
       });
     }
-  }, [node.entityType, loggedIn]);
+  }, [workflowOperations.currentOperation.objectType, loggedIn]);
 
   // Render input fields and entity settings
   return (
     <div>
       <div>
-        This step will create a new sample of type {node.entityType} in collection{" "}
-        {node.collection}
+        This step will create a new sample of type {workflowOperations.currentOperation.objectType} in collection{" "}
+        {workflowOperations.currentOperation.collectionIdentifier}
       </div>
       {entityAvailable ? (
         <OpenBisEntry objectType={entity} onEntry={handleEntry} />

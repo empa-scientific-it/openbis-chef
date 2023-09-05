@@ -8,23 +8,29 @@ import ReactFlow, {
   useEdgesState,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { Metagraph, getEdges, getVisualisationNodes } from "../metagraph";
+import { Metagraph, getEdges, getVisualisationNodes, walkGraph } from "../metagraph";
 
 type Props = {
   metagraph: Metagraph;
 };
 
 function Summary({ metagraph }: Props) {
-  const [nodes, setNodes, onNodesChange] = useNodesState(
-    getVisualisationNodes(metagraph)
-  );
-  const [edges, setEdges, onEdgesChange] = useEdgesState(getEdges(metagraph));
-  const onConnect = useCallback((params) => console.log("not possible"), []);
-  const onInit = (reactFlowInstance) => console.log("flow loaded:", nodes, edges);
+  const descriptions = walkGraph(metagraph, (node) => node.description);
+  // const [nodes, setNodes, onNodesChange] = useNodesState(
+  //   getVisualisationNodes(metagraph)
+  // );
+  // const [edges, setEdges, onEdgesChange] = useEdgesState(getEdges(metagraph));
+  // const onConnect = useCallback((params) => console.log("not possible"), []);
+  // const onInit = (reactFlowInstance) => console.log("flow loaded:", nodes, edges);
 
   return (
     <div className="flow" style={{ width: "100%", height: "100%" }}>
-      <ReactFlow
+      <ul>
+        {descriptions.map((node) => (
+          <li key={node}>{node}</li>
+        ))}
+      </ul>
+      {/* <ReactFlow
         nodes={nodes}
         edges={edges}
         onConnect={onConnect}
@@ -36,7 +42,7 @@ function Summary({ metagraph }: Props) {
       >
         <Controls />
         <MiniMap />
-      </ReactFlow>
+      </ReactFlow> */}
     </div>
   );
 }

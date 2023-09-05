@@ -223,6 +223,7 @@ export interface CreateOperation extends MetagraphOperation {
 
 export interface LinkOperation extends MetagraphOperation {
   type: "link";
+  objectType: string;
   collectionIdentifier: string;
   objectIdentifier: string;
 }
@@ -261,6 +262,7 @@ export function nodeToOperation(node: MetagraphNode): MetagraphOperations {
     return {
       collectionIdentifier: node.collection,
       operationId: node.id,
+      objectType: node.entityType,
       type: "link",
       objectIdentifier: "",
     };

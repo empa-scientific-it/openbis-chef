@@ -11,6 +11,15 @@
     width: 30%; /* Make the table take the full width of the container */
     border-collapse: collapse; /* Optional: Remove spacing between table cells */
   }
+
+
+thead, tbody { display: block; }
+
+tbody {
+    height: 400px;       /* Just for the demo          */
+    overflow-y: auto;    /* Trigger vertical scroll    */
+    overflow-x: hidden;  /* Hide the horizontal scroll */
+}
   
   th, td {
     border: 1px solid #ddd; /* Optional: Add borders to table cells */
