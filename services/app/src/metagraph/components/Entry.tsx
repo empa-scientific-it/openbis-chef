@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useMemo } from "react";
 import {
   EntryNode,
   MetagraphComponentProps,
@@ -16,19 +16,28 @@ import {
 } from "@src/openbis/dto";
 import { OperationContext } from "../OperationContext";
 
-
-
 function Entry() {
   const { loggedIn, service } = useContext(AuthContext);
   const [entity, setEntity] = useState({} as typeof SampleType);
   const [entityAvailable, setEntityAvailable] = useState(false);
-  const [properties, setProperties] = useState<{ [key: string]: string }>({});
-
   const workflowOperations = useContext(OperationContext);
+
+  const [properties, setProperties] = useState<{ [key: string]: string }>(workflowOperations.currentOperation.type == "create" ? workflowOperations.currentOperation.objectProperties : {});
+
+  // useEffect(() => {
+  //   console.log("Entry", workflowOperations.currentOperation)
+  //   setProperties(workflowOperations.currentOperation?.objectProperties)});
 
   function handleEntry(objectEntry: ObjectEntry) {
     console.log("handleEntry", objectEntry);
     setProperties(objectEntry.properties);
+    
+    const newEntity = {
+      ...entity,
+      properties: objectEntry.properties,
+        }
+      setEntity(newEntity);
+      console.log(newEntity)
   }
 
   function handleSave(event: React.FormEvent<HTMLButtonElement>) {
@@ -52,10 +61,11 @@ function Entry() {
   }, [workflowOperations.currentOperation.objectType, loggedIn]);
 
   // Render input fields and entity settings
-  return (
+  const ui = useMemo( () => { return (
     <div>
       <div>
-        This step will create a new sample of type {workflowOperations.currentOperation.objectType} in collection{" "}
+        This step will create a new sample of type{" "}
+        {workflowOperations.currentOperation.objectType} in collection{" "}
         {workflowOperations.currentOperation.collectionIdentifier}
       </div>
       {entityAvailable ? (
@@ -63,7 +73,8 @@ function Entry() {
       ) : null}
       <button onClick={handleSave}>Save</button>
     </div>
-  );
+  );}, [entity]);
+  return ui;
 }
 
 export default Entry;

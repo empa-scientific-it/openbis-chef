@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import { AuthContext } from "@src/openbis/AuthContext";
 import { OperationContext } from "../OperationContext";
 import { Experiment } from "@src/types/openbis";
@@ -81,7 +81,7 @@ const Select = () => {
         }
       });
     }
-  }, [currentCollection]);
+  }, [loggedIn, currentCollection]);
 
   const handleSelection = (event: React.ChangeEvent<HTMLSelectElement>) => {
     event.preventDefault();
@@ -93,10 +93,14 @@ const Select = () => {
     workflowOperations.setIdentifier(foundSample?.identifier.identifier);
   };
 
+  const ui = useMemo(() => {
+    return <SampleSelector samples={samples} onSelect={handleSelection} />;
+  }, [samples]);
+
   return (
     <div>
       <h3>Select an existing object</h3>
-      {<SampleSelector samples={samples} onSelect={handleSelection} />}
+      {ui}
       <h3>Selected sample</h3>
       <h3>{currentSample?.identifier?.identifier}</h3>
       {currentSample !== null ? <SampleEntry sample={currentSample} /> : null}

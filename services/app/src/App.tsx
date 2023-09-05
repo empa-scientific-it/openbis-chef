@@ -13,6 +13,9 @@ import {
 import Workflow from "@src/metagraph/components/Workflow";
 import { Metagraph } from "@src/metagraph/metagraph";
 import { useContext } from "react";
+import Demo from "./Demo";
+import { polyproWorkflow } from "./PolyproWorkflow";
+import { pizzaWorkflow } from "./PizzaWorkflow";
 
 
 function RequireAuth({ children }: { children: JSX.Element }) {
@@ -31,76 +34,8 @@ function RequireAuth({ children }: { children: JSX.Element }) {
 }
 
 const workflows = [
-  new Metagraph(
-    [
-      {
-        id: "Select extruder",
-        collection: "/POLPRO_EQUIPMENT/EXTRUSION/EXTRUSION_EXP_1",
-        type: "select",
-        entityType: "EXTRUDER",
-        dependencies: [],
-        description: "Select the extruder",
-      },
-      {
-        id: "Extruder Parameter",
-        collection: "/POLPRO_RUDOLF.HUFENUS_AT_EMPA.CH/TEST/TEST_EXP_1",
-        type: "entry",
-        entityType: "PARAMETER_EXTRUDER",
-        dependencies: ["Select extruder"],
-        description: "Enter the parameters for the extruder",
-      },
-      {
-        id: "Select spin pack",
-        collection: "/POLPRO_EQUIPMENT/EXTRUSION/EXTRUDER_EXP_8",
-        type: "select",
-        entityType: "SPIN_PACK",
-        dependencies: [],
-        description: "Select the spin pack",
-      },
-      {
-        id: "Spin pack parameter",
-        collection: "/POLPRO_RUDOLF.HUFENUS_AT_EMPA.CH/TEST/TEST_EXP_1",
-        type: "entry",
-        entityType: "PARAMETER_SPIN_PACK",
-        dependencies: ["Select spin pack"],
-        description: "Enter the parameters for the spin pack",
-      },
-      {
-        id: "Select die",
-        collection: "/POLPRO_EQUIPMENT/EXTRUSION/EXTRUDER_EXP_2",
-        type: "select",
-        entityType: "DIES",
-        dependencies: [],
-        description: "Select the die",
-      },
-      {
-        id: "Die parameter",
-        collection: "/POLPRO_RUDOLF.HUFENUS_AT_EMPA.CH/TEST/TEST_EXP_1",
-        type: "entry",
-        entityType: "PARAMETER_DIES",
-        dependencies: ["Select die"],
-        description: "Enter the parameters for the die",
-      },
-      {
-        id: "Select quencher",
-        collection: "/POLPRO_EQUIPMENT/EXTRUSION/EXTRUDER_EXP_7",
-        type: "select",
-        entityType: "QUENCHERS",
-        dependencies: [],
-        description: "Select the quencher",
-      },
-      {
-        id: "Quencher parameter",
-        collection: "/POLPRO_RUDOLF.HUFENUS_AT_EMPA.CH/TEST/TEST_EXP_1",
-        type: "entry",
-        entityType: "PARAMETER_QUENCHER",
-        dependencies: ["Select quencher"],
-        description: "Enter the parameters for the die",
-      },
-    ],
-    "Create fiber",
-    "Create fiber",
-  ),
+  polyproWorkflow, 
+  pizzaWorkflow
 ];
 
 const App: React.FC = () => {
@@ -121,6 +56,7 @@ const App: React.FC = () => {
                 </RequireAuth>
               }
             />
+            <Route path="demo" element={<Demo metagraph={pizzaWorkflow}/>}/>
           </Routes>
         </AuthContext.Provider>
       </Router>

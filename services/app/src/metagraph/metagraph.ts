@@ -7,6 +7,8 @@ import {
   SampleType,
 } from "@src/openbis/dto";
 
+import dagre from "dagre";
+
 export interface Node {
   id: string;
   entityType: string;
@@ -132,7 +134,7 @@ interface Edge {
 export function getEdges(g: Metagraph): Edge[] {
   return g.nodes.flatMap((node) => {
     return node.dependencies.map((depId) => {
-      return { source: depId, target: node.id, id: `${node.id}-${depId}`, type: 'step' };
+      return { source: depId, target: node.id, id: `${node.id}-${depId}`, type: "step" };
     });
   });
 }
@@ -168,45 +170,47 @@ function getRandomInt(max) {
  * using react-flow
  *
  */
-export function getVisualisationNodes(g: Metagraph, mult: {x: number, y: number} = {x: 200, y: 100}): VisualisationNode[] {
+export function getVisualisationNodes(
+  g: Metagraph,
+  config: {
+    width: number;
+    height: number;
+    rankdir: "LR" | "TD";
+    nodesep: number;
+    align: "UL";
+  } = { width: 200, height: 100, rankdir: "TD", nodesep: 200, align: "UL" }
+): VisualisationNode[] {
   //Place the node hierarchically
-  const nodes = walkGraph(g, (node) => node); 
+  const nodes = walkGraph(g, (node) => node);
   const edges = getEdges(g);
 
-  //TODO place the nodes hierarchically. To do so, we walk the graph using BFS
-  //and keep track of the depth of each node. Then we can place the nodes
-  interface NodeWithDepth {
-    id: string;
-    depth: number;
-    dependencies: string[];
-  }
-  const initGraph = g.nodes.map((node) => {
-    return {
-      id: node.id,
-      data: node,
-      depth: getDepth(node, g),
-      type: "default",
-      dependencies: node.dependencies,
-    };
-  });
-  const maxDepth = initGraph.sort((node)=> node.dependencies.length).map((node) => node.depth).reduce((a, b) => Math.max(a, b));
 
-  //Once we have the depth of each node, we can place the nodes hierarchically
-  // by setting y = depth and x = index of node in the depth level
-  const nodesWithDepth = initGraph.map((node) => {
+  //Use dagre to place the nodes hierarchically
+  const graph = new dagre.graphlib.Graph();
+  graph.setGraph({});
+
+  // Default to assigning a new object as a label for each new edge.
+  graph.setDefaultEdgeLabel(function () {
+    return {};
+  });
+  nodes.map((node) => {
+    graph.setNode(node.id, { width: 100, height: 100, label: node.description });
+  });
+  edges.map((edge) => graph.setEdge(edge.source, edge.target));
+  dagre.layout(graph, config);
+  console.log(graph);
+
+  return nodes.map((node) => {
     return {
       id: node.id,
-      data: { label: node.data.id },
+      data: { label: node.description },
       type: "default",
       position: {
-        y: (maxDepth - node.depth) * mult.y,
-        x: getRandomInt(node.depth) * mult.x,
+        y: graph.node(node.id).y,
+        x: graph.node(node.id).x,
       },
-      parentNode: node.dependencies[0],
-
     };
   });
-  return nodesWithDepth;
 }
 
 export interface MetagraphOperation {
