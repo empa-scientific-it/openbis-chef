@@ -29,12 +29,12 @@ export function useLogin() {
   const loginAndThen = (
     username: string,
     password: string,
-    then: () => void,
+    then: (service: Facade) => void,
   ) => {
     service.login(username, password).then((token) => {
       setToken("token", () => token as string);
       setLoggedIn(() => true);
-      then();
+      then(service);
     });
   };
 

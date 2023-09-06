@@ -16,6 +16,7 @@ import { useContext } from "react";
 import Demo from "./Demo";
 import { polyproWorkflow } from "./PolyproWorkflow";
 import { pizzaWorkflow } from "./PizzaWorkflow";
+import SampleGraphDemo from "./SampleGraphDemo";
 
 
 function RequireAuth({ children }: { children: JSX.Element }) {
@@ -57,6 +58,7 @@ const App: React.FC = () => {
               }
             />
             <Route path="demo" element={<Demo metagraph={pizzaWorkflow}/>}/>
+            <Route path="sampledemo" element={<SampleGraphDemo/>}/>
           </Routes>
         </AuthContext.Provider>
       </Router>
