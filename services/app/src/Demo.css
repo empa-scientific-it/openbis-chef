@@ -1,0 +1,15 @@
+main {
+    background-color: #fff;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    margin: 20px auto;
+    max-width: 600px;
+    padding: 20px;
+    text-align: center;
+    display: flexbox;
+}
+
+main > section {
+    flex: 1;
+    text-align: left;
+}

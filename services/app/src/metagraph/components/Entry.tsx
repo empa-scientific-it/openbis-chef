@@ -13,8 +13,10 @@ import {
   ExperimentIdentifier,
   SampleCreation,
   SampleType,
+  Sample,
 } from "@src/openbis/dto";
 import { OperationContext } from "../OperationContext";
+import { OpenBIS } from "@src/types/openbis";
 
 function Entry() {
   const { loggedIn, service } = useContext(AuthContext);
@@ -78,3 +80,7 @@ function Entry() {
 }
 
 export default Entry;
+
+
+
+

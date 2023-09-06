@@ -10,7 +10,7 @@ import ReactFlow, {
   Node,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import "./Demo.css"
+import "./Demo.css";
 import {
   Metagraph,
   VisualisationNode,
@@ -18,6 +18,7 @@ import {
   getVisualisationNodes,
   walkGraph,
 } from "@src/metagraph/metagraph";
+import { useList } from "./metagraph/useList";
 
 type Props = {
   metagraph: Metagraph;
@@ -49,21 +50,21 @@ function setUnvisited(node: Node) {
     ...node,
     style: {
       ...node.style,
-      background: "withe",
+      background: "white",
     },
   };
 }
 
 function Demo({ metagraph }: Props) {
-  const descriptions = walkGraph(metagraph, (node) => node.description);
   const [nodes, setNodes, onNodesChange] = useNodesState(
     getVisualisationNodes(metagraph)
   );
   const [edges, setEdges, onEdgesChange] = useEdgesState(getEdges(metagraph));
   const onInit = (reactFlowInstance) => console.log("flow loaded:", nodes, edges);
   const [walk, setWalk] = useState(false);
-
+  const visitedElements = useList<JSX.Element>([]);
   const [paused, setPaused] = useState(false); // New paused state
+  const alreadyVisited = useList<String>([]); // New alreadyVisited state
 
   // Function to pause execution
   const pause = (delay) => {
@@ -76,34 +77,55 @@ function Demo({ metagraph }: Props) {
 
   useEffect(() => {
     async function doWalk() {
-      setNodes((prevNodes) => nodes.map((node) => setUnvisited(node)));
+      setNodes((prevNodes) => prevNodes.map((node) => setUnvisited(node)));
+      visitedElements.clear();
       for (const node of nodes) {
         console.log(node);
+        visitedElements.add(<li>{node.id}</li>);
         await pause(500);
         setNodes((prevNodes) => {
           return prevNodes.map((prevNode) => {
             if (prevNode.id === node.id) {
+              alreadyVisited.add(node.id);
               return setVisiting(prevNode);
-            } else {
+            } else if (alreadyVisited.list.includes(node.id)) {
               return setVisited(prevNode);
+            } else {
+              return prevNode;
             }
           });
         });
         await pause(500);
       }
-      setNodes((prevNodes) => nodes.map((node) => setUnvisited(node)));
+      setNodes((prevNodes) => prevNodes.map((node) => setUnvisited(node)));
+      visitedElements.clear();
+      alreadyVisited.clear();
     }
     if (walk) {
       doWalk();
     }
+    return () => {
+      setNodes((prevNodes) => prevNodes.map((node) => setUnvisited(node)));
+      visitedElements.clear();
+    };
   }, [walk]);
 
+  function handleWalk(event: React.FormEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    setWalk((old) => !old);
+  }
+
   return (
-    <div>
-      <h1>Summary</h1>
-      <div
+    <main>
+      <h1>Workflow graph</h1>
+      <section
         className="flow"
-        style={{ width: "1000px", height: "1000px", overflow: "auto" }}
+        style={{
+          width: "500px",
+          height: "500px",
+          overflow: "auto",
+          fontFamily: "Virgil",
+        }}
       >
         <ReactFlow
           nodes={nodes}
@@ -113,13 +135,14 @@ function Demo({ metagraph }: Props) {
           maxZoom={100}
           minZoom={0.1}
           fitView
-        >
-          <Controls />
-          <MiniMap />
-        </ReactFlow>
-      </div>
-      <button onClick={() => setWalk((old) => !old)}>Walk</button>
-    </div>
+        ></ReactFlow>
+      </section>
+      <section>
+        <h2>Visited nodes</h2>
+        <ul>{visitedElements.list}</ul>
+      </section>
+      <button onClick={handleWalk}>Walk</button>
+    </main>
   );
 }
 
