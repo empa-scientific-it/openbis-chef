@@ -1,5 +1,6 @@
-import { Sample } from "@src/types/openbis";
+import { Sample, SamplePermId } from "@src/types/openbis";
 import dagre from "dagre";
+import { SampleFetchOptions } from "@src/openbis/dto";
 
 interface Node {
   id: string;
@@ -11,34 +12,63 @@ interface Edge {
   id?: string;
 }
 
-export function getRelationshipGraph(
-  s: Sample,
-  relationships: Sample[] | null,
-  reverse: Boolean = false
-): { nodes: Node[]; edges: Edge[] } {
-  const nodes = [{ id: s.code }].concat(
-    relationships?.map((relationship) => ({ id: relationship.code }))
-  );
-  const edges = relationships?.map((relationship) => ({
-    source: reverse ? s.code : relationship.code,
-    target: reverse ? relationship.code : s.code,
-    id: reverse ? `${s.code}-${relationship.code}` : `${relationship.code}-${s.code}`,
-  }));
-  return { nodes: nodes, edges: edges };
+interface Graph<NodeType extends Node, EdgeType extends Edge> {
+  nodes: NodeType[];
+  edges: EdgeType[];
 }
 
-export function getDirectGraph(s: Sample): { nodes: Node[]; edges: Edge[] } {
-  const parentsRelationships = getRelationshipGraph(s, s.parents);
-  const childrenRelationships = getRelationshipGraph(s, s.children, true);
+type SampleGraph = Graph<Node, Edge>;
 
-  const parentNodes = parentsRelationships?.nodes ? parentsRelationships.nodes : [];
-  const parentEdges = parentsRelationships?.edges ? parentsRelationships.edges : [];
-  const childrenNodes = childrenRelationships?.nodes ? childrenRelationships.nodes : [];
-  const childrenEdges = childrenRelationships?.edges ? childrenRelationships.edges : [];
+export function getDirectedRelationships(
+  s: Sample,
+  relationships: Sample[] | null,
+  reverse: boolean = false
+): SampleGraph {
+  const nodes = new Set([{ id: s.permId.permId }]);
+  const edges: Set<Edge> = new Set();
+
+  if (relationships) {
+    relationships.forEach((relationship) => {
+      if (relationship) {
+        nodes.add({ id: relationship.permId.permId });
+        edges.add({
+          source: reverse ? s.permId.permId : relationship.permId.permId,
+          target: reverse ? relationship.permId.permId : s.permId.permId,
+          id: reverse
+            ? `${s.code}-${relationship.permId.permId}`
+            : `${relationship.permId.permId}-${s.permId.permId}`,
+        });
+      }
+    });
+  }
+
+  return { nodes: Array.from(nodes), edges: Array.from(edges) };
+}
+
+function uniqueBy<T>(vals: T[], pred: (arg0: T) => string): T[] {
+  return [...new Map(vals.map((item) => [pred(item), item])).values()];
+}
+
+function uniqueEdges(edges: Edge[]): Edge[] {
+  return uniqueBy(edges, (e) => `${e.source}-${e.target}`);
+}
+
+function uniqueNodes(nodes: Node[]): Node[] {
+  return uniqueBy(nodes, (e) => e.id);
+}
+
+export function getDirectGraph(s: Sample): SampleGraph {
+  const parentsRelationships = getDirectedRelationships(s, s.parents);
+  const childrenRelationships = getDirectedRelationships(s, s.children, true);
+
+  const parentNodes = parentsRelationships.nodes;
+  const parentEdges = parentsRelationships.edges;
+  const childrenNodes = childrenRelationships.nodes;
+  const childrenEdges = childrenRelationships.edges;
 
   return {
-    nodes: [...parentNodes, ...childrenNodes],
-    edges: [...parentEdges, ...childrenEdges],
+    nodes: uniqueNodes([...parentNodes, ...childrenNodes]),
+    edges: uniqueEdges([...parentEdges, ...childrenEdges]),
   };
 }
 
@@ -46,29 +76,42 @@ export function getGraphToDepth(
   s: Sample,
   maxDepth: number,
   depth = 0,
-  accumulator: { nodes: Node[]; edges: Edge[] } = { nodes: [], edges: [] }
+  accumulator: SampleGraph = { nodes: [], edges: [] },
+  visited: Set<String> = new Set()
 ): { nodes: Node[]; edges: Edge[] } {
-  if (depth >= maxDepth) {
-    // If depth reaches maxDepth, return the accumulated graph
-    return accumulator;
+  console.log("getGraphToDepth", s, maxDepth, depth, accumulator, visited);
+  if (depth >= maxDepth || visited.has(s.permId.permId)) {
+    // If depth reaches maxDepth or the sample is already visited, return the accumulated graph
+    return {
+      nodes: uniqueNodes(accumulator.nodes),
+      edges: uniqueEdges(accumulator.edges),
+    };
   } else {
-    // Recursively visit all parents or children, depending on your use case
-    const graph = (s?.parents || []).flatMap((parent) =>
-      getGraphToDepth(parent, maxDepth, depth + 1, accumulator)
+    // Mark the current sample as visited
+    const newVisited = new Set(visited).add(s.permId.permId);
+
+    const { nodes, edges } = getDirectGraph(s);
+    const parentGraph = s.parents?.flatMap((parent) =>
+      getGraphToDepth(parent, maxDepth, depth + 1, accumulator, newVisited)
     );
-    const childrenGraph = (s?.children || []).flatMap((child) =>
-      getGraphToDepth(child, maxDepth, depth + 1, accumulator)
+    const childGraph = s.children?.flatMap((children) =>
+      getGraphToDepth(children, maxDepth, depth + 1, accumulator, newVisited)
     );
 
-    // Optionally, add the current node and edges to the accumulator
-    const currentNode = getDirectGraph(s);
-
-    accumulator.nodes.push(...currentNode?.nodes.filter(Boolean)); // Filter out null or undefined nodes
+    accumulator.nodes.push(
+      ...uniqueNodes([
+        ...nodes,
+        ...parentGraph?.flatMap((g) => g.nodes),
+        ...childGraph?.flatMap((g) => g.nodes),
+      ])
+    );
     accumulator.edges.push(
-      ...(graph?.flatMap((g) => g.edges).filter(Boolean) || []), // Filter out null or undefined edges
-      ...(childrenGraph?.flatMap((g) => g.edges).filter(Boolean) || []) // Filter out null or undefined edges
+      ...uniqueEdges([
+        ...edges,
+        ...parentGraph?.flatMap((g) => g.edges),
+        ...childGraph?.flatMap((g) => g.edges),
+      ])
     );
-
     return accumulator;
   }
 }
@@ -87,7 +130,17 @@ interface DisplayEdge {
   type: string;
 }
 
-export function getDisplayGraph(sampleGraph: { nodes: Node[]; edges: Edge[] }): {
+function uniqueGraph(graph: SampleGraph): SampleGraph {
+  return {
+    nodes: uniqueBy(graph.nodes, (e) => e.id),
+    edges: uniqueBy(graph.edges, (e) => `${e.source}-${e.target}`),
+  };
+}
+
+export function getDisplayGraph(sampleGraph: {
+  nodes: Node[];
+  edges: Edge[];
+}): {
   nodes: DisplayNode[];
   edges: DisplayEdge[];
 } {
@@ -99,13 +152,16 @@ export function getDisplayGraph(sampleGraph: { nodes: Node[]; edges: Edge[] }): 
   graph.setDefaultEdgeLabel(function () {
     return {};
   });
-  sampleGraph?.nodes.map((node) => {
+  const uniqueSampleGraph = uniqueGraph(sampleGraph);
+  uniqueSampleGraph?.nodes.map((node) => {
     graph.setNode(node.id, { width: 100, height: 100, label: node.id });
   });
-  sampleGraph?.edges.map((edge) => graph.setEdge(edge.source, edge.target));
+  uniqueSampleGraph?.edges.map((edge) =>
+    graph.setEdge(edge.source, edge.target)
+  );
   dagre.layout(graph);
   return {
-    nodes: sampleGraph.nodes.map((node) => {
+    nodes: uniqueSampleGraph.nodes.map((node) => {
       return {
         id: node.id,
         data: { label: node.id },
@@ -116,7 +172,7 @@ export function getDisplayGraph(sampleGraph: { nodes: Node[]; edges: Edge[] }): 
         },
       };
     }),
-    edges: sampleGraph.edges.map((edge) => {
+    edges: uniqueSampleGraph.edges.map((edge) => {
       return {
         id: edge.id,
         source: edge.source,
@@ -125,4 +181,15 @@ export function getDisplayGraph(sampleGraph: { nodes: Node[]; edges: Edge[] }): 
       };
     }),
   };
+}export function fetchOptionsToDepth(depth: number): typeof SampleFetchOptions {
+  if (depth <= 0) {
+    // Base case: Stop recursion and return an empty fetch options
+    return new SampleFetchOptions();
+  }
+
+  const fo = new SampleFetchOptions();
+  fo.withChildrenUsing(fetchOptionsToDepth(depth - 1));
+  fo.withParentsUsing(fetchOptionsToDepth(depth - 1));
+  return fo;
 }
+

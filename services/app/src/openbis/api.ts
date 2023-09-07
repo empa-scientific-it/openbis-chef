@@ -76,9 +76,9 @@ import type {
   AsynchronousOperationExecutionResults,
 } from "@src/types/openbis";
 
-import {ExecuteCustomASServiceOperation, AsynchronousOperationExecutionOptions, OperationExecutionFetchOptions} from './dto'
+import {ExecuteCustomASServiceOperation, AsynchronousOperationExecutionOptions, OperationExecutionFetchOptions, SampleDeletionOptions} from './dto'
 
-import { openbis } from "v3api/V3API.esm";
+import {  openbis } from "v3api/V3API.esm";
 
 import type {  OpenBIS  as OpenBISInterface} from "@src/types/openbis";
 
@@ -401,6 +401,12 @@ export class Facade {
         });
       }
     }
+  }
+
+  deleteSamples(ids: ISampleId[], reason: string = "No reason provided") {
+    const options = new SampleDeletionOptions();
+    options.reason = reason;
+    return this.promise(this.v3.deleteSamples(ids, options));
   }
 
   executeQuery(id: IQueryId, options: QueryExecutionOptions) {

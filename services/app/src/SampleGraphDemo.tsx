@@ -29,7 +29,6 @@ import {
   ProjectIdentifier,
   Sample,
   SampleCreation,
-  SampleFetchOptions,
   SamplePermId,
   SpacePermId,
   SampleUpdate,
@@ -37,7 +36,13 @@ import {
 } from "./openbis/dto";
 import { Facade } from "./openbis/api";
 import { UpdateSamplesOperation } from "v3api/V3API.esm";
-import { getDirectGraph, getDisplayGraph, getGraphToDepth } from "./openbis/sampleGraph";
+import {
+  getDirectGraph,
+  getDisplayGraph,
+  getGraphToDepth,
+} from "./openbis/sampleGraph";
+import { fetchOptionsToDepth } from "./openbis/sampleGraph";
+import ObjectGraph from "./metagraph/components/ObjectGraph";
 
 function newSample() {
   const s1 = new SampleCreation();
@@ -48,8 +53,8 @@ function newSample() {
   return s1;
 }
 
-async function createTestSample(service: Facade): Promise<typeof Sample> {
-  const s1 = [newSample(), newSample(), newSample()];
+async function createTestSample(service: Facade): Promise<(typeof Sample)[]> {
+  const s1 = [newSample(), newSample(), newSample(), newSample(), newSample()];
   const op = new CreateSamplesOperation(s1);
   const options = new SynchronousOperationExecutionOptions();
   const result = await service.executeOperations([op], options);
@@ -58,7 +63,6 @@ async function createTestSample(service: Facade): Promise<typeof Sample> {
       return r.objectIds;
     }
   });
-  console.log(permIds);
   const ops = permIds.reduce((prev, curr, index, array) => {
     const update = new SampleUpdate();
     update.sampleId = curr;
@@ -72,42 +76,34 @@ async function createTestSample(service: Facade): Promise<typeof Sample> {
     new UpdateSamplesOperation(ops),
     options
   );
-  const fo = new SampleFetchOptions();
-  fo.withChildrenUsing(new SampleFetchOptions());
-  fo.withParentsUsing(new SampleFetchOptions());
+  const fo = fetchOptionsToDepth(5);
   const res = await service.getSamples(permIds, fo);
-  return res[permIds[1].permId];
+  return Object.values(res);
 }
 
 function SampleGraphDemo() {
   const service = useLogin();
   const [sample, setSample] = useState({} as typeof Sample);
+  const [allSamples, setAllSamples] = useState<(typeof Sample)[]>([]);
   const [sampleAvailable, setSampleAvailable] = useState(false);
   const [getSample, setGetSample] = useState(false);
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+ 
 
   useEffect(() => {
     service.login("admin", "changeit");
     createTestSample(service.service).then((res) => {
-      setSample(res);
+      setSample(res[1]);
+      setAllSamples(res);
       setSampleAvailable(true);
+      console.log(res);
     });
   }, [getSample]);
 
-  useEffect(() => {
-    if (!sampleAvailable) {
-      return;
-    }
-    const { nodes, edges } = getDisplayGraph(getDirectGraph(sample));
-    console.log(nodes, edges);
-    setNodes(nodes);
-    setEdges(edges);
-  }, [sampleAvailable, sample]);
 
-  // const [nodes, setNodes, onNodesChange] = useNodesState(
-  //     getVisualisationNodes(metagraph)
-  // )
+  useEffect(() => {
+    service.login("admin", "changeit");
+    service.service.deleteSamples(allSamples.map((s) => s.permId));
+  }, []);
 
   return (
     <main>
@@ -121,15 +117,10 @@ function SampleGraphDemo() {
           fontFamily: "Virgil",
         }}
       >
-        {sampleAvailable? <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          attributionPosition="top-right"
-          maxZoom={100}
-          minZoom={0.1}
-          fitView
-        ></ReactFlow>: null}
-        <button onClick={() => setGetSample((oldVal) => !oldVal)}>Get sample</button>
+        {sampleAvailable ? <ObjectGraph sample={sample} maxDepth={3}/> : null}
+        <button onClick={() => setGetSample((oldVal) => !oldVal)}>
+          Get sample
+        </button>
       </section>
     </main>
   );
