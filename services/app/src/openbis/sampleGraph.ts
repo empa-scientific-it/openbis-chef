@@ -137,10 +137,7 @@ function uniqueGraph(graph: SampleGraph): SampleGraph {
   };
 }
 
-export function getDisplayGraph(sampleGraph: {
-  nodes: Node[];
-  edges: Edge[];
-}): {
+export function getDisplayGraph(sampleGraph: { nodes: Node[]; edges: Edge[] }): {
   nodes: DisplayNode[];
   edges: DisplayEdge[];
 } {
@@ -156,9 +153,7 @@ export function getDisplayGraph(sampleGraph: {
   uniqueSampleGraph?.nodes.map((node) => {
     graph.setNode(node.id, { width: 100, height: 100, label: node.id });
   });
-  uniqueSampleGraph?.edges.map((edge) =>
-    graph.setEdge(edge.source, edge.target)
-  );
+  uniqueSampleGraph?.edges.map((edge) => graph.setEdge(edge.source, edge.target));
   dagre.layout(graph);
   return {
     nodes: uniqueSampleGraph.nodes.map((node) => {
@@ -181,7 +176,8 @@ export function getDisplayGraph(sampleGraph: {
       };
     }),
   };
-}export function fetchOptionsToDepth(depth: number): typeof SampleFetchOptions {
+}
+export function fetchOptionsToDepth(depth: number): typeof SampleFetchOptions {
   if (depth <= 0) {
     // Base case: Stop recursion and return an empty fetch options
     return new SampleFetchOptions();
@@ -192,4 +188,3 @@ export function getDisplayGraph(sampleGraph: {
   fo.withParentsUsing(fetchOptionsToDepth(depth - 1));
   return fo;
 }
-

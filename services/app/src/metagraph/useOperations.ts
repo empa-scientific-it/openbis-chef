@@ -5,10 +5,9 @@ import { useList } from "./useList";
 export const useOperations = (init: MetagraphOperations[]) => {
 
 
+  
   const operationList = useList(init);
-  useEffect(() => {
-    console.log("Operations", operationList.list);
-  }, [operationList.list]);
+
 
   const addOperation = (operation: MetagraphOperations) => {
     operationList.add(operation);
@@ -18,13 +17,7 @@ export const useOperations = (init: MetagraphOperations[]) => {
     operationList.remove(operation);
   };
 
-  const nextOperation = () => {
-    operationList.next();
-  };
-
-  const previousOperation = () => {
-    operationList.previous();
-  };
+ 
 
   const updateOperation = (operation: MetagraphOperations) => {
     operationList.set(operation, operationList.idx);
@@ -72,11 +65,12 @@ export const useOperations = (init: MetagraphOperations[]) => {
     operationIndex: operationList.idx,
     addOperation,
     removeOperation,
-    nextOperation,
-    previousOperation,
+    nextOperation: operationList.next,
+    previousOperation: operationList.previous,
     updateOperation,
     clearOperations,
     setOperation,
+    setOperations: operationList.setList,
     goToOperation,
     setCollection,
     setProperties,

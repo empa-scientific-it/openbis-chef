@@ -8,6 +8,8 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   Node,
+  useReactFlow,
+  ReactFlowInstance,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import {
@@ -28,37 +30,31 @@ import { AuthContext } from "@src/openbis/AuthContext";
 
 type Props = {
   sample: typeof Sample;
-  maxDepth: number
+  maxDepth: number;
+  onNodeClick: (event: any, element: Node) => void;
 };
 
-function ObjectGraph({ sample, maxDepth }: Props) {
-
-
- 
+function ObjectGraph({ sample, maxDepth, onNodeClick }: Props) {
   const { edges: localEdges, nodes: localNodes } = getDisplayGraph(
-    getGraphToDepth(sample, maxDepth))
-    const [nodes, setNodes, onNodesChange] = useNodesState(localNodes);
-    const [edges, setEdges, onEdgesChange] = useEdgesState(localEdges);
-      
-   
-  
+    getGraphToDepth(sample, maxDepth)
+  );
+  const [nodes, setNodes, onNodesChange] = useNodesState(localNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(localEdges);
+  const [instance, setInstance] = useState<ReactFlowInstance | null>(null);
 
+  const onInit = (reactFlowInstance: ReactFlowInstance) => {
+    setInstance(reactFlowInstance);
+  };
 
-  const service = useContext(AuthContext);
-
+//   useEffect(() => {instance.setCenter()}, [edges, nodes]);
   const handleNodeClick = (event: any, element: Node) => {
-    const fo = fetchOptionsToDepth(maxDepth);
-    service.service
-      .getSamples([new SamplePermId(element.id)], fo)
-      .then((samples) => {
-        const sample = Object.values(samples)[0];
-        const { edges: newEdges, nodes: newNodes } = getDisplayGraph(
-          getGraphToDepth(sample, maxDepth)
-        );
-        console.log(sample)
-        setNodes(() => newNodes);
-        setEdges(() => newEdges);
-      });
+    onNodeClick(event, element);
+    instance.setViewport(  {
+        x: element.position.x - (element.width / 2) ,
+        y:  element.position.y - (element.height / 2),
+        zoom: 1,
+      })
+      instance.fitView();
   };
 
   return (
@@ -76,6 +72,7 @@ function ObjectGraph({ sample, maxDepth }: Props) {
         <ReactFlow
           nodes={nodes}
           edges={edges}
+          onInit={onInit}
           onNodeClick={(event, element) => handleNodeClick(event, element)}
           attributionPosition="top-right"
           maxZoom={100}

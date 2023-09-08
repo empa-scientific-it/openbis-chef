@@ -24,7 +24,7 @@ function Entry() {
   const [entityAvailable, setEntityAvailable] = useState(false);
   const workflowOperations = useContext(OperationContext);
 
-  const [properties, setProperties] = useState<{ [key: string]: string }>(workflowOperations.currentOperation.type == "create" ? workflowOperations.currentOperation.objectProperties : {});
+  const [properties, setProperties] = useState<{ [key: string]: string }>({});
 
   // useEffect(() => {
   //   console.log("Entry", workflowOperations.currentOperation)
@@ -44,12 +44,13 @@ function Entry() {
 
   function handleSave(event: React.FormEvent<HTMLButtonElement>) {
     event.preventDefault();
-    workflowOperations.setProperties(properties);
+    workflowOperations?.setProperties(properties);
   }
+
 
   useEffect(() => {
     const ssc = new SampleTypeSearchCriteria();
-    ssc.withCode().thatEquals(workflowOperations.currentOperation.objectType);
+    ssc.withCode().thatEquals(workflowOperations?.currentOperation?.objectType);
     const sfo = new SampleTypeFetchOptions();
     sfo.withPropertyAssignments().withPropertyType();
     if (loggedIn) {
@@ -60,15 +61,15 @@ function Entry() {
         }
       });
     }
-  }, [workflowOperations.currentOperation.objectType, loggedIn]);
+  }, []);
 
   // Render input fields and entity settings
   const ui = useMemo( () => { return (
     <div>
       <div>
         This step will create a new sample of type{" "}
-        {workflowOperations.currentOperation.objectType} in collection{" "}
-        {workflowOperations.currentOperation.collectionIdentifier}
+        {workflowOperations?.currentOperation?.objectType} in collection{" "}
+        {workflowOperations?.currentOperation?.collectionIdentifier}
       </div>
       {entityAvailable ? (
         <OpenBisEntry objectType={entity} onEntry={handleEntry} />

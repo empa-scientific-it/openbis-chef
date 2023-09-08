@@ -14,10 +14,10 @@ import Workflow from "@src/metagraph/components/Workflow";
 import { Metagraph } from "@src/metagraph/metagraph";
 import { useContext } from "react";
 import Demo from "./Demo";
-import { polyproWorkflow } from "./PolyproWorkflow";
-import { pizzaWorkflow } from "./PizzaWorkflow";
+import { polyproWorkflow } from "./workflows/PolyproWorkflow";
+import { pizzaWorkflow } from "./workflows/PizzaWorkflow";
 import SampleGraphDemo from "./SampleGraphDemo";
-
+import { simpleWorkflow } from "./workflows/SimpleWorkflow";
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   const { loggedIn } = useContext(AuthContext);
@@ -34,10 +34,7 @@ function RequireAuth({ children }: { children: JSX.Element }) {
   }
 }
 
-const workflows = [
-  polyproWorkflow, 
-  pizzaWorkflow
-];
+const workflows = [polyproWorkflow, pizzaWorkflow, simpleWorkflow];
 
 const App: React.FC = () => {
   const openbisContext = useLogin();
@@ -57,8 +54,8 @@ const App: React.FC = () => {
                 </RequireAuth>
               }
             />
-            <Route path="demo" element={<Demo metagraph={pizzaWorkflow}/>}/>
-            <Route path="sampledemo" element={<SampleGraphDemo/>}/>
+            <Route path="demo" element={<Demo metagraph={pizzaWorkflow} />} />
+            <Route path="sampledemo" element={<SampleGraphDemo />} />
           </Routes>
         </AuthContext.Provider>
       </Router>

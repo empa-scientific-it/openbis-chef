@@ -53,12 +53,11 @@ export interface VisualisationNode {
   };
 }
 
-
 // export interface ValidationFailure {
 //   type: "duplicateId" | "invalidDependency" | "circularDependency";
 // }
 
-export interface CircularDependencyFailure  {
+export interface CircularDependencyFailure {
   type: "circularDependency";
   node: string;
   circularDependency: string[];
@@ -83,33 +82,31 @@ export interface ValidationResult {
   failures: ValidationFailure[];
 }
 
-
 function checkUniqueIds(nodes: MetagraphNode[]): DuplicateId[] {
   const ids = nodes.map((node) => node.id);
   const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
-  return duplicates.map((id) => ({id: id, type: "duplicateId", node: id}));
+  return duplicates.map((id) => ({ id: id, type: "duplicateId", node: id }));
 }
 
 function checkValidDependencies(nodes: MetagraphNode[]): ValidationFailure[] {
   return nodes.flatMap((node) => {
     return node.dependencies.flatMap((depId) => {
       if (!nodes.some((n) => n.id === depId)) {
-        return [{type: "invalidDependency", dependency: depId, node: node.id}];
+        return [{ type: "invalidDependency", dependency: depId, node: node.id }];
       }
     });
   });
 }
 
-
 function formatFailure(failure: ValidationFailure): string {
-    switch (failure.type) {
-      case "circularDependency":
-        return `Circular dependency: ${failure.circularDependency.join(" -> ")}`;
-      case "duplicateId":
-        return `Duplicate id: ${failure.id} in node: ${failure.node}`;
-      case "invalidDependency":
-        return `Invalid dependency: ${failure.dependency} in node: ${failure.node}`;
-    }
+  switch (failure.type) {
+    case "circularDependency":
+      return `Circular dependency: ${failure.circularDependency.join(" -> ")}`;
+    case "duplicateId":
+      return `Duplicate id: ${failure.id} in node: ${failure.node}`;
+    case "invalidDependency":
+      return `Invalid dependency: ${failure.dependency} in node: ${failure.node}`;
+  }
 }
 
 export class Metagraph {
@@ -145,10 +142,14 @@ export class Metagraph {
       // Add more validation functions here
     ];
 
-    const failures = validations.flatMap((validation) => validation(this.nodes)).filter((f) => f !== undefined);
+    const failures = validations
+      .flatMap((validation) => validation(this.nodes))
+      .filter((f) => f !== undefined);
     console.log(failures);
     if (failures.length > 0) {
-      throw new Error("Metagraph validation failed: " + failures.map((f)=>formatFailure(f)).join(", "));
+      throw new Error(
+        "Metagraph validation failed: " + failures.map((f) => formatFailure(f)).join(", ")
+      );
     }
     // // Perform validations
     // if (!validations.every((validation) => validation(this.nodes))) {
@@ -247,7 +248,6 @@ export function getVisualisationNodes(
   //Place the node hierarchically
   const nodes = walkGraph(g, (node) => node);
   const edges = getEdges(g);
-
 
   //Use dagre to place the nodes hierarchically
   const graph = new dagre.graphlib.Graph();

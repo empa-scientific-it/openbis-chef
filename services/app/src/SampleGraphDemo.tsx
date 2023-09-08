@@ -89,6 +89,19 @@ function SampleGraphDemo() {
   const [getSample, setGetSample] = useState(false);
  
 
+  const onNodeClick = (event: React.MouseEvent, element: Node) => {
+   event.preventDefault()
+   console.log(element);
+    const permId = element.id;
+    console.log(permId);
+    const sc = fetchOptionsToDepth(5);
+    service.service.getSamples([new SamplePermId(permId)], sc).then((res) => {
+        console.log(res);
+        const sample = res[permId];
+        setSample(sample);
+        });
+  }
+
   useEffect(() => {
     service.login("admin", "changeit");
     createTestSample(service.service).then((res) => {
@@ -117,7 +130,7 @@ function SampleGraphDemo() {
           fontFamily: "Virgil",
         }}
       >
-        {sampleAvailable ? <ObjectGraph sample={sample} maxDepth={3}/> : null}
+        {sampleAvailable ? <ObjectGraph sample={sample} maxDepth={3} onNodeClick={onNodeClick}/> : null}
         <button onClick={() => setGetSample((oldVal) => !oldVal)}>
           Get sample
         </button>

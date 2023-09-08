@@ -12,7 +12,7 @@ export const useWorkflows = (initialWorkflows: Metagraph[]) => {
     const workflow = findWorkflow((w) => w.name === id);
     console.log("Selected workflow", workflow);
     if (workflow) {
-      setCurrentWorkflow(workflow);
+      setCurrentWorkflow(()=>workflow);
     }
   };
 

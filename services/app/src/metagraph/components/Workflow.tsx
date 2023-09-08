@@ -1,9 +1,10 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   Metagraph,
   walkGraph,
   nodeToOperation,
   MetagraphOperations,
+  MetagraphNode,
   CreateOperation,
   LinkOperation,
 } from "@src/metagraph/metagraph";
@@ -43,6 +44,8 @@ import {
 } from "@src/types/openbis";
 import { LoggerInterface, useLog } from "../useLog";
 import Log from "./Log";
+import ObjectGraph from "./ObjectGraph";
+import { fetchOptionsToDepth } from "@src/openbis/sampleGraph";
 
 type Props = {
   workflows: Metagraph[];
@@ -55,12 +58,15 @@ const Workflow = ({ workflows }: Props) => {
   const { currentWorkflow, selectWorkflow } = useWorkflows(workflows);
   // Keep track of the workflow selected
   const [workflowSelected, setWorkflowSelected] = useState(false);
+  // Keep track of the workflow completion
+  const [workflowCompleted, setWorkflowCompleted] = useState(false);
   // Create the context to store the workflow operations an pass it down to the components
   const workflowOps = useOperations([]);
   // Store the start of the workflow
   const [start, setStart] = useState(false);
   // Store the selected workflow
-  const [selected, setSelected] = useState("");
+  //Store the sample created by running the workflow
+  const [sample, setSample] = useState({} as Sample);
 
   const logger = useLog();
 
@@ -71,21 +77,24 @@ const Workflow = ({ workflows }: Props) => {
     idx: nodeIndex,
     finished,
     move,
-    set,
+    setList: setNodes,
     list: nodes,
-  } = useList(walkGraph(currentWorkflow, (node) => node));
+  } = useList([] as MetagraphNode[]);
 
   function handleLogout(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     logout();
   }
 
-  // Initialise one component for each graph node
-  const nodeComponents = nodes.map((node, index) => (
-    <div key={index} style={{ display: nodeIndex === index ? "block" : "none" }}>
-      <NodePage key={node.id} node={node} />{" "}
-    </div>
-  ));
+  function currentComponent(node: MetagraphNode, currentIndex: number, index: number) {
+    return (
+      <div key={index} style={{ display: currentIndex === index ? "block" : "none" }}>
+        <NodePage key={node.id} node={node} />
+      </div>
+    );
+  }
+
+  const [nodeComponents, setNodeComponents] = useState([] as JSX.Element[]);
 
   // Run workflow function
   const runWorkflow = async () => {
@@ -162,11 +171,21 @@ const Workflow = ({ workflows }: Props) => {
     });
     const linkResult = await service.executeOperations(linkOps, opts);
     linkResult.results.flatMap((it) => logger.append(it?.message));
+    const permIds = operationResults.flatMap((result) => {
+      return result.objects;
+    });
+    setWorkflowCompleted(true);
+    // Get the created objects
+    const fo = fetchOptionsToDepth(5);
+    const res1 = await service.getSamples(permIds, fo);
+    const sample = Object.values(res1)[0];
+    setSample(sample);
   };
 
   const handleNextStep = () => {
     workflowOps.nextOperation();
     next();
+    console.log(finished);
   };
 
   const handlePreviousStep = () => {
@@ -184,7 +203,7 @@ const Workflow = ({ workflows }: Props) => {
   };
 
   const handleWorkflowStart = () => {
-    if (selected === "") {
+    if (!currentWorkflow) {
       alert("Please select a workflow");
     } else {
       setStart(() => true);
@@ -193,17 +212,48 @@ const Workflow = ({ workflows }: Props) => {
   };
 
   const handleWorkflowSelection = (wf: Metagraph) => {
-    setSelected(wf.name);
     selectWorkflow(wf.name);
-    setWorkflowSelected(true);
-    workflowOps.clearOperations();
-    walkGraph(currentWorkflow, (node) => {
-      const op = nodeToOperation(node);
-      workflowOps.addOperation(op);
-    });
-    workflowOps.goToOperation(0);
-    console.log(workflowOps.operations);
+    setWorkflowSelected(() => true);
   };
+
+  const handleReset = () => {
+    setWorkflowSelected(() => false);
+    setStart(() => false);
+    setNodes([]);
+    setWorkflowSelected(() => false);
+    workflowOps.clearOperations();
+    setNodeComponents([]);
+  };
+
+  //Re-render the components when the workflow changes
+  useEffect(() => {
+    console.log(currentWorkflow);
+    if (currentWorkflow) {
+      const operations = walkGraph(currentWorkflow, (node) => {
+        return nodeToOperation(node);
+      });
+      console.log("Operations", workflowOps);
+      workflowOps.setOperations(operations);
+      workflowOps.goToOperation(0);
+
+      setNodeComponents(() =>
+        currentWorkflow.nodes.map((node, index) =>
+          currentComponent(node, nodeIndex, index)
+        )
+      );
+    }
+
+    console.log("Operations", workflowOps);
+  }, [workflowSelected]);
+
+  //Re-render the components when the node index changes
+  useEffect(() => {
+    console.log(workflowOps.operations);
+
+    setNodeComponents(() =>
+      currentWorkflow.nodes.map((node, index) => currentComponent(node, nodeIndex, index))
+    );
+  }, [nodeIndex]);
 
   const OperationInfo = (op: MetagraphOperations) => {
     const CreationInfo = (op: CreateOperation) => {
@@ -241,7 +291,6 @@ const Workflow = ({ workflows }: Props) => {
     const [submitted, setSubmitted] = useState(false);
     function handleSubmitLocal() {
       setSubmitted(() => true);
-
       handleSubmit();
     }
     return (
@@ -274,7 +323,9 @@ const Workflow = ({ workflows }: Props) => {
     handleMove,
     handlePreviousStep,
     handleNextStep,
+    handleReset,
     logger,
+    finished,
   }: {
     metagraph: Metagraph;
     handleSubmit: () => void;
@@ -283,7 +334,9 @@ const Workflow = ({ workflows }: Props) => {
     handleMove: (index: number) => void;
     handlePreviousStep: () => void;
     handleNextStep: () => void;
+    handleReset: () => void;
     logger: LoggerInterface;
+    finished: boolean;
   }) {
     return (
       <div>
@@ -291,7 +344,7 @@ const Workflow = ({ workflows }: Props) => {
         <Stepper
           handleBack={handlePreviousStep}
           handleNext={handleNextStep}
-          handleReset={() => {}}
+          handleReset={handleReset}
           handleMove={handleMove}
           currentStep={idx}
           maxSteps={metagraph.nodes.length}
@@ -309,6 +362,15 @@ const Workflow = ({ workflows }: Props) => {
     );
   }
 
+  function WorkflowResults({ sample }: { sample: Sample }) {
+    return (
+      <main>
+        <h2>Workflow results:</h2>
+        <ObjectGraph sample={sample} maxDepth={3} onNodeClick={() => {}} />
+      </main>
+    );
+  }
+
   function WorkflowSelection({
     workflows,
     onSelect,
@@ -316,10 +378,9 @@ const Workflow = ({ workflows }: Props) => {
     workflows: Metagraph[];
     onSelect: (selectedWorkflow: Metagraph) => void;
   }) {
-    const [selectedWorkflow, setSelectedWorkflow] = useState<Metagraph | null>(null);
-
+    const [selected, setSelected] = useState<string>("");
     const handleWorkflowSelect = (workflow: Metagraph) => {
-      setSelectedWorkflow(workflow);
+      setSelected(() => workflow.name);
       onSelect(workflow);
     };
 
@@ -347,10 +408,12 @@ const Workflow = ({ workflows }: Props) => {
     metagraph,
     onSelect,
     onStart,
+    disabled,
   }: {
     metagraph: Metagraph;
     onSelect: (metagraph: Metagraph) => void;
     onStart: (ev: React.MouseEvent<HTMLElement>) => void;
+    disabled: boolean;
   }) {
     return (
       <div>
@@ -367,7 +430,7 @@ const Workflow = ({ workflows }: Props) => {
           className="clickable-button"
           name="Start workflow"
           onClick={onStart}
-          disabled={!selected}
+          disabled={disabled}
         >
           Start workflow
         </button>
@@ -390,6 +453,7 @@ const Workflow = ({ workflows }: Props) => {
                 metagraph={currentWorkflow}
                 onSelect={handleWorkflowSelection}
                 onStart={handleWorkflowStart}
+                disabled={!workflowSelected}
               />
             ) : workflowSelected && start ? (
               <WorkflowPages
@@ -400,8 +464,12 @@ const Workflow = ({ workflows }: Props) => {
                 handleSubmit={handleSubmit}
                 handleNextStep={handleNextStep}
                 handlePreviousStep={handlePreviousStep}
+                handleReset={handleReset}
                 logger={logger}
+                finished={finished}
               />
+            ) : workflowCompleted ? (
+              WorkflowResults({ sample: {} })
             ) : null}
           </div>
         </div>

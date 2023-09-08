@@ -6,9 +6,12 @@ export const useList = <T>(initialData: T[]) => {
   const [elem, setElem] = useState(initialData[idx]);
   const [finished, setFinished] = useState(false);
 
-  useEffect(() => {
-    setElem(() => list[idx]);
-  }, [idx, list]);
+  const setNewList = (newList: T[]) => {
+    setList(() => newList);
+    setIdx(() => 0);
+    setElem(() => newList[0]);
+    setFinished(() => false);
+  } 
 
   const move = (newIdx: number) => {
     setIdx(() => newIdx);
@@ -87,7 +90,7 @@ export const useList = <T>(initialData: T[]) => {
     set: setElement,
     setCurrent,
     list,
-    setList,
+    setList: setNewList,
     clear,
   };
 };
