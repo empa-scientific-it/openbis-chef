@@ -53,6 +53,65 @@ export interface VisualisationNode {
   };
 }
 
+
+// export interface ValidationFailure {
+//   type: "duplicateId" | "invalidDependency" | "circularDependency";
+// }
+
+export interface CircularDependencyFailure  {
+  type: "circularDependency";
+  node: string;
+  circularDependency: string[];
+}
+
+export interface DuplicateId {
+  type: "duplicateId";
+  node: string;
+  id: string;
+}
+
+export interface InvalidDependency {
+  type: "invalidDependency";
+  node: string;
+  dependency: string;
+}
+
+type ValidationFailure = CircularDependencyFailure | DuplicateId | InvalidDependency;
+
+export interface ValidationResult {
+  valid: boolean;
+  failures: ValidationFailure[];
+}
+
+
+function checkUniqueIds(nodes: MetagraphNode[]): DuplicateId[] {
+  const ids = nodes.map((node) => node.id);
+  const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
+  return duplicates.map((id) => ({id: id, type: "duplicateId", node: id}));
+}
+
+function checkValidDependencies(nodes: MetagraphNode[]): ValidationFailure[] {
+  return nodes.flatMap((node) => {
+    return node.dependencies.flatMap((depId) => {
+      if (!nodes.some((n) => n.id === depId)) {
+        return [{type: "invalidDependency", dependency: depId, node: node.id}];
+      }
+    });
+  });
+}
+
+
+function formatFailure(failure: ValidationFailure): string {
+    switch (failure.type) {
+      case "circularDependency":
+        return `Circular dependency: ${failure.circularDependency.join(" -> ")}`;
+      case "duplicateId":
+        return `Duplicate id: ${failure.id} in node: ${failure.node}`;
+      case "invalidDependency":
+        return `Invalid dependency: ${failure.dependency} in node: ${failure.node}`;
+    }
+}
+
 export class Metagraph {
   nodes: MetagraphNode[];
   name: string;
@@ -69,13 +128,13 @@ export class Metagraph {
 
   private validateMetagraph() {
     // Define validation functions
-    const checkUniqueIds = (nodes: MetagraphNode[]) =>
-      new Set(nodes.map((node) => node.id)).size === nodes.length;
+    // const checkUniqueIds = (nodes: MetagraphNode[]) =>
+    //   new Set(nodes.map((node) => node.id)).size === nodes.length;
 
-    const checkValidDependencies = (nodes: MetagraphNode[]) =>
-      nodes.every((node) =>
-        node.dependencies.every((depId) => nodes.some((n) => n.id === depId))
-      );
+    // const checkValidDependencies = (nodes: MetagraphNode[]) =>
+    //   nodes.every((node) =>
+    //     node.dependencies.every((depId) => nodes.some((n) => n.id === depId))
+    //   );
 
     //TODO check for circular dependencies
 
@@ -86,10 +145,15 @@ export class Metagraph {
       // Add more validation functions here
     ];
 
-    // Perform validations
-    if (!validations.every((validation) => validation(this.nodes))) {
-      throw new Error("Metagraph validation failed");
+    const failures = validations.flatMap((validation) => validation(this.nodes)).filter((f) => f !== undefined);
+    console.log(failures);
+    if (failures.length > 0) {
+      throw new Error("Metagraph validation failed: " + failures.map((f)=>formatFailure(f)).join(", "));
     }
+    // // Perform validations
+    // if (!validations.every((validation) => validation(this.nodes))) {
+    //   throw new Error("Metagraph validation failed");
+    // }
   }
 }
 
