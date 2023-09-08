@@ -1,7 +1,4 @@
-import {
-  MetagraphComponentProps,
-  MetagraphNode,
-} from "@src/metagraph/metagraph";
+import { MetagraphComponentProps, MetagraphNode } from "@src/metagraph/metagraph";
 import Select from "./Select";
 import Entry from "./Entry";
 import "@src/App.css";
@@ -10,7 +7,7 @@ function selectEntryType(node: MetagraphNode) {
   if (node.type === "entry") {
     return <Entry key={node.id} node={node} />;
   } else if (node.type === "select") {
-    return <Select key={node.id}/>;
+    return <Select key={node.id} />;
   }
   // Handle other node types if needed
   return null;

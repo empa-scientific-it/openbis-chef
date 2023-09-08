@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 
 import ReactFlow, {
   addEdge,
@@ -12,6 +12,7 @@ import ReactFlow, {
   ReactFlowInstance,
 } from "reactflow";
 import "reactflow/dist/style.css";
+import "./ObjectGraph.css";
 import {
   Metagraph,
   VisualisationNode,
@@ -27,6 +28,9 @@ import {
   getGraphToDepth,
 } from "@src/openbis/sampleGraph";
 import { AuthContext } from "@src/openbis/AuthContext";
+import { useCallback } from "react";
+import { Handle, Position } from "reactflow";
+import SampleEntry from "@src/openbis/components/SampleEntry";
 
 type Props = {
   sample: typeof Sample;
@@ -34,9 +38,27 @@ type Props = {
   onNodeClick: (event: any, element: Node) => void;
 };
 
+function SampleNode({ data }: { data: { sample: typeof Sample } }) {
+  return (
+    <section className="sample-node">
+      <Handle type="target" position={Position.Top} />
+      <Handle type="source" position={Position.Bottom} />
+
+      <table>
+        <tbody>
+          <tr><td>PermID</td><td>{data.sample.permId.permId}</td></tr>
+          <tr><td>Code</td><td>{data.sample.code}</td></tr>
+          <tr><td>Identifier</td><td>{data.sample.identifier.identifier}</td></tr>
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
 function ObjectGraph({ sample, maxDepth, onNodeClick }: Props) {
   const { edges: localEdges, nodes: localNodes } = getDisplayGraph(
-    getGraphToDepth(sample, maxDepth)
+    getGraphToDepth(sample, maxDepth),
+    "sampleNode"
   );
   const [nodes, setNodes, onNodesChange] = useNodesState(localNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(localEdges);
@@ -46,20 +68,20 @@ function ObjectGraph({ sample, maxDepth, onNodeClick }: Props) {
     setInstance(reactFlowInstance);
   };
 
-//   useEffect(() => {instance.setCenter()}, [edges, nodes]);
+  const nodeTypes = useMemo(() => ({ sampleNode: SampleNode }), []);
+
   const handleNodeClick = (event: any, element: Node) => {
     onNodeClick(event, element);
-    instance.setViewport(  {
-        x: element.position.x - (element.width / 2) ,
-        y:  element.position.y - (element.height / 2),
-        zoom: 1,
-      })
-      instance.fitView();
+    instance.setViewport({
+      x: element.position.x - element.width / 2,
+      y: element.position.y - element.height / 2,
+      zoom: 1,
+    });
+    instance.fitView();
   };
 
   return (
     <main>
-      <h1>Object graph</h1>
       <section
         className="flow"
         style={{
@@ -73,6 +95,7 @@ function ObjectGraph({ sample, maxDepth, onNodeClick }: Props) {
           nodes={nodes}
           edges={edges}
           onInit={onInit}
+          nodeTypes={nodeTypes}
           onNodeClick={(event, element) => handleNodeClick(event, element)}
           attributionPosition="top-right"
           maxZoom={100}

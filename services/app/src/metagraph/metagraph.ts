@@ -124,14 +124,6 @@ export class Metagraph {
   }
 
   private validateMetagraph() {
-    // Define validation functions
-    // const checkUniqueIds = (nodes: MetagraphNode[]) =>
-    //   new Set(nodes.map((node) => node.id)).size === nodes.length;
-
-    // const checkValidDependencies = (nodes: MetagraphNode[]) =>
-    //   nodes.every((node) =>
-    //     node.dependencies.every((depId) => nodes.some((n) => n.id === depId))
-    //   );
 
     //TODO check for circular dependencies
 
@@ -151,10 +143,7 @@ export class Metagraph {
         "Metagraph validation failed: " + failures.map((f) => formatFailure(f)).join(", ")
       );
     }
-    // // Perform validations
-    // if (!validations.every((validation) => validation(this.nodes))) {
-    //   throw new Error("Metagraph validation failed");
-    // }
+
   }
 }
 

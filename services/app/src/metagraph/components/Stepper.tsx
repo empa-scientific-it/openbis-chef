@@ -7,8 +7,10 @@ type Props = {
   handleBack: () => void;
   handleReset: () => void;
   handleMove: (index: number) => void;
+  handleSubmit: () => void;
   currentStep: number;
   maxSteps: number;
+
 };
 
 export function Stepper({
@@ -18,17 +20,19 @@ export function Stepper({
   currentStep,
   maxSteps,
   handleMove,
+  handleSubmit,
 }: Props): JSX.Element {
   const [localStep, setLocalStep] = useState(currentStep);
 
   const handleNextStep = () => {
-    handleNext();
     setLocalStep((prev) => prev + 1);
+    handleNext();
   };
 
   const handlePreviousStep = () => {
-    handleBack();
     setLocalStep((prev) => prev - 1);
+
+    handleBack();
   };
 
   const handleLocalMove = (index: number) => {
@@ -58,6 +62,9 @@ export function Stepper({
       <button className="clickable-button stepper-button" onClick={handleReset}>
         Reset
       </button>
+      <button className="clickable-button submit-button" onClick={handleSubmit} disabled={localStep < maxSteps}>
+          Submit
+        </button>
 
       <div className="step-indicators-container">
         {Array.from({ length: maxSteps + 1 }, (value, index) => index).map((index) => (
