@@ -6,7 +6,7 @@ const Log = ({ entries }: { entries: LogEntry[] }) => {
   const cleanEntries = entries?.filter((entry) => entry?.message !== undefined);
   return (
     <div className="table-container">
-      <table className="log">
+      <table>
         <thead>
           <tr>
             <td>Timestamp</td>

@@ -2,7 +2,6 @@ import React, { useContext, useState } from "react";
 import { SampleType, DataType, Sample, PropertyType } from "@src/types/openbis";
 import "./EntryForm.css";
 import { mapDataTypeToInputType } from "@src/openbis/typeMappers";
-import { OperationContext } from "@src/metagraph/OperationContext";
 
 export interface ObjectEntry {
   type: SampleType;
@@ -38,22 +37,28 @@ function OpenBisEntry({ objectType, properties, onEntry }: Props) {
     };
   }
 
-
-
   return (
     <div>
       <form className="form-container">
-        {objectEntry.propertyAssignments.map((el) => {
+        {objectEntry.propertyAssignments.map((el, index) => {
           return (
-            <label className="form-label" key={el.propertyType.label}>
-              {el.propertyType.label}
+            <div key={index}>
+              <label
+                htmlFor="openbis-entry-input"
+                className="form-label"
+                key={el.propertyType.label}
+              >
+                {el.propertyType.label}  
+              </label>
               <input
+                id="openbis-entry-input"
                 className="form-input"
                 type={mapDataTypeToInputType(el.propertyType.dataType)}
                 onInput={handleInput(el.propertyType.code)}
                 value={properties[el.propertyType.code]}
               />
-            </label>
+              <br/>
+            </div>
           );
         })}
       </form>

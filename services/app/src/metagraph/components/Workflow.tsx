@@ -67,7 +67,8 @@ const Workflow = ({ workflows }: Props) => {
   // Store the start of the workflow
   const [start, setStart] = useState(false);
   // Store the selected workflow
-  //Store the sample created by running the workflow
+  const [selected, setSelected] = useState<string>("");
+  // Store the sample created by running the workflow
   const [sample, setSample] = useState<Sample | null>(null as Sample);
 
   const logger = useLog();
@@ -223,13 +224,14 @@ const Workflow = ({ workflows }: Props) => {
 
   const handleWorkflowSelection = (wf: Metagraph) => {
     selectWorkflow(wf.name);
+    setSelected(wf.name);
     setWorkflowSelected(() => true);
   };
 
   const handleReset = () => {
-    setWorkflowSelected(() => false);
     setStart(() => false);
     setWorkflowSelected(() => false);
+    setSelected("");
     workflowOps.clearOperations();
     setNodeComponents([]);
     setWorkflowCompleted(() => false);
@@ -255,51 +257,53 @@ const Workflow = ({ workflows }: Props) => {
     const CreationInfo = (op: CreateOperation) => {
       return (
         <ul>
-          <li>Operation type: {op.type}</li>
-          <li>Collection: {op.collectionIdentifier}</li>
-          <li>Object type: {op.objectType}</li>
+          <li><u>Operation type:</u> {op.type}</li>
+          <li><u>Collection:</u> {op.collectionIdentifier}</li>
+          <li><u>Object type:</u> {op.objectType}</li>
           <li>
-            Object properties:
+            <u>Object properties:</u>
             <ul>
-              {Object.entries(op.objectProperties).map((prop) => (
-                <li>{prop}</li>
+              {Object.entries(op.objectProperties).map((prop, index) => (
+                <li key={index}>{prop}</li>
               ))}
             </ul>
           </li>
         </ul>
       );
     };
+
     const LinkInfo = (op: LinkOperation) => {
       return (
         <ul>
-          <li>Operation type: {op.type}</li>
-          <li>Collection: {op.collectionIdentifier}</li>
-          <li>selected entity: {op.objectIdentifier}</li>
+          <li><u>Operation type:</u> {op.type}</li>
+          <li><u>Collection:</u> {op.collectionIdentifier}</li>
+          <li><u>Selected entity:</u> {op.objectIdentifier}</li>
         </ul>
       );
     };
-    return <ul>{op.type === "create" ? CreationInfo(op) : LinkInfo(op)}</ul>;
+  
+    return <>{op.type === "create" ? CreationInfo(op) : LinkInfo(op)}</>;
   };
 
   const WorkflowEnd = (handleSubmit: () => void, logger: LoggerInterface) => {
     const ops = useContext(OperationContext);
     const entries = logger.logEntries();
     return (
-      <main className="operations-summary">
-        <div>
-          <h3 className="container-title">Finished workflow </h3>
-          <h4>here are the operations that will be performed</h4>
-          <ul>
+      <>
+        <h1 className="container-title">Finished workflow </h1>
+        <main>
+          <h3>Here are the operations that will be performed:</h3>
+          <div>
             {ops.operations.map((op) => (
-              <li key={op.operationId}>{OperationInfo(op)}</li>
+              <div className="operations-list" key={op.operationId}>{OperationInfo(op)}</div>
             ))}
-          </ul>
-        </div>
-        <div className="">
-          <h4>OpenBIS log</h4>
-          <Log entries={entries} />
-        </div>
-      </main>
+          </div>
+          <div className="">
+            <h3>OpenBIS log:</h3>
+            <Log entries={entries} />
+          </div>
+        </main>
+      </>
     );
   };
 
@@ -344,10 +348,12 @@ const Workflow = ({ workflows }: Props) => {
 
   function WorkflowDescription({ metagraph }: { metagraph: Metagraph }) {
     return (
-      <div className="workflow-graph">
+      <>
         {<h3>Workflow summary: {metagraph.name}</h3>}
-        <Summary metagraph={metagraph} />
-      </div>
+        <div className="workflow-graph">
+          <Summary metagraph={metagraph} />
+        </div>
+      </>
     );
   }
 
@@ -378,9 +384,8 @@ const Workflow = ({ workflows }: Props) => {
     workflows: Metagraph[];
     onSelect: (selectedWorkflow: Metagraph) => void;
   }) {
-    const [selected, setSelected] = useState<string>("");
     const handleWorkflowSelect = (workflow: Metagraph) => {
-      setSelected(() => workflow.name);
+      setSelected(workflow.name);
       onSelect(workflow);
     };
 

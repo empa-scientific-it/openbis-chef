@@ -52,19 +52,22 @@ export function Stepper({
       >
         Previous step
       </button>
-      <button
-        className="clickable-button stepper-button"
-        onClick={handleNextStep}
-        disabled={localStep >= maxSteps}
-      >
-        Next step
-      </button>
-      <button className="clickable-button stepper-button" onClick={handleReset}>
-        Reset
-      </button>
-      <button className="clickable-button submit-button" onClick={handleSubmit} disabled={localStep < maxSteps}>
+
+      {
+        localStep < maxSteps
+        ?
+        <button
+          className="clickable-button stepper-button"
+          onClick={handleNextStep}
+          disabled={localStep >= maxSteps}
+        >
+          Next step
+        </button>
+      :
+        <button className="clickable-button stepper-button submit-button" onClick={handleSubmit}>
           Submit
         </button>
+      }
 
       <div className="step-indicators-container">
         {Array.from({ length: maxSteps + 1 }, (value, index) => index).map((index) => (
@@ -78,6 +81,10 @@ export function Stepper({
           />
         ))}
       </div>
+
+      <button className="clickable-button stepper-button" onClick={handleReset}>
+        Reset
+      </button>
     </div>
   );
 }

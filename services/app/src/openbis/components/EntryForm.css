@@ -1,31 +1,24 @@
 .form-container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  margin: 35px 0 25px 0;
 }
 
 .form-label {
-  font-weight: bold;
-  margin-bottom: 5px;
+  margin-right: 10px;
+  font-weight: 600;
+  width: 15%;
+  display: inline-block;
+  text-align: right;
 }
 
 .form-input {
-  width: 100%;
+  width: 60%;
   padding: 8px;
   border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-bottom: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
 }
 
 /* Additional styles for specific input types */
 .form-input[type="checkbox"] {
   margin-bottom: 0;
-}
-
-.form-label {
-  clear: both;
-}
-
-.form-input div {
-  float: left;
 }
