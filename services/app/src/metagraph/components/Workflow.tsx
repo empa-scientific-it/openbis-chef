@@ -304,6 +304,10 @@ const Workflow = ({ workflows }: Props) => {
             <h3>OpenBIS log:</h3>
             <Log entries={entries} />
           </div>
+
+          {entryFinished && sample ? (
+            <WorkflowResults sample={sample} handleReset={handleReset} />
+          ) : null}
         </main>
       </>
     );
@@ -367,15 +371,12 @@ const Workflow = ({ workflows }: Props) => {
     handleReset: () => void;
   }) {
     return (
-      <main>
+      <div className="workflow-graph-container">
         <h2>Workflow results:</h2>
         {sample ? (
           <ObjectGraph samples={sample} maxDepth={3} onNodeClick={() => {}} />
         ) : null}
-        <button className="clickable-button" onClick={handleReset}>
-          Reset
-        </button>
-      </main>
+      </div>
     );
   }
 
@@ -479,7 +480,7 @@ const Workflow = ({ workflows }: Props) => {
                 onStart={handleWorkflowStart}
                 disabled={!workflowSelected}
               />
-            ) : workflowSelected && !entryFinished && start ? (
+            ) : workflowSelected && start ? (
               <WorkflowPages
                 elem={nodeComponents}
                 idx={nodeIndex}
@@ -492,8 +493,6 @@ const Workflow = ({ workflows }: Props) => {
                 logger={logger}
                 finished={finished}
               />
-            ) : entryFinished && sample ? (
-              <WorkflowResults sample={sample} handleReset={handleReset} />
             ) : null}
           </div>
         </div>

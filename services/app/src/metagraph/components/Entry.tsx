@@ -17,6 +17,7 @@ import {
 } from "@src/openbis/dto";
 import { OperationContext } from "../OperationContext";
 import { OpenBIS } from "@src/types/openbis";
+import "./Select.css"
 
 function Entry() {
   const { loggedIn, service } = useContext(AuthContext);
@@ -70,22 +71,20 @@ function Entry() {
   // Render input fields and entity settings
   const ui = useMemo(() => {
     return (
-      <div>
-        <main>
+      <div className="selection-form">
         <p>
-            This step will create a new sample of type{" "}
-            {workflowOperations?.currentOperation?.objectType} in collection{" "}
-            {workflowOperations?.currentOperation?.collectionIdentifier}
-          </p>
-          {entityAvailable ? (
-            <OpenBisEntry
-              properties={properties}
-              objectType={entity}
-              onEntry={handleEntry}
-            />
-          ) : null}
-          <button className="clickable-button" onClick={handleSave}>Save</button>
-        </main>
+          This step will create a new sample of type{" "}
+          {workflowOperations?.currentOperation?.objectType} in collection{" "}
+          {workflowOperations?.currentOperation?.collectionIdentifier}
+        </p>
+        {entityAvailable ? (
+          <OpenBisEntry
+            properties={properties}
+            objectType={entity}
+            onEntry={handleEntry}
+          />
+        ) : null}
+        <button className="clickable-button" onClick={handleSave}>Save</button>
       </div>
     );
   }, [entity, properties]);
