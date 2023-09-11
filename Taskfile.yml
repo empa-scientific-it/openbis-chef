@@ -81,3 +81,11 @@ tasks:
         - java -jar ./utils/instance-io.jar dump  ./schemas/schema_402_local.json https://localhost:${OPENBIS_PORT} admin {{.OPENBIS_PASSWORD}}
       status:
         - test ./schemas/schema_402_local.json
+  serve:
+      deps:
+        - import_schema
+        - start_openbis
+      dir: ./services/app
+      cmds:
+        - docker build -t app .
+        - docker run -p 8080:8080 app 
