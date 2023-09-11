@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "vite-dev": "vite dev",
+    "vite-dev": "vite dev --host",
     "tscheck": "tsc -p ./ --noEmit",
     "generate-names": "npx tsx ./generate_names.ts",
     "test": "vitest",
