@@ -11,6 +11,7 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import "./Demo.css";
+import "./App.css";
 import {
   Metagraph,
   VisualisationNode,
@@ -116,15 +117,14 @@ function Demo({ metagraph }: Props) {
   }
 
   return (
-    <main>
+    <div className="demo-container">
       <h1>Workflow graph</h1>
       <section
-        className="flow"
         style={{
-          width: "500px",
-          height: "500px",
+          width: "99%",
+          height: "600px",
           overflow: "auto",
-          fontFamily: "Virgil",
+          fontFamily: "sans-serif",
         }}
       >
         <ReactFlow
@@ -137,12 +137,17 @@ function Demo({ metagraph }: Props) {
           fitView
         ></ReactFlow>
       </section>
-      <section>
-        <h2>Visited nodes</h2>
-        <ul>{visitedElements.list}</ul>
-      </section>
-      <button onClick={handleWalk}>Walk</button>
-    </main>
+
+      <button className="clickable-button" onClick={handleWalk}>Walk</button>
+
+      {
+        visitedElements.list.length > 0 && 
+          <section>
+            <h3>Visited nodes</h3>
+            <ul>{visitedElements.list}</ul>
+          </section>
+      }
+    </div>
   );
 }
 

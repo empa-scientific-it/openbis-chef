@@ -114,12 +114,10 @@ function ObjectGraph({ samples, maxDepth, onNodeClick }: Props) {
   return (
     <main>
       <section
-        className="flow"
         style={{
-          width: "500px",
-          height: "500px",
-          overflow: "auto",
-          fontFamily: "Virgil",
+          width: "99%",
+          height: "600px",
+          overflow: "auto"
         }}
       >
         <ReactFlow

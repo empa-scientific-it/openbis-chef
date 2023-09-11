@@ -13,6 +13,7 @@ import {
 } from "@src/openbis/dto";
 import { MetagraphComponentProps } from "@src/metagraph/metagraph";
 import SampleEntry from "@src/openbis/components/SampleEntry";
+import "./Select.css";
 
 const SampleSelector = ({
   samples,
@@ -27,11 +28,11 @@ const SampleSelector = ({
   }
   const [selectedValue, setSelectedValue] = useState("");
   return (
-    <form>
+    <form className="selection-form">
       {/* <div>Experiment: {experiment.identifier.identifier}</div> */}
       <label htmlFor="select-sample">Select sample:</label>
       {samples !== undefined ? (
-        <select id="select-sample" value={selectedValue} onChange={localOnSelect}>
+        <select id="select-sample" className="select-dropdown" value={selectedValue} onChange={localOnSelect}>
           {samples?.map((sample) => (
             <option
               key={sample.identifier.identifier}
@@ -101,7 +102,7 @@ const Select = () => {
     <div>
       <main>
         {ui}
-        <h3>Selected sample</h3>
+        {/* <h3>Selected sample</h3> */}
         <h3>{currentSample?.identifier?.identifier}</h3>
         {currentSample !== null ? <SampleEntry sample={currentSample} /> : null}
       </main>

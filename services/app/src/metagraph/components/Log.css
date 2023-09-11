@@ -1,29 +1,28 @@
-
-
 /* Apply styling to the container */
 .table-container {
-    max-height: 10%; /* Set a maximum height for the container */
-    overflow: scroll; /* Enable vertical scrolling */
-  }
+  max-height: 10%; /* Set a maximum height for the container */
+  overflow: scroll; /* Enable vertical scrolling */
+  margin-top: 10px;
+}
   
-  /* Style your table as needed */
-  table {
-    width: 30%; /* Make the table take the full width of the container */
-    border-collapse: collapse; /* Optional: Remove spacing between table cells */
-    border: 1px solid #ddd; /* Optional: Add a grey border */
-  }
+/* Style your table as needed */
+table {
+  width: 100%; /* Make the table take the full width of the container */
+  border-collapse: collapse; /* Optional: Remove spacing between table cells */
+  border: 1px solid #ddd; /* Optional: Add a grey border */
+}
 
 
 thead, tbody { display: block; }
 
 tbody {
-    height: 400px;       /* Just for the demo          */
-    overflow-y: auto;    /* Trigger vertical scroll    */
-    overflow-x: hidden;  /* Hide the horizontal scroll */
+  height: 400px;       /* Just for the demo          */
+  overflow-y: auto;    /* Trigger vertical scroll    */
+  overflow-x: hidden;  /* Hide the horizontal scroll */
 }
-  
-  th, td {
-    border: 1px solid #ddd; /* Optional: Add borders to table cells */
-    padding: 8px; /* Optional: Add padding to table cells */
-    text-align: left; /* Optional: Align text as needed */
-  }
+
+th, td {
+  border: 1px solid #ddd; /* Optional: Add borders to table cells */
+  padding: 8px; /* Optional: Add padding to table cells */
+  text-align: left; /* Optional: Align text as needed */
+}
