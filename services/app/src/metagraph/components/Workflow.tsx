@@ -69,7 +69,7 @@ const Workflow = ({ workflows }: Props) => {
   // Store the selected workflow
   const [selected, setSelected] = useState<string>("");
   // Store the sample created by running the workflow
-  const [sample, setSample] = useState<Sample | null>(null as Sample);
+  const [sample, setSample] = useState<Sample[] | null>(null as Sample[]);
 
   const logger = useLog();
 
@@ -178,9 +178,11 @@ const Workflow = ({ workflows }: Props) => {
     });
     setWorkflowCompleted(() => true);
     // Get the created objects
-    const fo = fetchOptionsToDepth(5);
+    const bo = new SampleFetchOptions()
+    bo.withProperties()
+    const fo = fetchOptionsToDepth(5, bo);
     const res1 = await service.getSamples(permIds, fo);
-    const sample = Object.values(res1)[0];
+    const sample = Object.values(res1);
     setSample(sample);
   };
 
@@ -368,7 +370,7 @@ const Workflow = ({ workflows }: Props) => {
       <main>
         <h2>Workflow results:</h2>
         {sample ? (
-          <ObjectGraph sample={sample} maxDepth={3} onNodeClick={() => {}} />
+          <ObjectGraph samples={sample} maxDepth={3} onNodeClick={() => {}} />
         ) : null}
         <button className="clickable-button" onClick={handleReset}>
           Reset

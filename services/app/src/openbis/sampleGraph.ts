@@ -1,7 +1,6 @@
-import { Sample, SamplePermId } from "@src/types/openbis";
+import { Sample,  SamplePermId } from "@src/types/openbis";
 import dagre from "dagre";
 import { SampleFetchOptions } from "@src/openbis/dto";
-import { M } from "vitest/dist/reporters-2ff87305.js";
 
 interface Node {
   id: string;
@@ -188,14 +187,14 @@ export function getDisplayGraph<N extends Node, E extends Edge>(
     }),
   };
 }
-export function fetchOptionsToDepth(depth: number): typeof SampleFetchOptions {
+export function fetchOptionsToDepth(depth: number, initialOptions: typeof SampleFetchOptions): typeof SampleFetchOptions {
   if (depth <= 0) {
     // Base case: Stop recursion and return an empty fetch options
-    return new SampleFetchOptions();
+    return initialOptions;
   }
 
-  const fo = new SampleFetchOptions();
-  fo.withChildrenUsing(fetchOptionsToDepth(depth - 1));
-  fo.withParentsUsing(fetchOptionsToDepth(depth - 1));
+  const fo = initialOptions;
+  fo.withChildrenUsing(fetchOptionsToDepth(depth - 1, initialOptions));
+  fo.withParentsUsing(fetchOptionsToDepth(depth - 1, initialOptions));
   return fo;
 }
