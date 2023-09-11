@@ -33,33 +33,63 @@ import { Handle, Position } from "reactflow";
 import SampleEntry from "@src/openbis/components/SampleEntry";
 
 type Props = {
-  sample: typeof Sample;
+  samples: (typeof Sample)[];
   maxDepth: number;
   onNodeClick: (event: any, element: Node) => void;
 };
 
 function SampleNode({ data }: { data: { sample: typeof Sample } }) {
+  const [isCollapsed, setIsCollapsed] = useState(true);
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
   return (
-    <section className="sample-node">
+    <section className={`sample-node${isCollapsed ? " collapsed" : ""}`}>
+      <div className="expand-collapse-toggle" onClick={toggleCollapse}>
+        {isCollapsed ? "▼" : "▲"}
+      </div>
       <Handle type="target" position={Position.Top} />
       <Handle type="source" position={Position.Bottom} />
 
-      <table>
-        <tbody>
-          <tr><td>PermID</td><td>{data.sample.permId.permId}</td></tr>
-          <tr><td>Code</td><td>{data.sample.code}</td></tr>
-          <tr><td>Identifier</td><td>{data.sample.identifier.identifier}</td></tr>
-        </tbody>
-      </table>
+      <h3>{data.sample.code}</h3>
+      {!isCollapsed && (
+        <table>
+          <tbody>
+            <tr>
+              <td>PermID</td>
+              <td>{data.sample.permId.permId}</td>
+            </tr>
+            <tr>
+              <td>Identifier</td>
+              <td>{data.sample.identifier.identifier}</td>
+            </tr>
+            {Object.entries(data?.sample?.properties ?? {}).map(([name, value]) => {
+              return (
+                <tr key={name}>
+                  <td>{name}</td>
+                  <td>{value}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
     </section>
   );
 }
 
-function ObjectGraph({ sample, maxDepth, onNodeClick }: Props) {
-  const { edges: localEdges, nodes: localNodes } = getDisplayGraph(
-    getGraphToDepth(sample, maxDepth),
-    "sampleNode"
+function ObjectGraph({ samples, maxDepth, onNodeClick }: Props) {
+  const res = samples.flatMap((sample) =>
+    getDisplayGraph(getGraphToDepth(sample, maxDepth), "sampleNode", {
+      width: 200,
+      height: 200,
+    })
   );
+
+  const localNodes = [...new Set(res.flatMap((el) => el.nodes))];
+  const localEdges = [...new Set(res.flatMap((el) => el.edges))];
   const [nodes, setNodes, onNodesChange] = useNodesState(localNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(localEdges);
   const [instance, setInstance] = useState<ReactFlowInstance | null>(null);
@@ -75,8 +105,9 @@ function ObjectGraph({ sample, maxDepth, onNodeClick }: Props) {
     instance.setViewport({
       x: element.position.x - element.width / 2,
       y: element.position.y - element.height / 2,
-      zoom: 1,
+      zoom: instance?.getViewport().zoom ?? 1,
     });
+
     instance.fitView();
   };
 

@@ -3,9 +3,15 @@
     padding: 5px;
     border-radius: 5px;
     background: white;
-    height: 100px;
+    display: block;
   }
   
+
+  .sample-node > .collapsed {
+
+    display: none;
+  }
+
   .sample-node label {
     display: block;
     color: #777;

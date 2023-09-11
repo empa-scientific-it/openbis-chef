@@ -33,23 +33,22 @@ import {
   SpacePermId,
   SampleUpdate,
   SynchronousOperationExecutionOptions,
+  SampleFetchOptions,
+  UpdateSamplesOperation,
 } from "./openbis/dto";
 import { Facade } from "./openbis/api";
-import { UpdateSamplesOperation } from "v3api/V3API.esm";
-import {
-  getDirectGraph,
-  getDisplayGraph,
-  getGraphToDepth,
-} from "./openbis/sampleGraph";
+
+import { getDirectGraph, getDisplayGraph, getGraphToDepth } from "./openbis/sampleGraph";
 import { fetchOptionsToDepth } from "./openbis/sampleGraph";
 import ObjectGraph from "./metagraph/components/ObjectGraph";
 
 function newSample() {
   const s1 = new SampleCreation();
-  s1.typeId = new EntityTypePermId("ENTRY");
+  s1.typeId = new EntityTypePermId("PRODUCT");
   s1.projectId = new ProjectIdentifier("/DEFAULT/DEFAULT");
   s1.experimentId = new ExperimentIdentifier("/DEFAULT/DEFAULT/DEFAULT");
   s1.spaceId = new SpacePermId("DEFAULT");
+  s1.properties = { $NAME: crypto.randomUUID() };
   return s1;
 }
 
@@ -76,7 +75,9 @@ async function createTestSample(service: Facade): Promise<(typeof Sample)[]> {
     new UpdateSamplesOperation(ops),
     options
   );
-  const fo = fetchOptionsToDepth(5);
+  const bo = new SampleFetchOptions();
+  bo.withProperties();
+  const fo = fetchOptionsToDepth(5, bo);
   const res = await service.getSamples(permIds, fo);
   return Object.values(res);
 }
@@ -87,20 +88,21 @@ function SampleGraphDemo() {
   const [allSamples, setAllSamples] = useState<(typeof Sample)[]>([]);
   const [sampleAvailable, setSampleAvailable] = useState(false);
   const [getSample, setGetSample] = useState(false);
- 
 
   const onNodeClick = (event: React.MouseEvent, element: Node) => {
-   event.preventDefault()
-   console.log(element);
+    event.preventDefault();
+    console.log(element);
     const permId = element.id;
     console.log(permId);
-    const sc = fetchOptionsToDepth(5);
+    const bo = new SampleFetchOptions();
+    bo.withProperties();
+    const sc = fetchOptionsToDepth(5, bo);
     service.service.getSamples([new SamplePermId(permId)], sc).then((res) => {
-        console.log(res);
-        const sample = res[permId];
-        setSample(sample);
-        });
-  }
+      console.log(res);
+      const sample = res[permId];
+      setSample(sample);
+    });
+  };
 
   useEffect(() => {
     service.login("admin", "changeit");
@@ -111,7 +113,6 @@ function SampleGraphDemo() {
       console.log(res);
     });
   }, [getSample]);
-
 
   useEffect(() => {
     service.login("admin", "changeit");
@@ -130,10 +131,10 @@ function SampleGraphDemo() {
           fontFamily: "Virgil",
         }}
       >
-        {sampleAvailable ? <ObjectGraph sample={sample} maxDepth={3} onNodeClick={onNodeClick}/> : null}
-        <button onClick={() => setGetSample((oldVal) => !oldVal)}>
-          Get sample
-        </button>
+        {sampleAvailable ? (
+          <ObjectGraph samples={[sample]} maxDepth={3} onNodeClick={onNodeClick} />
+        ) : null}
+        <button onClick={() => setGetSample((oldVal) => !oldVal)}>Get sample</button>
       </section>
     </main>
   );
