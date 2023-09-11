@@ -99,11 +99,12 @@ const Select = () => {
 
   return (
     <div>
-      <h3>Select an existing object</h3>
-      {ui}
-      <h3>Selected sample</h3>
-      <h3>{currentSample?.identifier?.identifier}</h3>
-      {currentSample !== null ? <SampleEntry sample={currentSample} /> : null}
+      <main>
+        {ui}
+        <h3>Selected sample</h3>
+        <h3>{currentSample?.identifier?.identifier}</h3>
+        {currentSample !== null ? <SampleEntry sample={currentSample} /> : null}
+      </main>
     </div>
   );
 };

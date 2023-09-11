@@ -10,6 +10,7 @@
   table {
     width: 30%; /* Make the table take the full width of the container */
     border-collapse: collapse; /* Optional: Remove spacing between table cells */
+    border: 1px solid #ddd; /* Optional: Add a grey border */
   }
 
 

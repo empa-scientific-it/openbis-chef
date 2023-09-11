@@ -68,11 +68,9 @@ const Workflow = ({ workflows }: Props) => {
   const [start, setStart] = useState(false);
   // Store the selected workflow
   //Store the sample created by running the workflow
-  const [sample, setSample] = useState<Sample|null>(null as Sample);
+  const [sample, setSample] = useState<Sample | null>(null as Sample);
 
   const logger = useLog();
-
-  
 
   function handleLogout(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -209,10 +207,10 @@ const Workflow = ({ workflows }: Props) => {
   };
 
   useEffect(() => {
-    if(completedEntries.size === currentWorkflow.nodes.length) {
+    if (completedEntries.size === currentWorkflow.nodes.length) {
       setEntryFinished(() => true);
     }
-  }, [completedEntries])
+  }, [completedEntries]);
 
   const handleWorkflowStart = () => {
     if (!currentWorkflow) {
@@ -261,7 +259,7 @@ const Workflow = ({ workflows }: Props) => {
           <li>Collection: {op.collectionIdentifier}</li>
           <li>Object type: {op.objectType}</li>
           <li>
-            Object properties:{" "}
+            Object properties:
             <ul>
               {Object.entries(op.objectProperties).map((prop) => (
                 <li>{prop}</li>
@@ -287,20 +285,21 @@ const Workflow = ({ workflows }: Props) => {
     const ops = useContext(OperationContext);
     const entries = logger.logEntries();
     return (
-      <div className="operations-summary">
+      <main className="operations-summary">
         <div>
-          <h3 className="container-title">
-            Finished workflow, here are the current steps
-          </h3>
+          <h3 className="container-title">Finished workflow </h3>
+          <h4>here are the operations that will be performed</h4>
           <ul>
             {ops.operations.map((op) => (
-              <li>{OperationInfo(op)}</li>
+              <li key={op.operationId}>{OperationInfo(op)}</li>
             ))}
           </ul>
         </div>
-        <h3>Log</h3>
-        <Log entries={entries} />
-      </div>
+        <div className="">
+          <h4>OpenBIS log</h4>
+          <Log entries={entries} />
+        </div>
+      </main>
     );
   };
 
@@ -362,8 +361,12 @@ const Workflow = ({ workflows }: Props) => {
     return (
       <main>
         <h2>Workflow results:</h2>
-        {sample ?  <ObjectGraph  sample={sample} maxDepth={3} onNodeClick={() => {}} /> : null}
-        <button className="clickable-button" onClick={handleReset}>Reset</button>
+        {sample ? (
+          <ObjectGraph sample={sample} maxDepth={3} onNodeClick={() => {}} />
+        ) : null}
+        <button className="clickable-button" onClick={handleReset}>
+          Reset
+        </button>
       </main>
     );
   }
@@ -381,11 +384,13 @@ const Workflow = ({ workflows }: Props) => {
       onSelect(workflow);
     };
 
+    const [showNewWorkflow, setShowNewWorkflow] = useState(false);
+
     return (
       <div>
-        <h2>Available workflows:</h2>
+        <h3>Available workflows:</h3>
         {workflows.map((workflow) => (
-          <div
+          <button
             key={workflow.name}
             id={workflow.name}
             onClick={() => handleWorkflowSelect(workflow)}
@@ -395,10 +400,25 @@ const Workflow = ({ workflows }: Props) => {
             }
           >
             {workflow.name}
-          </div>
+          </button>
         ))}
+        <button
+          className="workflow-selection-item"
+          onClick={(event)=>setShowNewWorkflow(() => true)}
+        >
+          Add workflow
+        </button>
       </div>
     );
+  }
+
+
+  function WorkflowCreation(){
+    return (
+      <div>
+        <h3>Workflow creation</h3>
+      </div>
+    )
   }
 
   function WorkflowEntry({

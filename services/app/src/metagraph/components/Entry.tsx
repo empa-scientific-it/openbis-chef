@@ -26,20 +26,25 @@ function Entry() {
 
   const [properties, setProperties] = useState<{ [key: string]: string }>({});
 
-  // useEffect(() => {
-  //   console.log("Entry", workflowOperations.currentOperation)
-  //   setProperties(workflowOperations.currentOperation?.objectProperties)});
+  useEffect(() => {
+    console.log("Entry", workflowOperations.currentOperation);
+    if (workflowOperations.currentOperation.type == "create") {
+      setProperties(() => workflowOperations.currentOperation?.objectProperties);
+    }
+  }, []);
 
   function handleEntry(objectEntry: ObjectEntry) {
     console.log("handleEntry", objectEntry);
-    setProperties(objectEntry.properties);
-    
+    setProperties((currentProperties) => {
+      return { ...currentProperties, ...objectEntry.properties };
+    });
+    console.log("properties", properties);
     const newEntity = {
       ...entity,
       properties: objectEntry.properties,
-        }
-      setEntity(newEntity);
-      console.log(newEntity)
+    };
+    setEntity(newEntity);
+    console.log(newEntity);
   }
 
   function handleSave(event: React.FormEvent<HTMLButtonElement>) {
@@ -47,8 +52,7 @@ function Entry() {
     workflowOperations?.setProperties(properties);
   }
 
-
-  useEffect(() => {
+  useMemo(() => {
     const ssc = new SampleTypeSearchCriteria();
     ssc.withCode().thatEquals(workflowOperations?.currentOperation?.objectType);
     const sfo = new SampleTypeFetchOptions();
@@ -61,27 +65,31 @@ function Entry() {
         }
       });
     }
-  }, []);
+  }, [workflowOperations?.currentOperation?.objectType]);
 
   // Render input fields and entity settings
-  const ui = useMemo( () => { return (
-    <div>
+  const ui = useMemo(() => {
+    return (
       <div>
-        This step will create a new sample of type{" "}
-        {workflowOperations?.currentOperation?.objectType} in collection{" "}
-        {workflowOperations?.currentOperation?.collectionIdentifier}
+        <main>
+        <p>
+            This step will create a new sample of type{" "}
+            {workflowOperations?.currentOperation?.objectType} in collection{" "}
+            {workflowOperations?.currentOperation?.collectionIdentifier}
+          </p>
+          {entityAvailable ? (
+            <OpenBisEntry
+              properties={properties}
+              objectType={entity}
+              onEntry={handleEntry}
+            />
+          ) : null}
+          <button className="clickable-button" onClick={handleSave}>Save</button>
+        </main>
       </div>
-      {entityAvailable ? (
-        <OpenBisEntry objectType={entity} onEntry={handleEntry} />
-      ) : null}
-      <button onClick={handleSave}>Save</button>
-    </div>
-  );}, [entity]);
+    );
+  }, [entity, properties]);
   return ui;
 }
 
 export default Entry;
-
-
-
-

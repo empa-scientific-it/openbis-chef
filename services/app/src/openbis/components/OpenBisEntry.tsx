@@ -12,13 +12,14 @@ export interface ObjectEntry {
 type Props = {
   objectType: SampleType;
   onEntry: (objectEntry: ObjectEntry) => void;
+  properties: { [key: string]: string };
 };
 
-function OpenBisEntry({ objectType, onEntry }: Props) {
+function OpenBisEntry({ objectType, properties, onEntry }: Props) {
   // const workflowOperations = useContext(OperationContext);
   // const [currentObject, setCurrentObject] = useState(workflowOperations.currentOperation.originObject);
   const [objectEntry, setObjectEntry] = useState(objectType);
-  const [properties, setProperties] = useState<{ [key: string]: string }>({});
+  // const [properties, setProperties] = useState<{ [key: string]: string }>({});
 
   function handleInput(propertyCode: string) {
     return (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,7 +32,7 @@ function OpenBisEntry({ objectType, onEntry }: Props) {
           type: objectType,
           properties: { ...properties, [propertyCode]: value },
         } as ObjectEntry;
-        setProperties(newObjectEntry.properties);
+        // setProperties(newObjectEntry.properties);
         onEntry(newObjectEntry);
       }
     };
@@ -50,6 +51,7 @@ function OpenBisEntry({ objectType, onEntry }: Props) {
                 className="form-input"
                 type={mapDataTypeToInputType(el.propertyType.dataType)}
                 onInput={handleInput(el.propertyType.code)}
+                value={properties[el.propertyType.code]}
               />
             </label>
           );
