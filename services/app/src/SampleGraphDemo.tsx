@@ -42,6 +42,9 @@ import { getDirectGraph, getDisplayGraph, getGraphToDepth } from "./openbis/samp
 import { fetchOptionsToDepth } from "./openbis/sampleGraph";
 import ObjectGraph from "./metagraph/components/ObjectGraph";
 
+import "./App.css";
+import "./Demo.css";
+
 function newSample() {
   const s1 = new SampleCreation();
   s1.typeId = new EntityTypePermId("PRODUCT");
@@ -120,23 +123,23 @@ function SampleGraphDemo() {
   }, []);
 
   return (
-    <main>
+    <div className="demo-container">
       <h1>Workflow graph</h1>
       <section
         className="flow"
         style={{
-          width: "500px",
-          height: "500px",
+          width: "99%",
+          height: "600px",
           overflow: "auto",
-          fontFamily: "Virgil",
+          fontFamily: "sans-serif",
         }}
       >
         {sampleAvailable ? (
           <ObjectGraph samples={[sample]} maxDepth={3} onNodeClick={onNodeClick} />
         ) : null}
-        <button onClick={() => setGetSample((oldVal) => !oldVal)}>Get sample</button>
+        <button className="clickable-button" onClick={() => setGetSample((oldVal) => !oldVal)}>Get sample</button>
       </section>
-    </main>
+    </div>
   );
 }
 

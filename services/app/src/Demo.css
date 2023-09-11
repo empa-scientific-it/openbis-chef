@@ -1,13 +1,15 @@
-main {
+.demo-container {
+    background: white;
+    max-height: 80%;
     border-radius: 10px;
     border: 1px solid #ccc;
     max-width: 80%;
-    margin: 0 auto;
+    margin: 5% auto;
     padding: 20px;
     text-align: center;
 }
 
-main > section {
+.demo-container section {
     flex: 1;
     text-align: left;
 }

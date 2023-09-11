@@ -300,7 +300,7 @@ const Workflow = ({ workflows }: Props) => {
               <div className="operations-list" key={op.operationId}>{OperationInfo(op)}</div>
             ))}
           </div>
-          <div className="">
+          <div className="operations-log">
             <h3>OpenBIS log:</h3>
             <Log entries={entries} />
           </div>

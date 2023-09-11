@@ -2,6 +2,7 @@
 .table-container {
   max-height: 10%; /* Set a maximum height for the container */
   overflow: scroll; /* Enable vertical scrolling */
+  margin-top: 10px;
 }
   
 /* Style your table as needed */
