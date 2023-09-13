@@ -1,0 +1,86 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "EntryNode": {
+            "properties": {
+                "collection": {
+                    "type": "string"
+                },
+                "dependencies": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "entityType": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "type": {
+                    "const": "entry",
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "MetagraphNode": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/EntryNode"
+                },
+                {
+                    "$ref": "#/definitions/SelectNode"
+                }
+            ]
+        },
+        "SelectNode": {
+            "properties": {
+                "collection": {
+                    "type": "string"
+                },
+                "dependencies": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "entityType": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "type": {
+                    "const": "select",
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "description": "Represents a metagraph that describes the workflow steps.\nA metagraph is a graph structure that outlines the sequence of steps\nrequired to create an object graph when executed.",
+    "properties": {
+        "description": {
+            "type": "string"
+        },
+        "name": {
+            "type": "string"
+        },
+        "nodes": {
+            "items": {
+                "$ref": "#/definitions/MetagraphNode"
+            },
+            "type": "array"
+        }
+    },
+    "type": "object"
+}
+

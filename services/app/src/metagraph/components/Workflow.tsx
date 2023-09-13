@@ -46,6 +46,8 @@ import { LoggerInterface, useLog } from "../useLog";
 import Log from "./Log";
 import ObjectGraph from "./ObjectGraph";
 import { fetchOptionsToDepth } from "@src/openbis/sampleGraph";
+import Modal from "./Modal";
+import WorkflowEditor from "./WorkflowEditor";
 
 type Props = {
   workflows: Metagraph[];
@@ -416,6 +418,7 @@ const Workflow = ({ workflows }: Props) => {
         >
           Add workflow
         </button>
+        <Modal isOpen={showNewWorkflow} onClose={()=>(setShowNewWorkflow(false))}><WorkflowEditor /></Modal>
       </div>
     );
   }

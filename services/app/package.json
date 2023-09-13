@@ -7,15 +7,19 @@
     "vite-dev": "vite dev --host",
     "tscheck": "tsc -p ./ --noEmit",
     "generate-names": "npx tsx ./generate_names.ts",
+    "generate-workflow-schema": "yarn run  typescript-json-schema --ignoreErrors ./src/metagraph/metagraph.ts Metagraph -o ./src/metagraph/metagraph.schema.json",
     "test": "vitest",
     "build": "vite build",
     "format": "npx prettier . --write"
   },
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.22.11",
+    "@monaco-editor/react": "^4.5.2",
     "buffer": "^6.0.3",
+    "monaco-editor": "^0.43.0",
     "react-dom": "^18.2.0",
-    "requirejs": "^2.3.6"
+    "requirejs": "^2.3.6",
+    "typescript-json-schema": "^0.61.0"
   },
   "devDependencies": {
     "@babel/core": "^7.22.11",

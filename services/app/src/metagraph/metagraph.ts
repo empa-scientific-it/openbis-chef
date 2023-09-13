@@ -114,6 +114,11 @@ export class Metagraph {
   name: string;
   description: string;
 
+  fromNodes(nodes: MetagraphNode[]): Metagraph | ValidationResult {
+   
+    return new Metagraph(nodes, this.description, this.name);
+  }
+
   constructor(nodes: MetagraphNode[], description: string, name: string) {
     this.nodes = nodes;
     this.description = description;
