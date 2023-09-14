@@ -242,6 +242,11 @@ const Workflow = ({ workflows }: Props) => {
     setEntryFinished(() => false);
   };
 
+
+  const handleNewMetagraph = (mg: Metagraph) => {
+    workflows.push(mg);
+  }
+
   //Re-render the components when the workflow changes
   useEffect(() => {
     console.log(currentWorkflow);
@@ -385,9 +390,11 @@ const Workflow = ({ workflows }: Props) => {
   function WorkflowSelection({
     workflows,
     onSelect,
+    handleNewMetagraph
   }: {
     workflows: Metagraph[];
     onSelect: (selectedWorkflow: Metagraph) => void;
+    handleNewMetagraph: (mg: Metagraph) => void;
   }) {
     const handleWorkflowSelect = (workflow: Metagraph) => {
       setSelected(workflow.name);
@@ -418,7 +425,7 @@ const Workflow = ({ workflows }: Props) => {
         >
           Add workflow
         </button>
-        <Modal isOpen={showNewWorkflow} onClose={()=>(setShowNewWorkflow(false))}><WorkflowEditor /></Modal>
+        <Modal isOpen={showNewWorkflow} onClose={()=>(setShowNewWorkflow(false))}><WorkflowEditor handleNewMetagraph={handleNewMetagraph}/></Modal>
       </div>
     );
   }
@@ -448,7 +455,7 @@ const Workflow = ({ workflows }: Props) => {
         <h1 className="container-title">Workflow Selection</h1>
         <div className="workflow-selection-container">
           <div className="workflow-selection-container-one">
-            <WorkflowSelection workflows={workflows} onSelect={onSelect} />
+            <WorkflowSelection workflows={workflows} onSelect={onSelect} handleNewMetagraph={handleNewMetagraph} />
           </div>
           <div className="workflow-selection-container-two">
             <WorkflowDescription metagraph={metagraph} />
