@@ -6,8 +6,9 @@ import {
   Sample,
   SampleType,
 } from "@src/openbis/dto";
-
+import * as E from 'fp-ts/Either'
 import dagre from "dagre";
+import { Either } from "fp-ts/Either";
 
 export interface Node {
   id: string;
@@ -109,47 +110,51 @@ function formatFailure(failure: ValidationFailure): string {
   }
 }
 
+function validateMetagraph(nodes: MetagraphNode[]): ValidationResult {
+  //TODO check for circular dependencies
+
+  // Combine validation functions
+  const validations = [
+    checkUniqueIds,
+    checkValidDependencies,
+    // Add more validation functions here
+  ];
+
+  const failures = validations
+    .flatMap((validation) => validation(nodes))
+    .filter((f) => f !== undefined);
+  console.log(failures);
+  if (failures.length > 0) {
+    return { valid: false, failures: failures };
+  } else {
+    return { valid: true, failures: [] };
+  }
+}
+
+
+
 export class Metagraph {
+
   nodes: MetagraphNode[];
   name: string;
   description: string;
 
-  fromNodes(nodes: MetagraphNode[]): Metagraph | ValidationResult {
-   
-    return new Metagraph(nodes, this.description, this.name);
+  static fromNodes(nodes: MetagraphNode[], description: string, name: string): Either<Metagraph, ValidationFailure> {
+    const valid = validateMetagraph(nodes);
+    if(valid.valid) {
+      return E.left(new Metagraph(nodes, description, name));
+    } else {
+      return E.right(valid.failures[0]);
+    }
   }
 
   constructor(nodes: MetagraphNode[], description: string, name: string) {
     this.nodes = nodes;
     this.description = description;
     this.name = name;
-
-    // Validate the metagraph
-    this.validateMetagraph();
   }
 
-  private validateMetagraph() {
-
-    //TODO check for circular dependencies
-
-    // Combine validation functions
-    const validations = [
-      checkUniqueIds,
-      checkValidDependencies,
-      // Add more validation functions here
-    ];
-
-    const failures = validations
-      .flatMap((validation) => validation(this.nodes))
-      .filter((f) => f !== undefined);
-    console.log(failures);
-    if (failures.length > 0) {
-      throw new Error(
-        "Metagraph validation failed: " + failures.map((f) => formatFailure(f)).join(", ")
-      );
-    }
-
-  }
+  
 }
 
 /**

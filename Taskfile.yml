@@ -20,7 +20,7 @@ tasks:
         - docker compose down -v
   download_jar:
       # requires:
-      #   vars: [TOKEN]
+      #vars: [TOKEN]
       dir: ./utils
       cmds:
         - 'curl  -L -H "Private-Token: {{.TOKEN}}"  https://gitlab.empa.ch/api/v4/projects/1553/packages/maven/ch/empa/openbisio/app/0.1.3/app-0.1.3.jar --output instance-io.jar'
@@ -49,6 +49,7 @@ tasks:
       deps:
         - cleanup_schema
         - start_openbis
+        - download_jar
       cmds:
         - until ./utils/check_openbis.sh https://localhost:${OPENBIS_PORT}; do sleep 1; done
         - java -jar ./utils/instance-io.jar load ./schemas/schema_402_clean.json https://localhost:${OPENBIS_PORT} admin changeit 
