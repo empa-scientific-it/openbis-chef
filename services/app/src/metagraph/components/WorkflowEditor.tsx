@@ -15,20 +15,19 @@ function ErrorDisplay(message: string) {
     <Toast>
       <Toast.Header>
         <img src="holder.js/20x20?text=%20" className="rounded me-2" alt="" />
-        <strong className="me-auto">Bootstrap</strong>
-        <small>11 mins ago</small>
+        <strong className="me-auto">Error</strong>
       </Toast.Header>
       <Toast.Body>{message}</Toast.Body>
     </Toast>
   );
 }
 
-function nodesFromJSON(json: string): Either<Metagraph, SyntaxError> {
-  try{
+function nodesFromJSON(json: string): Either<SyntaxError, Metagraph> {
+  try {
     const mg = JSON.parse(json) as Metagraph;
-    return left(mg);
+    return right(mg);
   } catch (e) {
-    return right(e);
+    return left(e);
   }
 }
 
@@ -58,18 +57,14 @@ function WorkflowEditor() {
   }
 
   function handleSave() {
-    console.log(value);
     const mg = nodesFromJSON(value);
-    pipe(mg, match(
-      (mg) => console.log(mg),
-      (err) => setToastComponent(ErrorDisplay(err.message))
-    ),
-    const res = Metagraph.fromNodes(mg.nodes,mg.description,mg.name);
-    console.log(res);
-    pipe(res, match( 
-      (mg) => console.log(mg),
-      (err) => setToastComponent(ErrorDisplay(err.type))))
-    
+    pipe(mg,
+      E.flatMap((mg) => Metagraph.fromNodes(mg.nodes, mg.description, mg.name)),
+      match(
+        (failure) => {setToastComponent(ErrorDisplay("fAILED"))},
+        (graph) => { },
+      ))
+
   }
 
   return (
@@ -84,7 +79,7 @@ function WorkflowEditor() {
         onMount={onMount}
         onChange={(ev, changedValue) => setValue(() => ev)}
       />
-        
+      {toastComponent}
       <button onClick={handleSave}>Save</button>
     </>
   );

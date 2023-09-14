@@ -139,12 +139,12 @@ export class Metagraph {
   name: string;
   description: string;
 
-  static fromNodes(nodes: MetagraphNode[], description: string, name: string): Either<Metagraph, ValidationFailure> {
+  static fromNodes(nodes: MetagraphNode[], description: string, name: string): Either<ValidationFailure, Metagraph> {
     const valid = validateMetagraph(nodes);
     if(valid.valid) {
-      return E.left(new Metagraph(nodes, description, name));
+      return E.right(new Metagraph(nodes, description, name));
     } else {
-      return E.right(valid.failures[0]);
+      return E.left(valid.failures[0]);
     }
   }
 
