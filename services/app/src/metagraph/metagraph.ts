@@ -76,7 +76,9 @@ export interface InvalidDependency {
   dependency: string;
 }
 
-type ValidationFailure = CircularDependencyFailure | DuplicateId | InvalidDependency;
+export type SyntaxError = { type: "SyntaxError"; message: string };
+
+export type ValidationFailure = CircularDependencyFailure | DuplicateId | InvalidDependency | SyntaxError;
 
 export interface ValidationResult {
   valid: boolean;
@@ -99,7 +101,7 @@ function checkValidDependencies(nodes: MetagraphNode[]): ValidationFailure[] {
   });
 }
 
-function formatFailure(failure: ValidationFailure): string {
+export function formatFailure(failure: ValidationFailure): string {
   switch (failure.type) {
     case "circularDependency":
       return `Circular dependency: ${failure.circularDependency.join(" -> ")}`;
@@ -107,6 +109,8 @@ function formatFailure(failure: ValidationFailure): string {
       return `Duplicate id: ${failure.id} in node: ${failure.node}`;
     case "invalidDependency":
       return `Invalid dependency: ${failure.dependency} in node: ${failure.node}`;
+    case "SyntaxError":
+      return `Syntax error: ${failure.message}`;
   }
 }
 
