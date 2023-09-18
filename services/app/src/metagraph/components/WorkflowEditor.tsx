@@ -1,25 +1,20 @@
-import Editor, { DiffEditor, useMonaco, loader, Monaco } from "@monaco-editor/react";
-import { on } from "process";
-import React, { useEffect, useRef, useState } from "react";
-import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-import Toast from 'react-bootstrap/Toast';
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import Toast from "react-bootstrap/Toast";
 import schema from "@src/metagraph/metagraph.schema.json";
 import "./Workflow.css";
 import { Metagraph, formatFailure, ValidationFailure, SyntaxError } from "../metagraph";
-import * as E from 'fp-ts/Either'
-import { match, left, right, Either } from 'fp-ts/Either'
-import { pipe } from 'fp-ts/function'
+import * as E from "fp-ts/Either";
+import { match, left, right, Either } from "fp-ts/Either";
+import { pipe } from "fp-ts/function";
+import Modal from "./Modal";
+
+
+
+import AceEditor from "react-ace";
+import "ace-builds/src-noconflict/mode-json";
 
 function ErrorDisplay(message: string) {
-  return (
-    <Toast>
-      <Toast.Header>
-        <img src="holder.js/20x20?text=%20" className="rounded me-2" alt="" />
-        <strong className="me-auto">Error</strong>
-      </Toast.Header>
-      <Toast.Body>{message}</Toast.Body>
-    </Toast>
-  );
+  return <div>{message}</div>;
 }
 
 function nodesFromJSON(json: string): Either<ValidationFailure, Metagraph> {
@@ -41,59 +36,80 @@ function nodesFromJSON(json: string): Either<ValidationFailure, Metagraph> {
 
 interface WorkflowEditorProps {
   handleNewMetagraph: (mg: Metagraph) => void;
+  handleClose: () => void;
+  isOpen: boolean;
+  initialValue: Metagraph
 }
 
-function WorkflowEditor({ handleNewMetagraph }: WorkflowEditorProps) {
-  const localMonaco = useMonaco();
+function WorkflowEditor({
+  handleNewMetagraph,
+  isOpen,
+  handleClose,
+  initialValue
+}: WorkflowEditorProps) {
   const [value, setValue] = useState("// some comment");
   const [toastComponent, setToastComponent] = useState<JSX.Element | null>();
-  function onMount(editor: { setModel: (arg0: any) => void }, monaco: Monaco) {
-    console.log(editor);
-    const modelUri = "foo://myapp/custom.json";
-    const model = monaco.editor.createModel(value, "json");
-    editor.setModel(model);
-    console.log(schema);
+  const [localIsOpen, setLocalIsOpen] = useState(isOpen);
 
-    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-      ...monaco.languages.json.jsonDefaults.diagnosticsOptions,
-      allowComments: true,
-      schemas: [
-        {
-          uri: "",
-          fileMatch: ["*"],
-          schema: schema,
-        },
-      ],
-      validate: true,
-    });
-  }
-
-  function handleSave() {
+  function handleSave(ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    ev.preventDefault();
+    console.log(value);
     const mg = nodesFromJSON(value);
-    pipe(mg,
+    pipe(
+      mg,
       E.flatMap((mg) => Metagraph.fromNodes(mg.nodes, mg.description, mg.name)),
       match(
-        (failure) => { setToastComponent(ErrorDisplay(formatFailure(failure))) },
-        (graph) => { handleNewMetagraph(graph) },
-      ))
-
+        (failure) => {
+          setToastComponent(ErrorDisplay(formatFailure(failure)));
+        },
+        (graph) => {
+          handleNewMetagraph(graph);
+        }
+      )
+    );
   }
 
+    useEffect(() => {
+        setValue(JSON.stringify(initialValue, null, 2));
+    }, [initialValue])
+
+  const handleChange = useCallback((value: string, update) => {
+    console.log(value);
+    setValue(value);
+  }, []);
+
+  const handleLocalClose = useCallback(
+    (ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      ev.preventDefault();
+      setLocalIsOpen(false);
+      handleClose();
+    },
+    []
+  );
+
   return (
-    <>
-      <h2>Workflow Editor</h2>
-      <Editor
-        height="90vh"
-        defaultLanguage="json"
-        defaultValue={value}
-        value={value}
-        language="json"
-        onMount={onMount}
-        onChange={(ev, changedValue) => setValue(() => ev)}
-      />
-      {toastComponent}
-      <button onClick={handleSave}>Save</button>
-    </>
+    <div>
+      <Modal isOpen={isOpen}>
+        <AceEditor
+          mode="json"
+          theme="github"
+          value={value}
+          onChange={handleChange}
+          name="UNIQUE_ID_OF_DIV"
+          editorProps={{ $blockScrolling: true }}
+          setOptions={{
+            useWorker: false,
+          }}
+        />
+        {toastComponent}
+        <button className="clickable-button" onClick={handleSave}>
+          Save
+        </button>
+        <button className="clickable-button" onClick={handleLocalClose}>
+          Close
+        </button>
+      </Modal>
+    </div>
   );
 }
 

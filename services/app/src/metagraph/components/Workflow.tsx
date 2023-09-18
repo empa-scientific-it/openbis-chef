@@ -48,6 +48,7 @@ import ObjectGraph from "./ObjectGraph";
 import { fetchOptionsToDepth } from "@src/openbis/sampleGraph";
 import Modal from "./Modal";
 import WorkflowEditor from "./WorkflowEditor";
+import WorkflowSelection from "./WorkflowSelection";
 
 type Props = {
   workflows: Metagraph[];
@@ -57,7 +58,7 @@ const Workflow = ({ workflows }: Props) => {
   // Get openbis service
   const { logout, service } = useContext(AuthContext);
   // Keep list of all available workflows
-  const { currentWorkflow, selectWorkflow } = useWorkflows(workflows);
+  const { currentWorkflow, selectWorkflow, addWorkflow, addOrReplaceWorkflow, workflows: allWorkflows } = useWorkflows(workflows);
   // Keep track of the workflow selected
   const [workflowSelected, setWorkflowSelected] = useState(false);
   // Keep track of the workflow completion
@@ -180,8 +181,8 @@ const Workflow = ({ workflows }: Props) => {
     });
     setWorkflowCompleted(() => true);
     // Get the created objects
-    const bo = new SampleFetchOptions()
-    bo.withProperties()
+    const bo = new SampleFetchOptions();
+    bo.withProperties();
     const fo = fetchOptionsToDepth(5, bo);
     const res1 = await service.getSamples(permIds, fo);
     const sample = Object.values(res1);
@@ -242,10 +243,9 @@ const Workflow = ({ workflows }: Props) => {
     setEntryFinished(() => false);
   };
 
-
   const handleNewMetagraph = (mg: Metagraph) => {
-    workflows.push(mg);
-  }
+    addOrReplaceWorkflow(mg);
+  };
 
   //Re-render the components when the workflow changes
   useEffect(() => {
@@ -266,9 +266,15 @@ const Workflow = ({ workflows }: Props) => {
     const CreationInfo = (op: CreateOperation) => {
       return (
         <ul>
-          <li><u>Operation type:</u> {op.type}</li>
-          <li><u>Collection:</u> {op.collectionIdentifier}</li>
-          <li><u>Object type:</u> {op.objectType}</li>
+          <li>
+            <u>Operation type:</u> {op.type}
+          </li>
+          <li>
+            <u>Collection:</u> {op.collectionIdentifier}
+          </li>
+          <li>
+            <u>Object type:</u> {op.objectType}
+          </li>
           <li>
             <u>Object properties:</u>
             <ul>
@@ -284,13 +290,19 @@ const Workflow = ({ workflows }: Props) => {
     const LinkInfo = (op: LinkOperation) => {
       return (
         <ul>
-          <li><u>Operation type:</u> {op.type}</li>
-          <li><u>Collection:</u> {op.collectionIdentifier}</li>
-          <li><u>Selected entity:</u> {op.objectIdentifier}</li>
+          <li>
+            <u>Operation type:</u> {op.type}
+          </li>
+          <li>
+            <u>Collection:</u> {op.collectionIdentifier}
+          </li>
+          <li>
+            <u>Selected entity:</u> {op.objectIdentifier}
+          </li>
         </ul>
       );
     };
-  
+
     return <>{op.type === "create" ? CreationInfo(op) : LinkInfo(op)}</>;
   };
 
@@ -304,7 +316,9 @@ const Workflow = ({ workflows }: Props) => {
           <h3>Here are the operations that will be performed:</h3>
           <div>
             {ops.operations.map((op) => (
-              <div className="operations-list" key={op.operationId}>{OperationInfo(op)}</div>
+              <div className="operations-list" key={op.operationId}>
+                {OperationInfo(op)}
+              </div>
             ))}
           </div>
           <div className="operations-log">
@@ -387,56 +401,66 @@ const Workflow = ({ workflows }: Props) => {
     );
   }
 
-  function WorkflowSelection({
-    workflows,
-    onSelect,
-    handleNewMetagraph
-  }: {
-    workflows: Metagraph[];
-    onSelect: (selectedWorkflow: Metagraph) => void;
-    handleNewMetagraph: (mg: Metagraph) => void;
-  }) {
-    const handleWorkflowSelect = (workflow: Metagraph) => {
-      setSelected(workflow.name);
-      onSelect(workflow);
-    };
+  // function WorkflowSelection({
+  //   workflows,
+  //   onSelect,
+  //   handleNewMetagraph,
+  // }: {
+  //   workflows: Metagraph[];
+  //   onSelect: (selectedWorkflow: Metagraph) => void;
+  //   handleNewMetagraph: (mg: Metagraph) => void;
+  // }) {
+  //   const handleWorkflowSelect = (workflow: Metagraph) => {
+  //     setSelected(workflow.name);
+  //     onSelect(workflow);
+  //   };
 
-    const [showNewWorkflow, setShowNewWorkflow] = useState(false);
+  //   const [showNewWorkflow, setShowNewWorkflow] = useState(false);
 
-    return (
-      <div>
-        <h3>Available workflows:</h3>
-        {workflows.map((workflow) => (
-          <button
-            key={workflow.name}
-            id={workflow.name}
-            onClick={() => handleWorkflowSelect(workflow)}
-            className={
-              "workflow-selection-item" +
-              (selected === workflow.name ? " workflow-selection-item-selected" : "")
-            }
-          >
-            {workflow.name}
-          </button>
-        ))}
-        <button
-          className="workflow-selection-item"
-          onClick={(event)=>setShowNewWorkflow(() => true)}
-        >
-          Add workflow
-        </button>
-        <Modal isOpen={showNewWorkflow} onClose={()=>(setShowNewWorkflow(false))}><WorkflowEditor handleNewMetagraph={handleNewMetagraph}/></Modal>
-      </div>
-    );
-  }
+  //   const handleNew = () => {
+  //     console.log("closing");
+  //     setShowNewWorkflow((old) => !old);
+  //   };
 
+  //   return (
+  //     <div>
+  //       <h3>Available workflows:</h3>
+  //       <div>
+  //         <button>Edit workflow</button>
+  //         <button className="workflow-selection-item" onClick={handleNew}>
+  //           Add workflow
+  //         </button>
+  //       </div>
 
-  function WorkflowCreation(){
+  //       {workflows.map((workflow) => (
+  //         <button
+  //           key={workflow.name}
+  //           id={workflow.name}
+  //           onClick={() => handleWorkflowSelect(workflow)}
+  //           className={
+  //             "workflow-selection-item" +
+  //             (selected === workflow.name ? " workflow-selection-item-selected" : "")
+  //           }
+  //         >
+  //           {workflow.name}
+  //         </button>
+  //       ))}
+
+  //       <WorkflowEditor
+  //         handleNewMetagraph={handleNewMetagraph}
+  //         isOpen={showNewWorkflow}
+  //         handleClose={handleNew}
+  //       />
+  //     </div>
+  //   );
+  // }
+
+  function WorkflowCreation() {
     return (
       <div>
         <h3>Workflow creation</h3>
       </div>
-    )
+    );
   }
 
   function WorkflowEntry({
@@ -444,10 +468,12 @@ const Workflow = ({ workflows }: Props) => {
     onSelect,
     onStart,
     disabled,
+    onNewWorkflow
   }: {
     metagraph: Metagraph;
     onSelect: (metagraph: Metagraph) => void;
     onStart: (ev: React.MouseEvent<HTMLElement>) => void;
+    onNewWorkflow: (metagraph: Metagraph) => void;
     disabled: boolean;
   }) {
     return (
@@ -455,7 +481,12 @@ const Workflow = ({ workflows }: Props) => {
         <h1 className="container-title">Workflow Selection</h1>
         <div className="workflow-selection-container">
           <div className="workflow-selection-container-one">
-            <WorkflowSelection workflows={workflows} onSelect={onSelect} handleNewMetagraph={handleNewMetagraph} />
+            <WorkflowSelection
+              workflows={allWorkflows}
+              onSelect={onSelect}
+              handleNewMetagraph={onNewWorkflow}
+              currentWofklow={currentWorkflow}
+            />
           </div>
           <div className="workflow-selection-container-two">
             <WorkflowDescription metagraph={metagraph} />
@@ -489,6 +520,7 @@ const Workflow = ({ workflows }: Props) => {
                 onSelect={handleWorkflowSelection}
                 onStart={handleWorkflowStart}
                 disabled={!workflowSelected}
+                onNewWorkflow={handleNewMetagraph}
               />
             ) : workflowSelected && start ? (
               <WorkflowPages
