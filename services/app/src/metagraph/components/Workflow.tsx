@@ -49,6 +49,7 @@ import { fetchOptionsToDepth } from "@src/openbis/sampleGraph";
 import Modal from "./Modal";
 import WorkflowEditor from "./WorkflowEditor";
 import WorkflowSelection from "./WorkflowSelection";
+import { Navigate } from "react-router-dom";
 
 type Props = {
   workflows: Metagraph[];
@@ -78,7 +79,14 @@ const Workflow = ({ workflows }: Props) => {
 
   function handleLogout(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    console.log("logout");
     logout();
+    <Navigate
+    to="/login"
+    replace // <-- redirect
+    state={{ path: location.pathname }}
+  />;
+    
   }
 
   function activateComponent(graph: Metagraph, currentIndex: number) {
@@ -509,7 +517,7 @@ const Workflow = ({ workflows }: Props) => {
     <OperationContext.Provider value={workflowOps}>
       <div className="App">
         <div className="app-container">
-          <button className="logout-button" name="Logout" onSubmit={() => handleLogout}>
+          <button className="logout-button" name="Logout" onClick={handleLogout}>
             Logout
           </button>
 

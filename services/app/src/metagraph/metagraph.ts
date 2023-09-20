@@ -6,7 +6,7 @@ import {
   Sample,
   SampleType,
 } from "@src/openbis/dto";
-import * as E from 'fp-ts/Either'
+import * as E from "fp-ts/Either";
 import dagre from "dagre";
 import { Either } from "fp-ts/Either";
 
@@ -78,7 +78,11 @@ export interface InvalidDependency {
 
 export type SyntaxError = { type: "SyntaxError"; message: string };
 
-export type ValidationFailure = CircularDependencyFailure | DuplicateId | InvalidDependency | SyntaxError;
+export type ValidationFailure =
+  | CircularDependencyFailure
+  | DuplicateId
+  | InvalidDependency
+  | SyntaxError;
 
 export interface ValidationResult {
   valid: boolean;
@@ -135,17 +139,35 @@ function validateMetagraph(nodes: MetagraphNode[]): ValidationResult {
   }
 }
 
-
+async function checkMetagraphData(
+  mg: Metagraph,
+  service: Facade
+): Promise<ValidationFailure[]> {
+  mg.nodes.map(async (node) => {
+    if (node.type === "entry") {
+      const sampleType = await getSampleType(node.entityType, service);
+      if (!sampleType) {
+        return {
+          type: "SyntaxError",
+          message: `Sample type ${node.entityType} does not exist`,
+        };
+      }
+    }
+  });
+}
 
 export class Metagraph {
-
   nodes: MetagraphNode[];
   name: string;
   description: string;
 
-  static fromNodes(nodes: MetagraphNode[], description: string, name: string): Either<ValidationFailure, Metagraph> {
+  static fromNodes(
+    nodes: MetagraphNode[],
+    description: string,
+    name: string
+  ): Either<ValidationFailure, Metagraph> {
     const valid = validateMetagraph(nodes);
-    if(valid.valid) {
+    if (valid.valid) {
       return E.right(new Metagraph(nodes, description, name));
     } else {
       return E.left(valid.failures[0]);
@@ -157,8 +179,6 @@ export class Metagraph {
     this.description = description;
     this.name = name;
   }
-
-  
 }
 
 /**

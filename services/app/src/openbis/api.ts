@@ -104,6 +104,13 @@ export class Facade {
     this.v3 = new openbis();
   }
 
+  static FacadeWithURL(url: String) {
+    const facade = new Facade();
+    const v3 = new openbis(url);
+    facade.v3 = v3;
+    return facade;
+  }
+
   checkSession(sessionToken: string) {
     this.useSession(sessionToken);
     console.log("Checking session");

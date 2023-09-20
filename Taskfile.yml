@@ -89,4 +89,19 @@ tasks:
       dir: ./services/app
       cmds:
         - docker build -t app .
-        - docker run -p 8080:8080 app 
+        - docker stop app || true
+        - docker container rm app || true
+        - docker run --name app -d -p 8080:8080 app
+      # sources:
+      #   - ./services/app/Dockerfile
+      #   - ./services/app/package.json
+      #   - ./services/app/yarn.lock
+      #   - ./services/app/nginx.conf
+      # generates:
+      #   - ./services/app/app/
+  test_serve:
+      deps:
+        - serve
+      dir: ./services/app
+      cmds:
+        - curl -X POST  http://localhost:8080/openbis-empa-lab207 -s -S
