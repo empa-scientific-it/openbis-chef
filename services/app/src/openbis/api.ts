@@ -106,7 +106,8 @@ export class Facade {
 
   static fromURL(url: string) {
     const facade = new Facade();
-    facade.v3 = new openbis(url);
+    facade.v3 = new openbis(`${url}/openbis/openbis/rmi-application-server-v3.json`);
+  
     return facade;
   }
 

@@ -13,11 +13,11 @@ localhost:8080 {
 
     # Define a named placeholder for the subdomain
     @subdomain {
-        path_regexp ^(\d+)
+        path_regexp ^/(\d+)
         #path https://openbis-empa-lab402.ethz.ch/openbis/openbis/rmi-application-server-v3.json
     }
 
-    # handle @subdomain {
+    handle @subdomain {
     reverse_proxy openbis-empa-lab{http.regexp.1}.ethz.ch/openbis/openbis/rmi-application-server-v3.json
             header {
         Access-Control-Allow-Origin *
@@ -25,6 +25,8 @@ localhost:8080 {
         Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept"
     }
     # }
+
+   reverse_proxy /openbis/* localhost:8445/openbis/openbis/rmi-application-server-v3.json
 
     file_server
 }

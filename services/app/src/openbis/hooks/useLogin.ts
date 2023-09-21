@@ -8,6 +8,7 @@ export function useLogin() {
 
   const setUrl = (url: string) => {
     setService(() =>  Facade.fromURL(url));
+    console.log(service);
   };
 
   const { item: token, setItem: setToken, removeItem: removeToken } = useSessionStorage<string | null>(
