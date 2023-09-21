@@ -104,4 +104,4 @@ tasks:
         - serve
       dir: ./services/app
       cmds:
-        - curl -X POST  http://localhost:8080/openbis-empa-lab207 -s -S
+        - docker exec -it app curl -X POST https://openbis-empa-lab402.ethz.ch/openbis/openbis/rmi-application-server-v3.json

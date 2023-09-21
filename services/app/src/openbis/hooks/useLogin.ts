@@ -7,7 +7,7 @@ export function useLogin() {
 
 
   const setUrl = (url: string) => {
-    setService(() => Facade.FacadeWithURL(url));
+    setService(() =>  Facade.fromURL(url));
   };
 
   const { item: token, setItem: setToken, removeItem: removeToken } = useSessionStorage<string | null>(

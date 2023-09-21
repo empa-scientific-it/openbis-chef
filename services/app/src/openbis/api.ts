@@ -104,10 +104,9 @@ export class Facade {
     this.v3 = new openbis();
   }
 
-  static FacadeWithURL(url: String) {
+  static fromURL(url: string) {
     const facade = new Facade();
-    const v3 = new openbis(url);
-    facade.v3 = v3;
+    facade.v3 = new openbis(url);
     return facade;
   }
 
