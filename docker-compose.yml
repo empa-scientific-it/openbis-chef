@@ -53,12 +53,12 @@ services:
     build:
       context: ./services/app
       dockerfile: Dockerfile
-    volumes:
-      - ./services/app/Caddyfile:/etc/caddy/Caddyfile
+    # volumes:
+    #   - ./services/app/Caddyfile:/etc/caddy/Caddyfile
     networks:
       - local
     ports:
-      - 8080:443
+      - ${CADDY_PORT}:443
 
 
     

@@ -123,3 +123,28 @@ tasks:
         - curl -k -X POST 'https://localhost:8080/openbis/openbis/openbis/rmi-application-server-v3.json' 
         - curl -k 'https://localhost:8080/login'
         - curl -k -X POST 'https://localhost:8080/openbis-empa-lab402/openbis/openbis/rmi-application-server-v3.json' 
+  add_context:
+      cmds:
+        - docker context create emp-openbis-data1 --docker "host=tcp://emp-openbis-data1"
+      status:
+        - docker context ls | grep emp-openbis-data1
+  openbis_remote:
+      deps:
+         - add_context
+      dir: ./services/app
+      env:
+        DOCKER_CONTEXT: emp-openbis-data1
+      cmds:
+        -  docker compose up openbis
+        - java -jar ./utils/instance-io.jar dump  ./schemas/schema_402_local.json https://localhost:${OPENBIS_PORT} admin {{.OPENBIS_PASSWORD}}
+
+  serve_remote: 
+      # deps:
+      #   - add_context
+      dir: ./services/app
+      env:
+        DOCKER_CONTEXT: emp-openbis-data1
+      cmds:
+        -  docker compose build app
+        -  docker compose stop app || true
+        -  docker compose run app
