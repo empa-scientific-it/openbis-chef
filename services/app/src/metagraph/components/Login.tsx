@@ -5,17 +5,25 @@ import { AuthContext } from "@src/openbis/AuthContext";
 import "@src/App.css";
 import "./Login.css";
 
+import { openBISInstance } from "@src/openbis/config/openBISInstance";
+import instances from "@src/openbis/config/instances.json";
+
+
+
 function Login() {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
-  const [server, setServer] = useState("https://localhost:8445");
+  const [server, setServer] = useState("local");
   const { loginAndThen, setUrl, service } = useContext(AuthContext);
 
-  let navigate = useNavigate();
-  let location = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const validInstances = instances as openBISInstance[];
 
   function handleSubmit() {
     const from = location.state?.from?.pathname || "/";
+    // const url = instances.find((instance) => instance.name === server)?.url;
     setUrl(server);
     loginAndThen(user, password, () => {
       navigate(from, { replace: true });
@@ -40,7 +48,13 @@ function Login() {
             <h1 className="container-title">Login to openBIS instance</h1>
             <div className="login-form-input">
               <label htmlFor="server">Instance:</label>
+              {/* <datalist id="instances">
+                {validInstances.map((instance) => {
+                    return <option value={instance.name} key={instance.name} />;
+                })}
+                </datalist> */}
               <input
+                // list = "instances"
                 name="server"
                 id="server"
                 type="server"

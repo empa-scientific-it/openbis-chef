@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "vite-dev": "vite dev --host",
+    "vite-dev": "vite dev --host -d",
     "tscheck": "tsc -p ./ --noEmit",
     "generate-names": "npx tsx ./generate_names.ts",
     "generate-workflow-schema": "yarn run  typescript-json-schema --ignoreErrors ./src/metagraph/metagraph.ts Metagraph -o ./src/metagraph/metagraph.schema.json",

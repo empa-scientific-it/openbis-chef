@@ -5,6 +5,9 @@ dotenv:
 
 tasks:
   start_openbis:
+      preconditions:
+        - sh: type -p docker
+          msg: "docker is not installed. Please install docker first"
       cmds:
         - docker compose up -d
         - until ./utils/check_openbis.sh https://localhost:${OPENBIS_PORT}; do sleep 1; done
@@ -27,6 +30,9 @@ tasks:
       status:
         - test  ./utils/instance-io.jar
   export_schema:
+      preconditions:
+        - sh: type -p java
+          msg: "java is not installed. Please install java first"
       requires:
         vars: [OPENBIS_SOURCE_USER, OPENBIS_SOURCE_PASSWORD]
       deps:
@@ -57,6 +63,10 @@ tasks:
       status:
         - test -f .schema_imported
   dev-install:
+      preconditions:
+        - sh: type -p yarn
+          msg: "yarn is not installed. Please install yarn first"
+      
       dir: ./services/app
       sources:
         - ./services/app/package.json
@@ -88,10 +98,15 @@ tasks:
         - start_openbis
       dir: ./services/app
       cmds:
-        - docker build -t app .
-        - docker stop app || true
-        - docker container rm app || true
-        - docker run --name app -d -p 8080:8080 app
+        - docker compose build app
+        - docker compose up app -d --force-recreate
+
+  reload_caddy:
+      deps:
+        - serve
+      cmds:
+        - docker compose exec -it app caddy reload --config /etc/caddy/Caddyfile
+
       # sources:
       #   - ./services/app/Dockerfile
       #   - ./services/app/package.json
@@ -104,4 +119,7 @@ tasks:
         - serve
       dir: ./services/app
       cmds:
-        - docker exec -it app curl -X POST https://openbis-empa-lab402.ethz.ch/openbis/openbis/rmi-application-server-v3.json
+        - sleep 4
+        - curl -k -X POST 'https://localhost:8080/openbis/openbis/openbis/rmi-application-server-v3.json' 
+        - curl -k 'https://localhost:8080/login'
+        - curl -k -X POST 'https://localhost:8080/openbis-empa-lab402/openbis/openbis/rmi-application-server-v3.json' 

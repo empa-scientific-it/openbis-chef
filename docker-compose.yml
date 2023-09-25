@@ -8,6 +8,9 @@ volumes:
 networks:
   local:
     driver: bridge
+    driver_opts:
+      subnet: "192.168.0.0/24"
+
 
 
 
@@ -44,5 +47,19 @@ services:
       start_period: 30s
     networks:
       - local
+  app:
+    env_file:
+      - ./.env
+    build:
+      context: ./services/app
+      dockerfile: Dockerfile
+    volumes:
+      - ./services/app/Caddyfile:/etc/caddy/Caddyfile
+    networks:
+      - local
+    ports:
+      - 8080:443
+
+
     
 
