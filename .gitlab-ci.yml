@@ -29,10 +29,9 @@ deploy-docker:
     - docker:dind
   tags:
     - dind
-  variables:
-    DOCKER_HOST: ssh://$DEPLOY_HOST
+
   script:
-    - docker pull $CI_REGISTRY_IMAGE
-    - docker stop app || true
-    - docker rm app || true
-    - docker run --name app -p 8000:80  $CI_REGISTRY_IMAGE
+    - DOCKER_HOST=ssh://$DEPLOY_HOST docker pull $CI_REGISTRY_IMAGE
+    - DOCKER_HOST=ssh://$DEPLOY_HOST docker stop app || true
+    - DOCKER_HOST=ssh://$DEPLOY_HOST docker rm app || true
+    - DOCKER_HOST=ssh://$DEPLOY_HOST docker run --name app -p 8000:80  $CI_REGISTRY_IMAGE
