@@ -1,0 +1,18 @@
+[
+  {
+    "name": "local",
+    "url": "/openbis/"
+  },
+  {
+    "name": "402",
+    "url": "/openbis-empa-lab402/"
+  },
+  {
+    "name": "207",
+    "url": "/openbis-empa-lab207/"
+  },
+  {
+    "name": "test",
+    "url": "/openbis-empa-test/"
+  }
+]
