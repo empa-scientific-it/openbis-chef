@@ -1,0 +1,21 @@
+.workflow-actions-buttons{
+    display: table-row;
+
+}
+
+.workflow-actions-buttons > button{
+    margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background: #eee;
+    cursor: pointer;
+    display: table-column;
+}   
+
+.workflow-list{
+    display: table;
+    width: 100%;
+    border: none;
+
+}

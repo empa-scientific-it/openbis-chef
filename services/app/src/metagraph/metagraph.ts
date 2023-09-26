@@ -6,8 +6,9 @@ import {
   Sample,
   SampleType,
 } from "@src/openbis/dto";
-
+import * as E from "fp-ts/Either";
 import dagre from "dagre";
+import { Either } from "fp-ts/Either";
 
 export interface Node {
   id: string;
@@ -71,7 +72,13 @@ export interface InvalidDependency {
   dependency: string;
 }
 
-type ValidationFailure = CircularDependencyFailure | DuplicateId | InvalidDependency;
+export type SyntaxError = { type: "SyntaxError"; message: string };
+
+export type ValidationFailure =
+  | CircularDependencyFailure
+  | DuplicateId
+  | InvalidDependency
+  | SyntaxError;
 
 export interface ValidationResult {
   valid: boolean;
@@ -122,7 +129,7 @@ function checkValidDependencies(nodes: MetagraphNode[]): ValidationFailure[] {
   });
 }
 
-function formatFailure(failure: ValidationFailure): string {
+export function formatFailure(failure: ValidationFailure): string {
   switch (failure.type) {
     case "circularDependency":
       return `Circular dependency in node: ${failure.node}`;
@@ -130,7 +137,46 @@ function formatFailure(failure: ValidationFailure): string {
       return `Duplicate id: ${failure.id} in node: ${failure.node}`;
     case "invalidDependency":
       return `Invalid dependency: ${failure.dependency} in node: ${failure.node}`;
+    case "SyntaxError":
+      return `Syntax error: ${failure.message}`;
   }
+}
+
+function validateMetagraph(nodes: MetagraphNode[]): ValidationResult {
+  // Combine validation functions
+  const validations = [
+    checkNonCircularDependencies,
+    checkUniqueIds,
+    checkValidDependencies,
+    // Add more validation functions here
+  ];
+
+  const failures = validations
+    .flatMap((validation) => validation(nodes))
+    .filter((f) => f !== undefined);
+  console.log(failures);
+  if (failures.length > 0) {
+    return { valid: false, failures: failures };
+  } else {
+    return { valid: true, failures: [] };
+  }
+}
+
+async function checkMetagraphData(
+  mg: Metagraph,
+  service: Facade
+): Promise<ValidationFailure[]> {
+  mg.nodes.map(async (node) => {
+    if (node.type === "entry") {
+      const sampleType = await getSampleType(node.entityType, service);
+      if (!sampleType) {
+        return {
+          type: "SyntaxError",
+          message: `Sample type ${node.entityType} does not exist`,
+        };
+      }
+    }
+  });
 }
 
 export class Metagraph {
@@ -138,34 +184,23 @@ export class Metagraph {
   name: string;
   description: string;
 
+  static fromNodes(
+    nodes: MetagraphNode[],
+    description: string,
+    name: string
+  ): Either<ValidationFailure, Metagraph> {
+    const valid = validateMetagraph(nodes);
+    if (valid.valid) {
+      return E.right(new Metagraph(nodes, description, name));
+    } else {
+      return E.left(valid.failures[0]);
+    }
+  }
+
   constructor(nodes: MetagraphNode[], description: string, name: string) {
     this.nodes = nodes;
     this.description = description;
     this.name = name;
-
-    // Validate the metagraph
-    this.validateMetagraph();
-  }
-
-  private validateMetagraph() {
-    // Combine validation functions
-    const validations = [
-      checkNonCircularDependencies,
-      checkUniqueIds,
-      checkValidDependencies,
-      // Add more validation functions here
-    ];
-
-    const failures = validations
-      .flatMap((validation) => validation(this.nodes))
-      .filter((f) => f !== undefined);
-    console.log(failures);
-    if (failures.length > 0) {
-      throw new Error(
-        "Metagraph validation failed: " + failures.map((f) => formatFailure(f)).join(", ")
-      );
-    }
-
   }
 }
 

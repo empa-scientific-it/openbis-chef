@@ -48398,6 +48398,7 @@ module.exports = function () {
         }
       }));
     };
+    
     this.loginAsAnonymousUser = function () {
       var thisFacade = this;
       return thisFacade._private.loginCommon(null, true, thisFacade._private.ajaxRequest({

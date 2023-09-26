@@ -104,6 +104,14 @@ export class Facade {
     this.v3 = new openbis();
   }
 
+  static fromURL(url: string) {
+    const facade = new Facade();
+    console.log(`New facade with url ${url}`)
+    facade.v3 = new openbis(`${url}/openbis/openbis/rmi-application-server-v3.json`);
+    console.log(facade)
+    return facade;
+  }
+
   checkSession(sessionToken: string) {
     this.useSession(sessionToken);
     console.log("Checking session");

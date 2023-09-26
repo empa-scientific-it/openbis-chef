@@ -1,0 +1,49 @@
+openbischef.scit.empa.ch:80 {
+	log {
+		output stdout
+		level DEBUG
+		format console
+	}
+
+	@api {
+		path_regexp ^/openbis/(.*)$
+	}
+
+	handle @api {
+		route {
+			rewrite * {uri}
+			reverse_proxy {
+				to https://openbis:443
+				transport http {
+					tls_insecure_skip_verify
+					tls
+				}
+			}
+		}
+	}
+
+    @openbis {
+        path_regexp ^/openbis-empa-lab(\w+)(/.*)$
+    }
+
+    handle @openbis {
+        route {
+            rewrite * {http.regexp.2}
+            reverse_proxy {
+                to openbis-empa-lab{http.regexp.1}.ethz.ch:443
+                transport http {
+                    tls_insecure_skip_verify
+                    tls
+                }
+            }
+        }
+    }
+
+	handle {
+		root * /site/
+		try_files {path} /index.html
+		file_server
+
+	}
+
+}

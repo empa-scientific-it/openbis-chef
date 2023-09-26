@@ -5,7 +5,13 @@ import { useSessionStorage } from "@src/session/useSessionStorage";
 export function useLogin() {
   const [service, setService] = useState(new Facade());
 
-  const { item: token, setItem: setToken } = useSessionStorage<string | null>(
+
+  const setUrl = (url: string) => {
+    setService(() =>  Facade.fromURL(url));
+    console.log(service);
+  };
+
+  const { item: token, setItem: setToken, removeItem: removeToken } = useSessionStorage<string | null>(
     "token",
     null,
   );
@@ -39,7 +45,7 @@ export function useLogin() {
   };
 
   const logout = () => {
-    setToken("token", () => null);
+    removeToken("token");
     setLoggedIn(() => false);
   };
 
@@ -52,5 +58,6 @@ export function useLogin() {
     service,
     loginAndThen,
     logout,
+    setUrl,
   };
 }

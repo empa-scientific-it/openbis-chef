@@ -9,6 +9,7 @@ export interface AuthContextInterface {
   login: (username: string, password: string) => void;
   logout: () => void;
   service: Facade;
+  setUrl: (url: string) => void;
   loginAndThen: (user: string, password: string, callback: Function) => void;
 }
 
@@ -20,5 +21,6 @@ export const AuthContext = createContext<AuthContextInterface>({
   login: (username: string, password: string) => {},
   logout: () => {},
   service: null as Facade,
+  setUrl: (url: string) => {},
   loginAndThen: (user: string, password: string, callback: Function) => {},
 });
