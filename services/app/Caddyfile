@@ -1,4 +1,4 @@
-localhost:443 {
+openbischef.scit.empa.ch:80 {
 	log {
 		output stdout
 		level DEBUG
@@ -23,14 +23,14 @@ localhost:443 {
 	}
 
     @openbis {
-        path_regexp ^/openbis-empa-lab(\d+)(.*)$
+        path_regexp ^/openbis-empa-lab(\w+)(/.*)$
     }
 
     handle @openbis {
         route {
-            rewrite * {uri}
+            rewrite * {http.regexp.2}
             reverse_proxy {
-                to openbis-empa-lab{http.regexp.1}:443
+                to openbis-empa-lab{http.regexp.1}.ethz.ch:443
                 transport http {
                     tls_insecure_skip_verify
                     tls
@@ -42,7 +42,8 @@ localhost:443 {
 	handle {
 		root * /site/
 		try_files {path} /index.html
+		file_server
+
 	}
 
-	file_server
 }

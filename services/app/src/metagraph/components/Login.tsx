@@ -7,14 +7,17 @@ import "./Login.css";
 
 import { openBISInstance } from "@src/openbis/config/openBISInstance";
 import instances from "@src/openbis/config/instances.json";
+import SliderButton from "./SliderButton";
 
-
+type loginMethods = "password" | "token";
 
 function Login() {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [server, setServer] = useState("local");
   const { loginAndThen, setUrl, service } = useContext(AuthContext);
+
+  const [loginMethod, setLoginMethod] = useState<loginMethods>("password");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,16 +26,27 @@ function Login() {
 
   function handleSubmit() {
     const from = location.state?.from?.pathname || "/";
-    // const url = instances.find((instance) => instance.name === server)?.url;
+    console.log("server", server);
     setUrl(server);
-    loginAndThen(user, password, () => {
-      navigate(from, { replace: true });
-    });
+    switch (loginMethod) {
+      case "password":
+        loginAndThen(user, password, () => {
+          navigate(from, { replace: true });
+        });
+        break;
+      case "token":
+        
+    }
   }
 
   useEffect(() => {
     console.log("service", service);
-  }, [service])
+  }, [service]);
+
+  const handleLoginType = (choice: string) => {
+    console.log(choice);
+    setLoginMethod(choice as loginMethods);
+  };
 
   return (
     <div className="App">
@@ -48,40 +62,65 @@ function Login() {
             <h1 className="container-title">Login to openBIS instance</h1>
             <div className="login-form-input">
               <label htmlFor="server">Instance:</label>
-              {/* <datalist id="instances">
-                {validInstances.map((instance) => {
-                    return <option value={instance.name} key={instance.name} />;
-                })}
-                </datalist> */}
-              <input
-                // list = "instances"
+              <select
                 name="server"
                 id="server"
-                type="server"
-                value={server}
                 onChange={(event) => setServer(event.target.value)}
-              />
+              >
+                {validInstances.map((instance) => {
+                  return (
+                    <option value={instance.url} key={instance.name}>
+                      {instance.name}
+                    </option>
+                  );
+                })}
+              </select>
             </div>
+
             <div className="login-form-input">
-              <label htmlFor="username">Username:</label>
-              <input
-                name="username"
-                id="username"
-                type="user"
-                value={user}
-                onChange={(event) => setUser(event.target.value)}
+              <label htmlFor="login-type">Choose login type</label>
+              <SliderButton
+                id="login-type"
+                choices={["password", "token"]}
+                onClick={handleLoginType}
               />
             </div>
-            <div className="login-form-input">
-              <label htmlFor="password">Password:</label>
-              <input
-                name="password"
-                id="password"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-              />
-            </div>
+
+            {loginMethod === "token" ? (
+              <div className="login-form-input">
+                <label htmlFor="token">Token:</label>
+                <input
+                  name="token"
+                  id="token"
+                  type="text"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                />
+              </div>
+            ) : (
+              <>
+                <div className="login-form-input">
+                  <label htmlFor="username">Username:</label>
+                  <input
+                    name="username"
+                    id="username"
+                    type="user"
+                    value={user}
+                    onChange={(event) => setUser(event.target.value)}
+                  />
+                </div>
+                <div className="login-form-input">
+                  <label htmlFor="password">Password:</label>
+                  <input
+                    name="password"
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                  />
+                </div>
+              </>
+            )}
 
             <button className="clickable-button" name="Login" type="submit">
               Login

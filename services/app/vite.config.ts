@@ -37,10 +37,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
-      "/openbis-empa-lab402/": {
+      "^/openbis-empa-(\w+)/": {
         target: "https://openbis-empa-lab402.ethz.ch/",
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => {console.log(path); return path.replace(/^\/openbis-empa-(\w+)/, "/$1")},
       },
     },
   },
