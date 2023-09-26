@@ -21,8 +21,6 @@ build-docker:
       - master
 deploy-docker:
   before_script:
-    - docker context create openbis --docker "host=ssh://$DEPLOY_HOST" 
-    - docker context use openbis
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
   stage: deploy
@@ -31,6 +29,8 @@ deploy-docker:
     - docker:dind
   tags:
     - dind
+  variables:
+    DOCKER_HOST: ssh://$DEPLOY_HOST
   script:
     - docker pull $CI_REGISTRY_IMAGE
     - docker stop app || true
