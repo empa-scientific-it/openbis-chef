@@ -7,7 +7,6 @@ RUN yarn install --frozen-lockfile
 COPY lib/ lib/
 COPY src/ src/
 COPY tsconfig.json ./
-COPY node_modules/ node_modules/
 COPY vite.config.ts ./
 COPY index.html ./
 
