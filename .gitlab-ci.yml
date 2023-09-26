@@ -14,11 +14,6 @@ build-docker:
   script:
     - docker build --pull -t $CI_REGISTRY_IMAGE:latest .
     - docker push $CI_REGISTRY_IMAGE
-  only:
-    changes:
-      - ./services/app/Dockerfile
-      - ./services/app/**.tsx
-
 deploy-docker:
   before_script:
     - docker context create --docker "host=$DOCKER_HOST" 
