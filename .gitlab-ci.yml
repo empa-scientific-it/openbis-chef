@@ -4,7 +4,7 @@ stages:
 
 build-docker:
   stage: build
-  image: docker:latest
+  image: docker:20.10.22-dind
   services: 
     - docker:dind
   tags:
@@ -19,7 +19,7 @@ deploy-docker:
     - docker context create --docker "host=$DOCKER_HOST" 
     - docker context use $DOCKER_CONTEXT
   stage: deploy
-  image: docker:latest
+  image: docker:20.10.22-dind
   services: 
     - docker:dind
   tags:
