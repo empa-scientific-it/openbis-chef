@@ -14,9 +14,14 @@ build-docker:
   script:
     - docker build --pull -t $CI_REGISTRY_IMAGE:latest services/app
     - docker push $CI_REGISTRY_IMAGE
+  only:
+    changes:
+      - services/app/**/
+    refs:
+      - master
 deploy-docker:
   before_script:
-    - docker context create openbis --docker "host=$DOCKER_HOST" 
+    - docker context create openbis --docker "host=ssh://$DEPLOY_HOST" 
     - docker context use openbis
   stage: deploy
   image: docker:20.10.22-dind
