@@ -20,9 +20,10 @@ build-docker:
     refs:
       - master
 deploy-docker:
-  image: docker:23.0.6-dind-alpine3.18
+  image: docker:23.0.6-alpine3.18
   variables:
     DOCKER_HOST: ssh://$DEPLOY_HOST
+    GIT_STRATEGY: none
   # services:
   #   - docker:23.0.6-dind-alpine3.18
   # tags:
@@ -30,6 +31,8 @@ deploy-docker:
   # before_script:
   #   - DOCKER_HOST=ssh://$DEPLOY_HOST  docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   before_script:
+    - cp "$SSH_KNOWN_HOSTS" ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
     - apk add openssh-client
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - 
