@@ -5,7 +5,7 @@ stages:
 build-docker:
   stage: build
   image: docker:20.10.22-dind
-  services: 
+  services:
     - docker:dind
   tags:
     - dind
@@ -21,15 +21,23 @@ build-docker:
       - master
 deploy-docker:
   image: docker:23.0.6-dind-alpine3.18
-  services:   
-    - docker:dind
-  tags:
-    - dind
+  variables:
+    DOCKER_HOST: ssh://$DEPLOY_HOST
+  # services:
+  #   - docker:23.0.6-dind-alpine3.18
+  # tags:
+  #   - dind
+  # before_script:
+  #   - DOCKER_HOST=ssh://$DEPLOY_HOST  docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   before_script:
-    - DOCKER_HOST=ssh://$DEPLOY_HOST  docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - apk add openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - 
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
   stage: deploy
   script:
-    - DOCKER_HOST=ssh://$DEPLOY_HOST docker pull $CI_REGISTRY_IMAGE
-    - DOCKER_HOST=ssh://$DEPLOY_HOST docker stop app || true
-    - DOCKER_HOST=ssh://$DEPLOY_HOST docker rm app || true
-    - DOCKER_HOST=ssh://$DEPLOY_HOST docker run --name app -p 8000:80  $CI_REGISTRY_IMAGE
+    - docker pull $CI_REGISTRY_IMAGE
+    - docker stop app || true
+    - docker rm app || true
+    - docker run --name app -p 8000:80  $CI_REGISTRY_IMAGE
