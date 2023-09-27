@@ -36,7 +36,6 @@ deploy-docker:
     - chmod 700 ~/.ssh
     - touch ~/.ssh/known_hosts
     - ssh-keyscan $DEPLOY_HOST 
-    - chmod 644 ~/.ssh/known_hosts
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - 
   stage: deploy
