@@ -2,6 +2,9 @@ stages:
   - build
   - deploy
 
+tags:
+  - openbis
+
 build-docker:
   stage: build
   image: docker:20.10.22-dind
