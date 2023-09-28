@@ -1,9 +1,10 @@
 stages:
   - build
   - deploy
-
-tags:
-  - openbis
+  
+default:
+  tags:
+    - openbis
 
 build-docker:
   stage: build
