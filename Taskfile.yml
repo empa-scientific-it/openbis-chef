@@ -8,6 +8,8 @@ tasks:
       preconditions:
         - sh: type -p docker
           msg: "docker is not installed. Please install docker first"
+      env:
+        DOCKER_HOST: tcp://localhost:2375
       cmds:
         - docker context use default
         - docker compose up 
@@ -88,7 +90,6 @@ tasks:
   test:
       deps:
         - dev-install
-        - import_schema
       dir: ./services/app
       cmds:
         - yarn run test
