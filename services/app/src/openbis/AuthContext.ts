@@ -7,6 +7,7 @@ export interface AuthContextInterface {
   loggedIn: boolean;
   setLoggedIn: (current: boolean) => void;
   login: (username: string, password: string) => void;
+  loginWithPAT: (token: string, callback: (service: Facade) => void) => void;
   logout: () => void;
   service: Facade;
   setUrl: (url: string) => void;
@@ -19,6 +20,7 @@ export const AuthContext = createContext<AuthContextInterface>({
   setToken: () => {},
   setLoggedIn: () => {},
   login: (username: string, password: string) => {},
+  loginWithPAT: (token: string, callback: (service: Facade) => void) => {},
   logout: () => {},
   service: null as Facade,
   setUrl: (url: string) => {},

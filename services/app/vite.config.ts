@@ -31,11 +31,12 @@ export default defineConfig({
           });
         },
       },
-      "/openbis/": {
+      "/local/": {
         //You can use https://sgl01646:8443/ for remote development with the instance in SG. You can also use https://openbis-empa-lab402.ethz.ch/openbis/webapp/eln-lims/ but be careful with creating objects
         target: "https://localhost:8445/",
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => {const newPath =  path.replace("/local", ""); console.log(newPath); return newPath},
       },
       "^/openbis-empa-(\w+)/": {
         target: "https://openbis-empa-lab402.ethz.ch/",

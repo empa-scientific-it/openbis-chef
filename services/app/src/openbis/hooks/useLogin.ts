@@ -49,12 +49,26 @@ export function useLogin() {
     setLoggedIn(() => false);
   };
 
+  const loginWithPAT = (token: string, then: (service: Facade) => void) => {
+    service.useSession(token);
+    service.checkSession(token).then((result) =>{
+      setToken("token", () => token as string);
+      setLoggedIn(() => true);
+      then(service)
+    }).catch(
+      () => {}
+    )
+  }
+
+
+
   return {
     token,
     setToken,
     loggedIn,
     setLoggedIn,
     login,
+    loginWithPAT,
     service,
     loginAndThen,
     logout,

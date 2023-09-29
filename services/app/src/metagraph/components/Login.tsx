@@ -15,7 +15,7 @@ function Login() {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [server, setServer] = useState("local");
-  const { loginAndThen, setUrl, service } = useContext(AuthContext);
+  const { loginAndThen, loginWithPAT, setUrl, service } = useContext(AuthContext);
 
   const [loginMethod, setLoginMethod] = useState<loginMethods>("password");
 
@@ -28,13 +28,15 @@ function Login() {
     const from = location.state?.from?.pathname || "/";
     console.log("server", server);
     setUrl(server);
+    const doNavigate = () => navigate(from, { replace: true });
     switch (loginMethod) {
       case "password":
         loginAndThen(user, password, () => {
-          navigate(from, { replace: true });
+          doNavigate();
         });
         break;
       case "token":
+        loginWithPAT(password, () => doNavigate())
         
     }
   }
