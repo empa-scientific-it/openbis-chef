@@ -54,10 +54,6 @@ export interface VisualisationNode {
   };
 }
 
-// export interface ValidationFailure {
-//   type: "duplicateId" | "invalidDependency" | "circularDependency";
-// }
-
 export interface CircularDependencyFailure {
   type: "circularDependency";
   node: string;
@@ -89,6 +85,34 @@ export interface ValidationResult {
   failures: ValidationFailure[];
 }
 
+function checkNonCircularDependencies(nodes: MetagraphNode[]): CircularDependencyFailure[] {
+  // For each node that has not been visited yet, perform BFS
+  // Store visited nodes in a set
+  // If you encounter a node already included in the set -> is a circular dependency 
+  const visited = new Set();
+  const queue = [];
+
+  nodes.forEach((node) => {
+    if (visited.has(node.id)) {
+      return [{ type: "circularDependency", node: node.id }];
+    }
+  
+    queue.push(node);
+    while (queue.length > 0) {
+      const currentNode = queue.shift();
+      visited.add(currentNode.id);
+      currentNode.dependencies.forEach((depId) => {
+        const depNode = nodes.find((n) => n.id === depId);
+        if (!visited.has(depNode.id)) {
+          queue.push(depNode);
+        }
+      });
+    }
+  });
+
+  return []
+}
+
 function checkUniqueIds(nodes: MetagraphNode[]): DuplicateId[] {
   const ids = nodes.map((node) => node.id);
   const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
@@ -108,7 +132,7 @@ function checkValidDependencies(nodes: MetagraphNode[]): ValidationFailure[] {
 export function formatFailure(failure: ValidationFailure): string {
   switch (failure.type) {
     case "circularDependency":
-      return `Circular dependency: ${failure.circularDependency.join(" -> ")}`;
+      return `Circular dependency in node: ${failure.node}`;
     case "duplicateId":
       return `Duplicate id: ${failure.id} in node: ${failure.node}`;
     case "invalidDependency":
@@ -119,10 +143,9 @@ export function formatFailure(failure: ValidationFailure): string {
 }
 
 function validateMetagraph(nodes: MetagraphNode[]): ValidationResult {
-  //TODO check for circular dependencies
-
   // Combine validation functions
   const validations = [
+    checkNonCircularDependencies,
     checkUniqueIds,
     checkValidDependencies,
     // Add more validation functions here
