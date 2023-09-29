@@ -6,12 +6,11 @@ export interface AuthContextInterface {
   setToken: (token: string) => void;
   loggedIn: boolean;
   setLoggedIn: (current: boolean) => void;
-  login: (username: string, password: string) => void;
-  loginWithPAT: (token: string, callback: (service: Facade) => void) => void;
+  login: (username: string, password: string) => Promise<boolean>;
+  loginWithPAT: (token: string) => Promise<boolean>;
   logout: () => void;
   service: Facade;
   setUrl: (url: string) => void;
-  loginAndThen: (user: string, password: string, callback: Function) => void;
 }
 
 export const AuthContext = createContext<AuthContextInterface>({
@@ -19,10 +18,9 @@ export const AuthContext = createContext<AuthContextInterface>({
   loggedIn: false,
   setToken: () => {},
   setLoggedIn: () => {},
-  login: (username: string, password: string) => {},
-  loginWithPAT: (token: string, callback: (service: Facade) => void) => {},
+  login: async (username: string, password: string) => false,
+  loginWithPAT: async (token: string) => false,
   logout: () => {},
   service: null as Facade,
   setUrl: (url: string) => {},
-  loginAndThen: (user: string, password: string, callback: Function) => {},
 });

@@ -55,7 +55,7 @@ export function prepareValueForDisplay(
   }
 }
 
-interface PropertyWithType {
+export interface PropertyWithType {
   value: string;
   type: DataType;
   plugin: Plugin;
@@ -101,5 +101,13 @@ export function displayValue(entry: PropertyWithType): React.JSX.Element {
       );
     default:
       return <div>{entry.value}</div>;
+  }
+}
+
+
+export function inputForType(type: DataType): React.JSX.Element{
+  switch (type){
+    case "HYPERLINK":
+      return 
   }
 }

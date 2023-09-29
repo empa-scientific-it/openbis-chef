@@ -59,6 +59,7 @@ function Entry() {
     const sfo = new SampleTypeFetchOptions();
     sfo.withPropertyAssignments().withPropertyType();
     if (loggedIn) {
+      console.log(service)
       service.searchSampleTypes(ssc, sfo).then((res) => {
         if (res.totalCount > 0) {
           setEntity(() => res.objects[0]);

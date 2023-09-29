@@ -14,8 +14,8 @@ type loginMethods = "password" | "token";
 function Login() {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
-  const [server, setServer] = useState("local");
-  const { loginAndThen, loginWithPAT, setUrl, service } = useContext(AuthContext);
+  const [server, setServer] = useState("/local/");
+  const { login, loginWithPAT, setUrl, service } = useContext(AuthContext);
 
   const [loginMethod, setLoginMethod] = useState<loginMethods>("password");
 
@@ -26,24 +26,18 @@ function Login() {
 
   function handleSubmit() {
     const from = location.state?.from?.pathname || "/";
-    console.log("server", server);
     setUrl(server);
+    console.log("Login method: " + loginMethod, "Server: " + server);
     const doNavigate = () => navigate(from, { replace: true });
     switch (loginMethod) {
       case "password":
-        loginAndThen(user, password, () => {
-          doNavigate();
-        });
+        login(user, password).then((res) => (res ? doNavigate() : {}));
         break;
       case "token":
-        loginWithPAT(password, () => doNavigate())
-        
+        loginWithPAT(password).then((res) => (res ? doNavigate() : {}));
+        break;
     }
   }
-
-  useEffect(() => {
-    console.log("service", service);
-  }, [service]);
 
   const handleLoginType = (choice: string) => {
     console.log(choice);
