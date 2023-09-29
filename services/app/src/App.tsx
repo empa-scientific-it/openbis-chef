@@ -24,15 +24,19 @@ function RequireAuth({ children }: { children: JSX.Element }) {
   const location = useLocation();
 
   if (!loggedIn) {
-    <Navigate
-      to="/login"
-      replace // <-- redirect
-      state={{ path: location.pathname }}
-    />;
+    console.log("Redirecting to login");
+    return (
+      <Navigate
+        to="/login"
+        replace // <-- redirect
+        state={{ path: location.pathname }}
+      />
+    );
   } else {
     return <>{children}</>;
   }
 }
+
 
 const workflows = [polyproWorkflow, pizzaWorkflow, simpleWorkflow];
 
