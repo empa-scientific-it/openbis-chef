@@ -3,163 +3,170 @@ version: 3
 dotenv:
   - ".env"
 
+
+
 tasks:
   start_openbis:
-      preconditions:
-        - sh: type -p docker
-          msg: "docker is not installed. Please install docker first"
-      env:
-        DOCKER_HOST: tcp://localhost:2375
-      cmds:
-        - docker context use default
-        - docker compose up 
-        - until ./utils/check_openbis.sh https://localhost:${OPENBIS_PORT}; do sleep 1; done
-      status:
-        - docker compose ps | grep openbis
-        - ./utils/check_openbis.sh https://localhost:${OPENBIS_PORT}
+    preconditions:
+      - sh: type -p docker
+        msg: "docker is not installed. Please install docker first"
+    requires:
+      vars: [DOCKER_LOCAL_HOST, OPENBIS_PORT]
+    env:
+      DOCKER_HOST: "{{.DOCKER_LOCAL_HOST}}"
+    cmds:
+      - docker compose up openbis -d
+      - until ./utils/check_openbis.sh https://localhost:${OPENBIS_PORT}; do sleep 1; done
+    status:
+      - docker compose ps | grep openbis
+      - ./utils/check_openbis.sh https://localhost:${OPENBIS_PORT}
 
   #TODO fix  this part
   #If it does not work, just download the tool from here:
   #https://gitlab.empa.ch/openbis-tools/instance-io/-/packages/57 and place it in ./utils/ of the project with the name instance-io.jar
   cleanup:
-      cmds:
-        - docker compose down -v
+    requires:
+      vars: [DOCKER_LOCAL_HOST, OPENBIS_PORT]
+    env:
+      DOCKER_HOST: "{{.DOCKER_LOCAL_HOST}}"
+    cmds:
+      - docker compose down -v
+
   download_jar:
-      # requires:
-      #vars: [TOKEN]
-      dir: ./utils
-      cmds:
-        - 'curl  -L -H "Private-Token: {{.TOKEN}}"  https://gitlab.empa.ch/api/v4/projects/1553/packages/maven/ch/empa/openbisio/app/0.1.3/app-0.1.3.jar --output instance-io.jar'
-      status:
-        - test  ./utils/instance-io.jar
+    dir: ./utils
+    requires:
+      vars: [TOKEN]
+    cmds:
+      - 'curl  -L -H "Private-Token: {{.TOKEN}}"  https://gitlab.empa.ch/api/v4/projects/1553/packages/maven/ch/empa/openbisio/app/0.1.3/app-0.1.3.jar --output instance-io.jar'
+    status:
+      - test  ./utils/instance-io.jar
   export_schema:
-      preconditions:
-        - sh: type -p java
-          msg: "java is not installed. Please install java first"
-      requires:
-        vars: [OPENBIS_SOURCE_USER, OPENBIS_SOURCE_PASSWORD]
-      deps:
-        - download_jar
-      cmds:
-        - java -jar ./utils/instance-io.jar dump  ./schemas/schema_402.json https://openbis-empa-lab402.ethz.ch/ {{.OPENBIS_SOURCE_USER}} {{.OPENBIS_SOURCE_PASSWORD}}  
-      status:
-        - test ./schemas/schema_402.json
+    preconditions:
+      - sh: type -p java
+        msg: "java is not installed. Please install java first"
+    requires:
+      vars: [OPENBIS_SOURCE_USER, OPENBIS_SOURCE_PASSWORD]
+    deps:
+      - download_jar
+    cmds:
+      - java -jar ./utils/instance-io.jar dump  ./schemas/schema_402.json https://openbis-empa-lab402.ethz.ch/ {{.OPENBIS_SOURCE_USER}} {{.OPENBIS_SOURCE_PASSWORD}}
+    status:
+      - test ./schemas/schema_402.json
   cleanup_schema:
-      deps:
-        - export_schema
-      sources:
-        - ./schemas/schema_402.json
-      generates:
-        - ./schemas/schema_402_clean.json
-      cmds:
-        - cat ./schemas/schema_402.json | jq '.spaces |= map(select(.code | contains("POLPRO")))' | more > ./schemas/schema_402_clean.json
+    preconditions:
+      - sh: type -p jq
+        msg: "jq is not installed. Please install jq first"
+    deps:
+      - export_schema
+    sources:
+      - ./schemas/schema_402.json
+    generates:
+      - ./schemas/schema_402_clean.json
+    cmds:
+      - cat ./schemas/schema_402.json | jq '.spaces |= map(select(.code | contains("POLPRO")))' | more > ./schemas/schema_402_clean.json
   ##TODO fix this part: improve the checking whether the schema is already imported
   import_schema:
-      deps:
-        - cleanup_schema
-        - start_openbis
-        - download_jar
-      cmds:
-        - until ./utils/check_openbis.sh https://localhost:${OPENBIS_PORT}; do sleep 1; done
-        - java -jar ./utils/instance-io.jar load ./schemas/schema_402_clean.json https://localhost:${OPENBIS_PORT} admin changeit 
-        - touch .schema_imported
-      status:
-        - test -f .schema_imported
+    deps:
+      - cleanup_schema
+      - start_openbis
+      - download_jar
+    cmds:
+      - until ./utils/check_openbis.sh https://localhost:${OPENBIS_PORT}; do sleep 1; done
+      - java -jar ./utils/instance-io.jar load ./schemas/schema_402_clean.json https://localhost:${OPENBIS_PORT} admin changeit
+      - touch .schema_imported
+    status:
+      - test -f .schema_imported
   dev-install:
-      preconditions:
-        - sh: type -p yarn
-          msg: "yarn is not installed. Please install yarn first"
-      
-      dir: ./services/app
-      sources:
-        - ./services/app/package.json
-      generates:
-        - ./services/app/yarn.lock
-      cmds:
-        - yarn install
-      status:
-        -  test ./services/app/yarn.lock
-      run: once
-  dev:
-      deps:
-        - dev-install
-        - import_schema
-      dir: ./services/app
-      cmds:
-        - yarn run vite-dev
-  test:
-      deps:
-        - dev-install
-      dir: ./services/app
-      cmds:
-        - yarn run test
-  dump_local_schema:
-      deps:
-        - download_jar
-        - start_openbis
-      cmds:
-        - java -jar ./utils/instance-io.jar dump  ./schemas/schema_402_local.json https://localhost:${OPENBIS_PORT} admin {{.OPENBIS_PASSWORD}}
-      status:
-        - test ./schemas/schema_402_local.json
-  serve:
-      deps:
-        - import_schema
-        - start_openbis
-      dir: ./services/app
-      cmds:
-        - docker compose build app
-        - docker compose up app -d --force-recreate
+    preconditions:
+      - sh: type -p yarn
+        msg: "yarn is not installed. Please install yarn first"
 
+    dir: ./services/app
+    sources:
+      - ./services/app/package.json
+    generates:
+      - ./services/app/yarn.lock
+    cmds:
+      - yarn install
+    status:
+      - test ./services/app/yarn.lock
+    run: once
+  dev:
+    preconditions:
+    - sh: type -p yarn
+      msg: "yarn is not installed. Please install yarn first"
+    deps:
+      - dev-install
+      - import_schema
+    dir: ./services/app
+    cmds:
+      - yarn run vite-dev
+  test:
+    deps:
+      - dev-install
+    dir: ./services/app
+    cmds:
+      - yarn run test
+  dump_local_schema:
+    deps:
+      - download_jar
+      - start_openbis
+    cmds:
+      - java -jar ./utils/instance-io.jar dump  ./schemas/schema_402_local.json https://localhost:${OPENBIS_PORT} admin {{.OPENBIS_PASSWORD}}
+    status:
+      - test ./schemas/schema_402_local.json
+  serve:
+    requires:
+      vars: [DOCKER_LOCAL_HOST]
+    env:
+      DOCKER_HOST: "{{.DOCKER_LOCAL_HOST}}"
+    deps:
+      - import_schema
+      - start_openbis
+    dir: ./services/app
+    cmds:
+      - docker compose build app
+      - docker compose up app -d --force-recreate
 
   reload_caddy:
-      deps:
-        - serve
-      cmds:
-        - docker compose exec -it app caddy reload --config /etc/caddy/Caddyfile
-
-      # sources:
-      #   - ./services/app/Dockerfile
-      #   - ./services/app/package.json
-      #   - ./services/app/yarn.lock
-      #   - ./services/app/nginx.conf
-      # generates:
-      #   - ./services/app/app/
+    deps:
+      - serve
+    cmds:
+      - docker compose exec -it app caddy reload --config /etc/caddy/Caddyfile
   test_serve:
-      deps:
-        - serve
-      dir: ./services/app
-      cmds:
-        - sleep 4
-        - curl -k -X POST 'https://localhost:8080/openbis/openbis/openbis/rmi-application-server-v3.json' 
-        - curl -k 'https://localhost:8080/login'
-        - curl -k -X POST 'https://localhost:8080/openbis-empa-lab402/openbis/openbis/rmi-application-server-v3.json' 
-  add_context:
-      cmds:
-        - docker context create emp-openbis-data1 --docker "host=tcp://emp-openbis-data1"
-      status:
-        - docker context ls | grep emp-openbis-data1
-  openbis_remote:
-      deps:
-         - add_context
-      dir: ./services/app
-      env:
-        DOCKER_CONTEXT: emp-openbis-data1
-      cmds:
-        -  docker compose up openbis
-        - java -jar ./utils/instance-io.jar dump  ./schemas/schema_402_local.json https://localhost:${OPENBIS_PORT} admin {{.OPENBIS_PASSWORD}}
+    deps:
+      - serve
+    dir: ./services/app
+    cmds:
+      - sleep 2
+      - curl -k -X POST 'https://localhost:8080/openbis/openbis/openbis/rmi-application-server-v3.json'
+      - curl -k 'https://localhost:8080/login'
+      - curl -k -X POST 'https://localhost:8080/openbis-empa-lab402/openbis/openbis/rmi-application-server-v3.json'
 
-  serve_remote: 
-      # deps:
-      #   - add_context
-      dir: ./services/app
-      env:
-        DOCKER_CONTEXT: emp-openbis-data1
-      cmds:
-        -  docker build . -t app
-        -  docker stop app || true
-        -  docker rm app || true
-        -  docker run --name app -p 8000:80  app  || true
-        # -  docker compose run app
+  openbis_remote:
+    dir: ./services/app
+    requires:
+      vars: [DOCKER_REMOTE_HOST]
+    env:
+      DOCKER_HOST: "{{.DOCKER_REMOTE_HOST}}"
+    cmds:
+      - docker compose  up openbis -d
+      - java -jar ./utils/instance-io.jar load  ./schemas/schema_402_local.json https://openbis.scit.empa.ch:${OPENBIS_PORT} admin {{.OPENBIS_PASSWORD}}
+
+  serve_remote:
+    # deps:
+    #   - add_context
+    requires:
+      vars: [DOCKER_REMOTE_HOST]
+    env:
+      DOCKER_HOST: "{{.DOCKER_REMOTE_HOST}}"
+    dir: ./services/app
+    cmds:
+      - docker build . -t app
+      - docker stop app || true
+      - docker rm app || true
+      - docker run -d --name app -p 8000:80  app  || true
+      # -  docker compose run app
   gitlab_build_local:
     env:
       DOCKER_HOST: tcp://localhost:2375
