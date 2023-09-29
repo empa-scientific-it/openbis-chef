@@ -8,8 +8,11 @@ tasks:
       preconditions:
         - sh: type -p docker
           msg: "docker is not installed. Please install docker first"
+      env:
+        DOCKER_HOST: tcp://localhost:2375
       cmds:
-        - docker compose up -d
+        - docker context use default
+        - docker compose up 
         - until ./utils/check_openbis.sh https://localhost:${OPENBIS_PORT}; do sleep 1; done
       status:
         - docker compose ps | grep openbis
@@ -84,6 +87,12 @@ tasks:
       dir: ./services/app
       cmds:
         - yarn run vite-dev
+  test:
+      deps:
+        - dev-install
+      dir: ./services/app
+      cmds:
+        - yarn run test
   dump_local_schema:
       deps:
         - download_jar
@@ -100,6 +109,7 @@ tasks:
       cmds:
         - docker compose build app
         - docker compose up app -d --force-recreate
+
 
   reload_caddy:
       deps:
@@ -150,3 +160,8 @@ tasks:
         -  docker rm app || true
         -  docker run --name app -p 8000:80  app  || true
         # -  docker compose run app
+  gitlab_build_local:
+    env:
+      DOCKER_HOST: tcp://localhost:2375
+    cmds:
+      - gitlab-runner exec docker build-docker --env DOCKER_HOST={{.DOCKER_HOST}}
