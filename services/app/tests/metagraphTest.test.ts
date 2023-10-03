@@ -1,5 +1,7 @@
-import { Metagraph, MetagraphNode } from "@src/metagraph/metagraph";
+import { Metagraph, MetagraphNode, ValidationFailure } from "@src/metagraph/metagraph";
 import { expect, describe, test } from "vitest";
+import { match } from "fp-ts/Either";
+import { pipe } from "fp-ts/function";
 
 function validGraph(): MetagraphNode[] {
   return [
@@ -65,13 +67,23 @@ describe("check metagraph validation", () => {
 
   test("should return an error for an invalid metagraph with missing nodes", () => {
     const nodes = missingNodeGraph();
-    const metagraph = new Metagraph(nodes, "", "");
-    expect(metagraph.nodes).toThrowError();
+    const metagraph = Metagraph.fromNodes(nodes, "", "");
+
+    const res = pipe(metagraph, match(
+      (e: ValidationFailure) => e.type,
+      (a: Metagraph) => a.name
+    ));
+    expect(res).toMatch("invalidDependency");
   });
 
   test("should return an error for an invalid metagraph with circular dependencies", () => {
     const nodes = circularDependencyGraph();
-    const metagraph = new Metagraph(nodes, "", "");
-    expect(metagraph.nodes).toEqual(nodes);
+    const metagraph = Metagraph.fromNodes(nodes, "", "");
+    
+    const res = pipe(metagraph, match(
+      (e: ValidationFailure) => e.type,
+      (a: Metagraph) => a.name
+    ));
+    expect(res).toMatch("circularDependency");
   });
 });

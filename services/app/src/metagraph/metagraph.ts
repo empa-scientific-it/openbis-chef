@@ -57,7 +57,7 @@ export interface VisualisationNode {
 export interface CircularDependencyFailure {
   type: "circularDependency";
   node: string;
-  circularDependency: string[];
+  dependency: string;
 }
 
 export interface DuplicateId {
@@ -86,31 +86,35 @@ export interface ValidationResult {
 }
 
 function checkNonCircularDependencies(nodes: MetagraphNode[]): CircularDependencyFailure[] {
-  // For each node that has not been visited yet, perform BFS
-  // Store visited nodes in a set
-  // If you encounter a node already included in the set -> is a circular dependency 
-  const visited = new Set();
-  const queue = [];
+  const visited: Record<string, boolean> = {};
+  const stack: Record<string, boolean> = {};
 
-  nodes.forEach((node) => {
-    if (visited.has(node.id)) {
-      return [{ type: "circularDependency", node: node.id }];
-    }
-  
-    queue.push(node);
-    while (queue.length > 0) {
-      const currentNode = queue.shift();
-      visited.add(currentNode.id);
-      currentNode.dependencies.forEach((depId) => {
-        const depNode = nodes.find((n) => n.id === depId);
-        if (!visited.has(depNode.id)) {
-          queue.push(depNode);
+  const hasCircularDependency = (node: MetagraphNode): string | boolean => {
+    if (node !== undefined) {
+      if (!visited[node.id]) {
+        visited[node.id] = true;
+        stack[node.id] = true;
+
+        for (const dependency of node.dependencies) {
+          const dependentNode = nodes.find((n) => n.id === dependency);
+          if ((!visited[dependency] && hasCircularDependency(dependentNode)) || stack[dependency]) {
+            return dependency;
+          }
         }
-      });
+      }
+      stack[node.id] = false;
     }
-  });
+    return false;
+  };
 
-  return []
+  for (const node of nodes) {
+    const dependency = hasCircularDependency(node);
+    if (typeof dependency === "string") {
+      return [{ type: "circularDependency", node: node.id, dependency: dependency }];
+    }
+  }
+
+  return [];
 }
 
 function checkUniqueIds(nodes: MetagraphNode[]): DuplicateId[] {
@@ -142,7 +146,7 @@ export function formatFailure(failure: ValidationFailure): string {
   }
 }
 
-function validateMetagraph(nodes: MetagraphNode[]): ValidationResult {
+export function validateMetagraph(nodes: MetagraphNode[]): ValidationResult {
   // Combine validation functions
   const validations = [
     checkNonCircularDependencies,
@@ -154,7 +158,6 @@ function validateMetagraph(nodes: MetagraphNode[]): ValidationResult {
   const failures = validations
     .flatMap((validation) => validation(nodes))
     .filter((f) => f !== undefined);
-  console.log(failures);
   if (failures.length > 0) {
     return { valid: false, failures: failures };
   } else {
@@ -204,20 +207,13 @@ export class Metagraph {
   }
 }
 
-/**
- * Walk the graph in a BFS form and apply a transformation to each visited node
- * @param g
- * @param transform
- * @returns
- */
-export function walkGraph<T>(g: Metagraph, transform: (v: MetagraphNode) => T): T[] {
-  //Perform BFS on the graph
+export function walkNodes<T>(nodes: MetagraphNode[], transform: (v: MetagraphNode) => T): T[]{
   const visited = new Set();
   const queue = [];
   const result = [];
   //TODO use a functional / immutable style instead
   //For each node that has not been visited yet, perform BFS
-  g.nodes.forEach((node) => {
+  nodes.forEach((node) => {
     if (!visited.has(node.id)) {
       queue.push(node);
       while (queue.length > 0) {
@@ -225,7 +221,7 @@ export function walkGraph<T>(g: Metagraph, transform: (v: MetagraphNode) => T): 
         visited.add(currentNode.id);
         result.push(transform(currentNode));
         currentNode.dependencies.forEach((depId) => {
-          const depNode = g.nodes.find((n) => n.id === depId);
+          const depNode = nodes.find((n) => n.id === depId);
           if (!visited.has(depNode.id)) {
             queue.push(depNode);
           }
@@ -234,6 +230,17 @@ export function walkGraph<T>(g: Metagraph, transform: (v: MetagraphNode) => T): 
     }
   });
   return result;
+}
+
+/**
+ * Walk the graph in a BFS form and apply a transformation to each visited node
+ * @param g
+ * @param transform
+ * @returns
+ */
+export function walkGraph<T>(g: Metagraph, transform: (v: MetagraphNode) => T): T[] {
+  //Perform BFS on the graph
+  return walkNodes(g.nodes, transform);
 }
 
 interface Edge {
