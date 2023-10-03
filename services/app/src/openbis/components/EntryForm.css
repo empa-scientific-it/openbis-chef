@@ -22,3 +22,11 @@
 .form-input[type="checkbox"] {
   margin-bottom: 0;
 }
+
+
+.form-input > .xml-property-editor{
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}

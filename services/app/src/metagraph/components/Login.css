@@ -34,3 +34,45 @@
     border-width: 1px;
     height: 25px;
 }
+
+/* Toast container */
+.toast-container {
+    position: fixed;
+    bottom: 20px; /* Adjust as needed for placement */
+    right: 20px; /* Adjust as needed for placement */
+    z-index: 9999; /* Ensure it appears above other content */
+    max-width: 300px; /* Adjust the maximum width */
+    background-color: #333; /* Background color */
+    color: #fff; /* Text color */
+    padding: 10px 20px; /* Padding around content */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Box shadow for a subtle elevation effect */
+  }
+  
+  /* Toast message text */
+  .toast-message {
+    font-size: 16px; /* Adjust the font size */
+    line-height: 1.4; /* Adjust the line height */
+  }
+  
+  /* Toast success style */
+  .toast-success {
+    background-color: #28a745; /* Green background for success */
+  }
+  
+  /* Toast error style */
+  .toast-error {
+    background-color: #dc3545; /* Red background for error */
+  }
+  
+  /* Toast animation (optional) */
+  .toast-enter {
+    transform: translateY(100%);
+    opacity: 0;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  }
+  
+  .toast-enter-active {
+    transform: translateY(0);
+    opacity: 1;
+  }

@@ -9,7 +9,11 @@ import { openBISInstance } from "@src/openbis/config/openBISInstance";
 import instances from "@src/openbis/config/instances.json";
 import SliderButton from "./SliderButton";
 
-type loginMethods = "password" | "token";
+
+import Toast from "react-bootstrap/Toast";
+
+
+type LoginMethods = "password" | "token";
 
 function Login() {
   const [user, setUser] = useState("");
@@ -17,7 +21,9 @@ function Login() {
   const [server, setServer] = useState("/local/");
   const { login, loginWithPAT, setUrl, service } = useContext(AuthContext);
 
-  const [loginMethod, setLoginMethod] = useState<loginMethods>("password");
+  const [showToast, setShowToast] = useState(false);
+
+  const [loginMethod, setLoginMethod] = useState<LoginMethods>("password");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,19 +35,27 @@ function Login() {
     setUrl(server);
     console.log("Login method: " + loginMethod, "Server: " + server);
     const doNavigate = () => navigate(from, { replace: true });
+
+    const fail = () => setShowToast((old) => true);
+
+    useEffect(() => {
+      const timer = setTimeout(() => setShowToast((old) => false), 2000);
+      return () => clearTimeout(timer);
+    }, [showToast]);
+
     switch (loginMethod) {
       case "password":
-        login(user, password).then((res) => (res ? doNavigate() : {}));
+        login(user, password).then((res) => (res ? doNavigate() : fail()));
         break;
       case "token":
-        loginWithPAT(password).then((res) => (res ? doNavigate() : {}));
+        loginWithPAT(password).then((res) => (res ? doNavigate() : fail()));
         break;
     }
   }
 
   const handleLoginType = (choice: string) => {
     console.log(choice);
-    setLoginMethod(choice as loginMethods);
+    setLoginMethod(choice as LoginMethods);
   };
 
   return (
@@ -123,6 +137,12 @@ function Login() {
             </button>
           </form>
         </div>
+        <Toast hidden={showToast}>
+          <Toast.Header className="toast-container">Problem</Toast.Header>
+          <Toast.Body>
+            Wrong password
+          </Toast.Body>
+          </Toast>
       </div>
     </div>
   );
