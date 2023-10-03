@@ -9,9 +9,7 @@ import { openBISInstance } from "@src/openbis/config/openBISInstance";
 import instances from "@src/openbis/config/instances.json";
 import SliderButton from "./SliderButton";
 
-
 import Toast from "react-bootstrap/Toast";
-
 
 type LoginMethods = "password" | "token";
 
@@ -30,25 +28,25 @@ function Login() {
 
   const validInstances = instances as openBISInstance[];
 
+  //Hide toast after 2 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => setShowToast((old) => false), 2000);
+    return () => clearTimeout(timer);
+  }, [showToast]);
+
   function handleSubmit() {
     const from = location.state?.from?.pathname || "/";
     setUrl(server);
-    console.log("Login method: " + loginMethod, "Server: " + server);
     const doNavigate = () => navigate(from, { replace: true });
 
-    const fail = () => setShowToast((old) => true);
-
-    useEffect(() => {
-      const timer = setTimeout(() => setShowToast((old) => false), 2000);
-      return () => clearTimeout(timer);
-    }, [showToast]);
+    const failLogin = () => setShowToast((old) => true);
 
     switch (loginMethod) {
       case "password":
-        login(user, password).then((res) => (res ? doNavigate() : fail()));
+        login(user, password).then((res) => (res ? doNavigate() : failLogin()));
         break;
       case "token":
-        loginWithPAT(password).then((res) => (res ? doNavigate() : fail()));
+        loginWithPAT(password).then((res) => (res ? doNavigate() : failLogin()));
         break;
     }
   }
@@ -137,12 +135,10 @@ function Login() {
             </button>
           </form>
         </div>
-        <Toast hidden={showToast}>
-          <Toast.Header className="toast-container">Problem</Toast.Header>
-          <Toast.Body>
-            Wrong password
-          </Toast.Body>
-          </Toast>
+        <Toast show={showToast}>
+          <Toast.Header className="toast-container">Error</Toast.Header>
+          <Toast.Body>Wrong password</Toast.Body>
+        </Toast>
       </div>
     </div>
   );

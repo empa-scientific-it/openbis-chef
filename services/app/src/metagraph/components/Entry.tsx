@@ -57,7 +57,7 @@ function Entry() {
     const ssc = new SampleTypeSearchCriteria();
     ssc.withCode().thatEquals(workflowOperations?.currentOperation?.objectType);
     const sfo = new SampleTypeFetchOptions();
-    sfo.withPropertyAssignments().withPropertyType();
+    sfo.withPropertyAssignments().withPropertyType().withVocabulary().withTerms();
     if (loggedIn) {
       console.log(service)
       service.searchSampleTypes(ssc, sfo).then((res) => {
