@@ -18,8 +18,16 @@ import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import { AuthContext } from "@src/openbis/AuthContext";
 
-function ErrorDisplay(message: string) {
-  return <div>{message}</div>;
+function ErrorDisplay(messages: string[]) {
+  return (
+    <div>
+      <ul>
+        {messages.map((msg, idx) => (
+          <li key={idx}>{msg}</li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 function nodesFromJSON(json: string): Either<ValidationFailure, Metagraph> {
@@ -66,16 +74,14 @@ function WorkflowEditor({
       E.flatMap((mg) => Metagraph.fromNodes(mg.nodes, mg.description, mg.name)),
       match(
         (failure) => {
-          setToastComponent(ErrorDisplay(formatFailure(failure)));
+          setToastComponent(ErrorDisplay([formatFailure(failure)]));
         },
         (graph) => {
           checkMetagraphData(graph, service).then((result) => {
             if (result.valid) {
               handleNewMetagraph(graph);
             } else {
-              setToastComponent(
-                ErrorDisplay(result.failures.map(formatFailure).join("\n"))
-              );
+              setToastComponent(ErrorDisplay(result.failures.map(formatFailure)));
             }
           });
         }
