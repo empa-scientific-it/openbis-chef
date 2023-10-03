@@ -40,6 +40,11 @@ function WorkflowSelection({
     handleNewMetagraph({ ...structuredClone(selected), name: selected.name + ` copy ${Date()}` });
   };
 
+  const handleClose = () => {
+    console.log("closing");
+    setShowNewWorkflow((old) => !old);
+  }
+
   return (
     <div>
       <h3>Available workflows:</h3>
@@ -90,7 +95,7 @@ function WorkflowSelection({
         initialValue={selected}
         handleNewMetagraph={handleNewMetagraph}
         isOpen={showNewWorkflow}
-        handleClose={handleNew}
+        handleClose={handleClose}
       />
     </div>
   );

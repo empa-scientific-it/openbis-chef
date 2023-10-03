@@ -9,6 +9,7 @@ import {
 import * as E from "fp-ts/Either";
 import dagre from "dagre";
 import { Either } from "fp-ts/Either";
+import { ExperimentFetchOptions, ExperimentSearchCriteria } from "v3api/V3API.esm";
 
 export interface Node {
   id: string;
@@ -187,7 +188,10 @@ async function checkSampleType(
     return {
       valid: false,
       failures: [
-        { type: "DataError", message: `Sample type ${node.entityType} does not exist` },
+        {
+          type: "DataError",
+          message: `Sample type ${node.entityType} in node "${node.id}" does not exist`,
+        },
       ],
     };
   }
@@ -198,17 +202,18 @@ async function checkCollection(
   node: EntryNode,
   service: Facade
 ): Promise<ValidationResult> {
-  const ssc = new SampleTypeSearchCriteria();
-  ssc.withCode().thatEquals(node.collection);
-  const sfo = new SampleTypeFetchOptions();
-  sfo.withPropertyAssignments().withPropertyType();
-
-  const res = await service.searchSampleTypes(ssc, sfo);
+  const ssc = new ExperimentSearchCriteria();
+  ssc.withIdentifier().thatEquals(node.collection);
+  const sfo = new ExperimentFetchOptions();
+  const res = await service.searchExperiments(ssc, sfo);
   if (res.totalCount === 0) {
     return {
       valid: false,
       failures: [
-        { type: "DataError", message: `Collection ${node.collection} does not exist` },
+        {
+          type: "DataError",
+          message: `Collection ${node.collection} in node "${node.id}" does not exist`,
+        },
       ],
     };
   }
@@ -226,7 +231,10 @@ async function checkLink(node: SelectNode, service: Facade): Promise<ValidationR
     return {
       valid: false,
       failures: [
-        { type: "DataError", message: `Collection ${node.collection} does not exist` },
+        {
+          type: "DataError",
+          message: `Collection ${node.collection} in node "${node.id}" does not exist`,
+        },
       ],
     };
   }
@@ -272,12 +280,12 @@ export class Metagraph {
     nodes: MetagraphNode[],
     description: string,
     name: string
-  ): Either<ValidationFailure, Metagraph> {
+  ): Either<ValidationFailure[], Metagraph> {
     const valid = validateMetagraph(nodes);
     if (valid.valid) {
       return E.right(new Metagraph(nodes, description, name));
     } else {
-      return E.left(valid.failures[0]);
+      return E.left(valid.failures);
     }
   }
 
