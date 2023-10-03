@@ -256,7 +256,7 @@ export async function checkMetagraphData(
   service: Facade
 ): Promise<ValidationResult> {
   const entryValidations = [checkSampleType, checkCollection];
-  const selectValidations = [checkLink];
+  const selectValidations = [checkCollection, checkSampleType];
   const validationResults = await Promise.all(
     mg.nodes.map((node) => {
       if (node.type === "entry") {
