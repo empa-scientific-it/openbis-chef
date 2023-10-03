@@ -74,10 +74,16 @@ export interface InvalidDependency {
 
 export type SyntaxError = { type: "SyntaxError"; message: string };
 
+export type DataError = {
+  type: "DataError";
+  message: string;
+};
+
 export type ValidationFailure =
   | CircularDependencyFailure
   | DuplicateId
   | InvalidDependency
+  | DataError
   | SyntaxError;
 
 export interface ValidationResult {
@@ -85,7 +91,9 @@ export interface ValidationResult {
   failures: ValidationFailure[];
 }
 
-function checkNonCircularDependencies(nodes: MetagraphNode[]): CircularDependencyFailure[] {
+function checkNonCircularDependencies(
+  nodes: MetagraphNode[]
+): CircularDependencyFailure[] {
   const visited: Record<string, boolean> = {};
   const stack: Record<string, boolean> = {};
 
@@ -97,7 +105,10 @@ function checkNonCircularDependencies(nodes: MetagraphNode[]): CircularDependenc
 
         for (const dependency of node.dependencies) {
           const dependentNode = nodes.find((n) => n.id === dependency);
-          if ((!visited[dependency] && hasCircularDependency(dependentNode)) || stack[dependency]) {
+          if (
+            (!visited[dependency] && hasCircularDependency(dependentNode)) ||
+            stack[dependency]
+          ) {
             return dependency;
           }
         }
@@ -143,6 +154,8 @@ export function formatFailure(failure: ValidationFailure): string {
       return `Invalid dependency: ${failure.dependency} in node: ${failure.node}`;
     case "SyntaxError":
       return `Syntax error: ${failure.message}`;
+    case "DataError":
+      return `Data error: ${failure.message}`;
   }
 }
 
@@ -165,21 +178,89 @@ export function validateMetagraph(nodes: MetagraphNode[]): ValidationResult {
   }
 }
 
-async function checkMetagraphData(
+async function checkSampleType(
+  node: EntryNode,
+  service: Facade
+): Promise<ValidationResult> {
+  const sampleType = await getSampleType(node.entityType, service);
+  if (!sampleType) {
+    return {
+      valid: false,
+      failures: [
+        { type: "DataError", message: `Sample type ${node.entityType} does not exist` },
+      ],
+    };
+  }
+  return { valid: true, failures: [] };
+}
+
+async function checkCollection(
+  node: EntryNode,
+  service: Facade
+): Promise<ValidationResult> {
+  const ssc = new SampleTypeSearchCriteria();
+  ssc.withCode().thatEquals(node.collection);
+  const sfo = new SampleTypeFetchOptions();
+  sfo.withPropertyAssignments().withPropertyType();
+
+  const res = await service.searchSampleTypes(ssc, sfo);
+  if (res.totalCount === 0) {
+    return {
+      valid: false,
+      failures: [
+        { type: "DataError", message: `Collection ${node.collection} does not exist` },
+      ],
+    };
+  }
+  return { valid: true, failures: [] };
+}
+
+async function checkLink(node: SelectNode, service: Facade): Promise<ValidationResult> {
+  const ssc = new SampleTypeSearchCriteria();
+  ssc.withCode().thatEquals(node.collection);
+  const sfo = new SampleTypeFetchOptions();
+  sfo.withPropertyAssignments().withPropertyType();
+
+  const res = await service.searchSampleTypes(ssc, sfo);
+  if (res.totalCount === 0) {
+    return {
+      valid: false,
+      failures: [
+        { type: "DataError", message: `Collection ${node.collection} does not exist` },
+      ],
+    };
+  }
+  return { valid: true, failures: [] };
+}
+
+async function performValidations(
+  node: MetagraphNode,
+  service: Facade,
+  validations: ((node: MetagraphNode, service: Facade) => Promise<ValidationResult>)[]
+): Promise<ValidationResult> {
+  const validationResults = await Promise.all(validations.map((v) => v(node, service)));
+  const failures = validationResults.flatMap((vr) => vr.failures);
+  return { valid: failures.length === 0, failures: failures };
+}
+
+export async function checkMetagraphData(
   mg: Metagraph,
   service: Facade
-): Promise<ValidationFailure[]> {
-  mg.nodes.map(async (node) => {
-    if (node.type === "entry") {
-      const sampleType = await getSampleType(node.entityType, service);
-      if (!sampleType) {
-        return {
-          type: "SyntaxError",
-          message: `Sample type ${node.entityType} does not exist`,
-        };
+): Promise<ValidationResult> {
+  const entryValidations = [checkSampleType, checkCollection];
+  const selectValidations = [checkLink];
+  const validationResults = await Promise.all(
+    mg.nodes.map((node) => {
+      if (node.type === "entry") {
+        return performValidations(node, service, entryValidations);
+      } else if (node.type === "select") {
+        return performValidations(node, service, selectValidations);
       }
-    }
-  });
+    })
+  );
+  //Accumulate all failures
+  const failures = validationResults.flatMap((vr) => vr.failures);
+  return { valid: failures.length === 0, failures: failures };
 }
 
 export class Metagraph {
@@ -207,7 +288,10 @@ export class Metagraph {
   }
 }
 
-export function walkNodes<T>(nodes: MetagraphNode[], transform: (v: MetagraphNode) => T): T[]{
+export function walkNodes<T>(
+  nodes: MetagraphNode[],
+  transform: (v: MetagraphNode) => T
+): T[] {
   const visited = new Set();
   const queue = [];
   const result = [];

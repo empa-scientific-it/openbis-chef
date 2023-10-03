@@ -1,17 +1,22 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import Toast from "react-bootstrap/Toast";
 import schema from "@src/metagraph/metagraph.schema.json";
 import "./Workflow.css";
-import { Metagraph, formatFailure, ValidationFailure, SyntaxError } from "../metagraph";
+import {
+  Metagraph,
+  formatFailure,
+  ValidationFailure,
+  SyntaxError,
+  checkMetagraphData,
+} from "../metagraph";
 import * as E from "fp-ts/Either";
 import { match, left, right, Either } from "fp-ts/Either";
 import { pipe } from "fp-ts/function";
 import Modal from "./Modal";
 
-
-
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
+import { AuthContext } from "@src/openbis/AuthContext";
 
 function ErrorDisplay(message: string) {
   return <div>{message}</div>;
@@ -38,15 +43,16 @@ interface WorkflowEditorProps {
   handleNewMetagraph: (mg: Metagraph) => void;
   handleClose: () => void;
   isOpen: boolean;
-  initialValue: Metagraph
+  initialValue: Metagraph;
 }
 
 function WorkflowEditor({
   handleNewMetagraph,
   isOpen,
   handleClose,
-  initialValue
+  initialValue,
 }: WorkflowEditorProps) {
+  const { service } = useContext(AuthContext);
   const [value, setValue] = useState("// some comment");
   const [toastComponent, setToastComponent] = useState<JSX.Element | null>();
   const [localIsOpen, setLocalIsOpen] = useState(isOpen);
@@ -63,15 +69,23 @@ function WorkflowEditor({
           setToastComponent(ErrorDisplay(formatFailure(failure)));
         },
         (graph) => {
-          handleNewMetagraph(graph);
+          checkMetagraphData(graph, service).then((result) => {
+            if (result.valid) {
+              handleNewMetagraph(graph);
+            } else {
+              setToastComponent(
+                ErrorDisplay(result.failures.map(formatFailure).join("\n"))
+              );
+            }
+          });
         }
       )
     );
   }
 
-    useEffect(() => {
-        setValue(JSON.stringify(initialValue, null, 2));
-    }, [initialValue])
+  useEffect(() => {
+    setValue(JSON.stringify(initialValue, null, 2));
+  }, [initialValue]);
 
   const handleChange = useCallback((value: string, update) => {
     console.log(value);
