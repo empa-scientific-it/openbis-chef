@@ -120,44 +120,27 @@ function SelectDisplay({ name, value, className }: DisplayProps) {
   return TextDisplay({ name, value, className });
 }
 
-function XMLInput({ name, value, onChange, className }: EditorProps) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className={className} hidden={open} onClick={() => setOpen((open) => !open)}>
-      <AceEditor
-        mode="XNL"
-        theme="github"
-        value={value}
-        onChange={onChange}
-        name="xml-property-editor"
-        editorProps={{ $blockScrolling: true }}
-        setOptions={{
-          useWorker: false,
-        }}
-      />
-    </div>
-  );
-  // function extractValueFromXML(xml: string) {
-  //   const parser = new DOMParser();
-  //   console.log(value);
-  //   const xmlDoc = parser.parseFromString(xml ?? "", "text/xml");
-  //   return xmlDoc.documentElement.textContent;
-  // }
-  // function insertValueIntoXML(xml: string, value: string) {
-  //   const parser = new DOMParser();
-  //   const xmlDoc = parser.parseFromString(xml ?? "", "text/xml");
-  //   xmlDoc.documentElement.textContent = value;
-  //   const serializer = new XMLSerializer();
-  //   return serializer.serializeToString(xmlDoc);
-  // }
-  // return (
-  //   <textarea
-  //     className={className}
-  //     name={name}
-  //     value={value !== "" ? extractValueFromXML(value) : ""}
-  //     onChange={(e) => onChange(name, insertValueIntoXML(value, e.target.value))}
-  //   />
-  // );
+type SupportedLang = "json" | "xml" | "yaml";
+
+function makeCodeInput(lang: SupportedLang): PropertyEditor {
+  return ({ name, value, onChange, className }: EditorProps) => {
+    const [open, setOpen] = useState(false);
+    return (
+      <div className={className} hidden={open} onClick={() => setOpen((open) => !open)}>
+        <AceEditor
+          mode={lang}
+          theme="github"
+          value={value}
+          onChange={onChange}
+          name="xml-property-editor"
+          editorProps={{ $blockScrolling: true }}
+          setOptions={{
+            useWorker: false,
+          }}
+        />
+      </div>
+    );
+  };
 }
 
 function XMLDisplay({ name, value, className }: DisplayProps) {
@@ -199,7 +182,6 @@ function HyperlinkDisplay({ name, value, className }: DisplayProps) {
   );
 }
 
-
 function SampleInput({ name, value, onChange, className }: EditorProps) {
   return (
     <input
@@ -236,7 +218,7 @@ export function elementForType(
     case "MULTILINE_VARCHAR":
       return readOnly ? MultiLineTextDisplay : MultiLineTextInput;
     case "XML":
-      return readOnly ? XMLDisplay : XMLInput;
+      return readOnly ? XMLDisplay : makeCodeInput("xml");
     case "HYPERLINK":
       return readOnly ? HyperlinkDisplay : HyperlinkInput;
     case "CONTROLLEDVOCABULARY":
@@ -245,6 +227,8 @@ export function elementForType(
     case "SAMPLE":
       return readOnly ? SampleDisplay : SampleInput;
     case "JSON":
+      return readOnly ? makeCodeInput("json") : makeCodeInput("json");
+    //TODO: Implement array types
     case "ARRAY_INTEGER":
     case "ARRAY_REAL":
     case "ARRAY_STRING":
