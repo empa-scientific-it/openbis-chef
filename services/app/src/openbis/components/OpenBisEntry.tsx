@@ -3,6 +3,7 @@ import { SampleType, DataType, Sample, PropertyType } from "@src/types/openbis";
 import "./EntryForm.css";
 import { mapDataTypeToInputType } from "@src/openbis/typeMappers";
 import { elementForType } from "./PropertyEditor";
+import { c } from "vitest/dist/reporters-5f784f42.js";
 
 export interface ObjectEntry {
   type: SampleType;
@@ -41,21 +42,19 @@ function OpenBisEntry({ objectType, properties, onEntry }: Props) {
   const [objectEntry, setObjectEntry] = useState(objectType);
   // const [properties, setProperties] = useState<{ [key: string]: string }>({});
 
-  function handleInput(propertyCode: string) {
-    return (event: React.ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value;
-      const property = objectType.propertyAssignments.find(
-        (el) => el.propertyType.code == propertyCode
-      );
-      if (property) {
-        const newObjectEntry = {
-          type: objectType,
-          properties: { ...properties, [propertyCode]: value },
-        } as ObjectEntry;
-        // setProperties(newObjectEntry.properties);
-        onEntry(newObjectEntry);
-      }
-    };
+  function handleInput(propertyCode: string, value: string) {
+    const property = objectType.propertyAssignments.find(
+      (el) => el.propertyType.code == propertyCode
+    );
+    if (property) {
+      const newObjectEntry = {
+        type: objectType,
+        properties: { ...properties, [propertyCode]: value },
+      } as ObjectEntry;
+      // setProperties(newObjectEntry.properties);
+      console.log(value);
+      onEntry(newObjectEntry);
+    }
   }
 
   return (

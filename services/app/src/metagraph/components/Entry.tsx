@@ -17,7 +17,7 @@ import {
 } from "@src/openbis/dto";
 import { OperationContext } from "../OperationContext";
 import { OpenBIS } from "@src/types/openbis";
-import "./Select.css"
+import "./Select.css";
 
 function Entry() {
   const { loggedIn, service } = useContext(AuthContext);
@@ -59,7 +59,7 @@ function Entry() {
     const sfo = new SampleTypeFetchOptions();
     sfo.withPropertyAssignments().withPropertyType().withVocabulary().withTerms();
     if (loggedIn) {
-      console.log(service)
+      console.log(service);
       service.searchSampleTypes(ssc, sfo).then((res) => {
         if (res.totalCount > 0) {
           setEntity(() => res.objects[0]);
@@ -85,7 +85,9 @@ function Entry() {
             onEntry={handleEntry}
           />
         ) : null}
-        <button className="clickable-button" onClick={handleSave}>Save</button>
+        <button className="clickable-button" onClick={handleSave}>
+          Save
+        </button>
       </div>
     );
   }, [entity, properties]);
