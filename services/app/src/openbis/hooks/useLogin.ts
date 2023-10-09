@@ -5,7 +5,6 @@ import { useSessionStorage } from "@src/session/useSessionStorage";
 export function useLogin() {
   const [service, setService] = useState(new Facade());
 
-
   const {
     item: token,
     setItem: setToken,
@@ -18,7 +17,7 @@ export function useLogin() {
       if (token) {
         try {
           const valid = await service.checkSession(token);
-          console.log("checkSession", valid)
+          console.log("checkSession", valid);
           if (valid) {
             setLoggedIn(true);
           } else {
@@ -40,11 +39,11 @@ export function useLogin() {
       const newToken = await service.login(username, password);
       setToken("token", () => newToken as string);
       setLoggedIn(true);
-      return true
+      return true;
     } catch (error) {
       setLoggedIn(false);
       removeToken("token");
-      return false
+      return false;
     }
   };
 
@@ -66,12 +65,12 @@ export function useLogin() {
       if (result) {
         setToken("token", () => patToken);
         setLoggedIn(true);
-        return true
+        return true;
       }
     } catch (error) {
       removeToken("token");
       setLoggedIn(false);
-      return false
+      return false;
     }
   };
 
@@ -87,6 +86,6 @@ export function useLogin() {
     logout,
     loginWithPAT,
     setUrl,
-    service
+    service,
   };
 }

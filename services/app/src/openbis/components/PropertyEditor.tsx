@@ -228,7 +228,7 @@ export function elementForType(
       return readOnly ? SampleDisplay : SampleInput;
     case "JSON":
       return readOnly ? makeCodeInput("json") : makeCodeInput("json");
-    //TODO: Implement array types
+    //TODO: Implement array types: probably we can just use a ul of the single type or a comma separated list
     case "ARRAY_INTEGER":
     case "ARRAY_REAL":
     case "ARRAY_STRING":

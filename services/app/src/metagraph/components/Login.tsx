@@ -26,6 +26,8 @@ function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [doLogin, setDoLogin] = useState(false);
+
   const validInstances = instances as openBISInstance[];
 
   // useEffect(() => {
@@ -47,7 +49,7 @@ function Login() {
     return () => clearTimeout(timer);
   }, [showToast]);
 
-  function handleSubmit() {
+  useEffect(() => {
     const from = location.state?.from?.pathname || "/";
     setUrl(server);
     const doNavigate = () => navigate(from, { replace: true });
@@ -62,6 +64,13 @@ function Login() {
         loginWithPAT(password).then((res) => (res ? doNavigate() : failLogin()));
         break;
     }
+    return () => {
+      setDoLogin(() => false);
+    };
+  }, [doLogin]);
+
+  function handleSubmit() {
+    setDoLogin((old) => true);
   }
 
   const handleLoginType = (choice: string) => {
