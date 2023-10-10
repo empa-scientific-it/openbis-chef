@@ -26,34 +26,18 @@ function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [doLogin, setDoLogin] = useState(false);
-
   const validInstances = instances as openBISInstance[];
 
-  // useEffect(() => {
-  //   if (service) {
-  //     service
-  //       .checkSession(token)
-  //       .then((res) => {
-  //         if (res) {
-  //           const from = location.state?.from?.pathname || "/";
-  //           navigate(from, { replace: true });
-  //         }
-  //       })
-  //       .catch((err) => console.log(err));
-  //   }
-  // }, [service, token, navigate, location.state?.from?.pathname])
   //Hide toast after 2 seconds
   useEffect(() => {
     const timer = setTimeout(() => setShowToast((old) => false), 2000);
     return () => clearTimeout(timer);
   }, [showToast]);
 
-  useEffect(() => {
+  function handleLogin() {
     const from = location.state?.from?.pathname || "/";
     setUrl(server);
     const doNavigate = () => navigate(from, { replace: true });
-
     const failLogin = () => setShowToast((old) => true);
 
     switch (loginMethod) {
@@ -64,17 +48,9 @@ function Login() {
         loginWithPAT(password).then((res) => (res ? doNavigate() : failLogin()));
         break;
     }
-    return () => {
-      setDoLogin(() => false);
-    };
-  }, [doLogin]);
-
-  function handleSubmit() {
-    setDoLogin((old) => true);
   }
 
   const handleLoginType = (choice: string) => {
-    console.log(choice);
     setLoginMethod(choice as LoginMethods);
   };
 
@@ -86,7 +62,7 @@ function Login() {
             className="login-form"
             onSubmit={(event) => {
               event.preventDefault();
-              handleSubmit();
+              handleLogin();
             }}
           >
             <h1 className="container-title">Login to openBIS instance</h1>

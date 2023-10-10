@@ -48,6 +48,7 @@ function Entry() {
     console.log(newEntity);
   }
 
+
   function handleSave(event: React.FormEvent<HTMLButtonElement>) {
     event.preventDefault();
     workflowOperations?.setProperties(properties);

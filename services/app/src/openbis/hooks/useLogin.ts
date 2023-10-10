@@ -12,6 +12,8 @@ export function useLogin() {
   } = useSessionStorage<string | null>("token", null);
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
 
+  // check if token is valid when component is mounted
+  // or when token changes
   useEffect(() => {
     const checkSession = async () => {
       if (token) {
@@ -33,6 +35,9 @@ export function useLogin() {
 
     checkSession().catch((e) => console.error(e));
   }, [token, loggedIn, service, removeToken]);
+
+
+
 
   const login = async (username: string, password: string) => {
     try {
