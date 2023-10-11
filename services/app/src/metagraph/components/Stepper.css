@@ -26,6 +26,15 @@
     background-color: #7595d7;
 }
 
+
+.stepper-status-container{
+  display: inline-flex;
+  height: 3%;
+}
+
+.step {
+  display: inline-block;
+}
 .step-indicator:hover {
   background-color: #4d77cb;
 }

@@ -28,7 +28,7 @@ type StepProps = {
 
 export function Step({ label, completed, children, onClick }: StepProps): JSX.Element {
   return (
-    <div>
+    <div className="step">
       <div
         key={label}
         className={"step-indicator" + (completed ? " completed" : " active")}
@@ -48,7 +48,6 @@ export function Stepper({
   handleSubmit,
   children,
 }: Props): JSX.Element {
-
   const handleNextStep = () => {
     handleNext();
   };
@@ -63,27 +62,34 @@ export function Stepper({
 
   return (
     <div className="stepper-container">
-      <button
-        className="clickable-button stepper-button"
-        onClick={handlePreviousStep}
-        disabled={currentStep < 0}
-      >
-        Previous step
-      </button>
+      <div className="stepper-status-container">
+        <button
+          className="clickable-button stepper-button"
+          onClick={handlePreviousStep}
+          disabled={currentStep < 0}
+        >
+          Previous step
+        </button>
 
-      <button
-        className="clickable-button stepper-button"
-        onClick={handleNextStep}
-        disabled={currentStep > children.length - 1}>
+        <div className="step-indicators-container">
+          {children.map((child, index) => child)}
+        </div>
+
+        <button
+          className="clickable-button stepper-button"
+          onClick={handleNextStep}
+          disabled={currentStep > children.length - 1}
+        >
           Next step
-      </button>
-
-      <div className="step-indicators-container">
-        {children.map((child, index) => child)}
+        </button>
       </div>
 
       <button className="clickable-button stepper-button" onClick={handleReset}>
         Reset
+      </button>
+
+      <button className="clickable-button stepper-button" onClick={handleSubmit}>
+        Finish
       </button>
     </div>
   );
