@@ -19,6 +19,7 @@ import { pizzaWorkflow } from "./workflows/PizzaWorkflow";
 import SampleGraphDemo from "./SampleGraphDemo";
 import { simpleWorkflow } from "./workflows/SimpleWorkflow";
 import ReducerDemo from "./ReducerDemo";
+import StepperDemo from "./StepperDemo";
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   const { loggedIn } = useContext(AuthContext);
@@ -62,6 +63,7 @@ const App: React.FC = () => {
             <Route path="demo" element={<Demo metagraph={pizzaWorkflow} />} />
             <Route path="demo1" element={<ReducerDemo/>} />
             <Route path="sampledemo" element={<SampleGraphDemo />} />
+            <Route path="stepper" element={<StepperDemo />} />
           </Routes>
         </AuthContext.Provider>
       </Router>

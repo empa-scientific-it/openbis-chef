@@ -51,6 +51,7 @@ import WorkflowEditor from "./WorkflowEditor";
 import WorkflowSelection from "./WorkflowSelection";
 import { Navigate } from "react-router-dom";
 import WorkflowEnd from "./WorkflowEnd";
+import WorkflowPages from "./WorkflowPages";
 
 type Props = {
   workflows: Metagraph[];
@@ -109,6 +110,7 @@ const Workflow = ({ workflows }: Props) => {
     finished,
     move,
     setList: setNodeComponents,
+    list: nodeList,
   } = useList([] as JSX.Element[]);
 
   // Run workflow function
@@ -201,14 +203,11 @@ const Workflow = ({ workflows }: Props) => {
 
   const handleNextStep = () => {
     workflowOps.nextOperation();
-    next();
-    console.log(nodeIndex);
     setCompletedEntries((prev) => prev.add(nodeIndex.toString()));
   };
 
   const handlePreviousStep = () => {
     workflowOps.previousOperation();
-    previous();
   };
 
   const handleSubmit = () => {
@@ -218,7 +217,6 @@ const Workflow = ({ workflows }: Props) => {
 
   const handleMove = (index: number) => {
     workflowOps.goToOperation(index);
-    move(index);
     setCompletedEntries((prev) => prev.add(nodeIndex.toString()));
   };
 
@@ -273,46 +271,6 @@ const Workflow = ({ workflows }: Props) => {
   }, [workflowSelected]);
 
 
-  function WorkflowPages({
-    metagraph,
-    handleSubmit,
-    elem,
-    idx,
-    handleMove,
-    handlePreviousStep,
-    handleNextStep,
-    handleReset,
-    logger,
-    finished,
-    hierarchyRoot
-  }: {
-    metagraph: Metagraph;
-    elem: JSX.Element[];
-    idx: number;
-    handleMove: (index: number) => void;
-    handlePreviousStep: () => void;
-    handleNextStep: () => void;
-    handleReset: () => void;
-    handleSubmit: () => void;
-    logger: LoggerInterface;
-    finished: boolean;
-    hierarchyRoot: Sample;
-  }) {
-    return (
-      <div>
-        {finished ? WorkflowEnd(logger, finished, hierarchyRoot) : elem}
-        <Stepper
-          handleBack={handlePreviousStep}
-          handleNext={handleNextStep}
-          handleReset={handleReset}
-          handleMove={handleMove}
-          currentStep={idx}
-          maxSteps={metagraph.nodes.length}
-          handleSubmit={handleSubmit}
-        />
-      </div>
-    );
-  }
 
   function WorkflowDescription({ metagraph }: { metagraph: Metagraph }) {
     return (
@@ -388,10 +346,8 @@ const Workflow = ({ workflows }: Props) => {
               />
             ) : workflowSelected && start ? (
               <WorkflowPages
-                elem={nodeComponents}
-                idx={nodeIndex}
+                children={nodeList}
                 handleMove={handleMove}
-                metagraph={currentWorkflow}
                 handleSubmit={handleSubmit}
                 handleNextStep={handleNextStep}
                 handlePreviousStep={handlePreviousStep}

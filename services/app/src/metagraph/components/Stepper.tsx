@@ -1,6 +1,13 @@
-import { useState } from "react";
+import { Children, useEffect, useState } from "react";
 import "./Stepper.css";
 import "@src/App.css";
+
+import {
+  Stepper as MaterialStepper,
+  StepButton,
+  StepContent,
+  StepLabel,
+} from "@material-ui/core";
 
 type Props = {
   handleNext: () => void;
@@ -9,38 +16,49 @@ type Props = {
   handleMove: (index: number) => void;
   handleSubmit: () => void;
   currentStep: number;
-  maxSteps: number;
-
+  children: JSX.Element[];
 };
+
+type StepProps = {
+  label: string;
+  completed?: boolean;
+  children?: JSX.Element;
+  onClick?: () => void;
+};
+
+export function Step({ label, completed, children, onClick }: StepProps): JSX.Element {
+  return (
+    <div>
+      <div
+        key={label}
+        className={"step-indicator" + (completed ? " completed" : " active")}
+        onClick={() => onClick()}
+      ></div>
+      {children}
+    </div>
+  );
+}
 
 export function Stepper({
   handleBack,
   handleNext,
   handleReset,
   currentStep,
-  maxSteps,
   handleMove,
   handleSubmit,
+  children,
 }: Props): JSX.Element {
-  const [localStep, setLocalStep] = useState(currentStep);
 
   const handleNextStep = () => {
-    setLocalStep((prev) => prev + 1);
     handleNext();
   };
 
   const handlePreviousStep = () => {
-    setLocalStep((prev) => prev - 1);
-
     handleBack();
   };
 
   const handleLocalMove = (index: number) => {
-    return (ev: Event) => {
-      ev.preventDefault();
-      handleMove(index);
-      setLocalStep(index);
-    };
+    handleMove(index);
   };
 
   return (
@@ -48,38 +66,20 @@ export function Stepper({
       <button
         className="clickable-button stepper-button"
         onClick={handlePreviousStep}
-        disabled={localStep < 1}
+        disabled={currentStep < 0}
       >
         Previous step
       </button>
 
-      {
-        localStep < maxSteps
-        ?
-        <button
-          className="clickable-button stepper-button"
-          onClick={handleNextStep}
-          disabled={localStep >= maxSteps}
-        >
+      <button
+        className="clickable-button stepper-button"
+        onClick={handleNextStep}
+        disabled={currentStep > children.length - 1}>
           Next step
-        </button>
-      :
-        <button className="clickable-button stepper-button submit-button" onClick={handleSubmit}>
-          Submit
-        </button>
-      }
+      </button>
 
       <div className="step-indicators-container">
-        {Array.from({ length: maxSteps + 1 }, (value, index) => index).map((index) => (
-          <div
-            key={index}
-            className={
-              "step-indicator" +
-              (index < localStep ? " completed" : index > localStep ? " inactive" : "")
-            }
-            onClick={handleLocalMove(index)}
-          />
-        ))}
+        {children.map((child, index) => child)}
       </div>
 
       <button className="clickable-button stepper-button" onClick={handleReset}>

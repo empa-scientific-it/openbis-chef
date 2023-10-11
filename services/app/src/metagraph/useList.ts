@@ -11,28 +11,27 @@ export const useList = <T>(initialData: T[]) => {
     setIdx(() => 0);
     setElem(() => newList[0]);
     setFinished(() => false);
-  } 
+  };
 
   const move = (newIdx: number) => {
-    setIdx(() => newIdx);
-    setElem(() => list[newIdx]);
-    setFinished(false);
+    if (newIdx >= 0 && newIdx <= list.length - 1) {
+      setIdx(() => newIdx);
+      setElem(() => list[newIdx]);
+      if (newIdx == list.length - 1) {
+        setFinished(() => true);
+      } else {
+        setFinished(() => false);
+      }
 
-    if (newIdx == list.length) {
-      setFinished(true);
     }
   };
 
   const next = () => {
-    if (idx <= list.length) {
-      move(idx + 1);
-    }
+    move(idx + 1);
   };
 
   const previous = () => {
-    if (idx >= 0) {
-      move(idx - 1);
-    }
+    move(idx - 1);
   };
 
   const find = (predicate: (elem: T) => boolean): T | undefined => {
@@ -49,8 +48,6 @@ export const useList = <T>(initialData: T[]) => {
 
   const add = (elem: T) => {
     setList((oldList) => [...oldList, elem]);
-    // setIdx(() => list.length + 1);
-    // setElem(() => elem);
   };
 
   const setCurrent = (newElem: T) => {
@@ -64,7 +61,6 @@ export const useList = <T>(initialData: T[]) => {
       setList((prevList) => {
         const newList = [...prevList];
         newList[newIndex] = newElem;
-        // move(newIndex); // Update the current element
         return newList;
       });
     }
@@ -76,6 +72,7 @@ export const useList = <T>(initialData: T[]) => {
     setIdx(() => 0);
     setFinished(() => false);
   };
+
 
   return {
     elem,
