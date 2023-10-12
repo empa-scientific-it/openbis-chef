@@ -55,12 +55,21 @@ function WorkflowPages({
     console.log("moved");
     handleMove(index);
     setVisited(true, index);
+    checkWorkflowFinished()
   };
 
+  const checkWorkflowFinished = () => {
+    if (visited.reduce((cur, sum) => sum && cur) && idx === children.length - 1) {
+      setWorkflowFinished(() => true);
+    }
+  }
+
   const handleMoveToNext = () => {
+
     next();
     handleNextStep();
     setVisited(true, idx);
+    checkWorkflowFinished()
   };
 
   const handleMoveToPrevious = () => {
@@ -81,18 +90,14 @@ function WorkflowPages({
     return children[step];
   }
 
-  const handleFinish = () => {
-    if (visited.reduce((cur, sum) => sum)) {
-      setWorkflowFinished(true);
-    }
-  };
 
-  
+
+
 
   return (
     <div>
       {workflowFinished
-        ? WorkflowEnd(logger, childrenFinished, hierarchyRoot)
+        ? WorkflowEnd(logger, childrenFinished, hierarchyRoot, handleSubmit)
         : getStepElement(idx)}
 
       <Stepper
@@ -101,7 +106,6 @@ function WorkflowPages({
         handleReset={handleLocalReset}
         handleMove={handleMoveTo}
         currentStep={idx}
-        handleSubmit={handleFinish}
       >
         {children.map((child, index) => (
           <Step
@@ -114,7 +118,6 @@ function WorkflowPages({
           </Step>
         ))}
       </Stepper>
-      <button onClick={handleSubmit}>Submit</button>
     </div>
   );
 }

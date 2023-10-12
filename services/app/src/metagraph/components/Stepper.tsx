@@ -2,19 +2,12 @@ import { Children, useEffect, useState } from "react";
 import "./Stepper.css";
 import "@src/App.css";
 
-import {
-  Stepper as MaterialStepper,
-  StepButton,
-  StepContent,
-  StepLabel,
-} from "@material-ui/core";
 
 type Props = {
   handleNext: () => void;
   handleBack: () => void;
   handleReset: () => void;
   handleMove: (index: number) => void;
-  handleSubmit: () => void;
   currentStep: number;
   children: JSX.Element[];
 };
@@ -45,7 +38,6 @@ export function Stepper({
   handleReset,
   currentStep,
   handleMove,
-  handleSubmit,
   children,
 }: Props): JSX.Element {
   const handleNextStep = () => {
@@ -85,12 +77,10 @@ export function Stepper({
       </div>
 
       <button className="clickable-button stepper-button" onClick={handleReset}>
-        Reset
+        Stop
       </button>
 
-      <button className="clickable-button stepper-button" onClick={handleSubmit}>
-        Finish
-      </button>
+
     </div>
   );
 }

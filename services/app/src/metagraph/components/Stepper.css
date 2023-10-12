@@ -23,7 +23,7 @@
   transition:
     background-color 0.2s,
     transform 0.2s;
-    background-color: #7595d7;
+    background-color: var(--enabled-light-color);
 }
 
 
@@ -36,17 +36,17 @@
   display: inline-block;
 }
 .step-indicator:hover {
-  background-color: #4d77cb;
+  background-color: var(--enabled-color);
 }
 
 .step-indicator.inactive {
-  background-color: #bfbfbf;
+  background-color: var(--disabled-color);
 }
 
 .step-indicator.completed {
-  background-color: #00cc44;
+  background-color: var(--enabled-light-color);
 }
 
 .step-indicator.completed:hover {
-  background-color: #009933;
+  background-color: var(--enabled-color)  ;
 }

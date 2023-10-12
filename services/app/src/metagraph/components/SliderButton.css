@@ -22,8 +22,8 @@
     width: 150px;
     border-radius: 50px;
     background-image: linear-gradient(to right,
-            rgb(255, 195, 110),
-            rgb(255, 146, 91));
+           var(--enabled-color),
+            var(--disabled-color));
     border: none;
     cursor: pointer;
 }

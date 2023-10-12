@@ -354,7 +354,7 @@ const Workflow = ({ workflows }: Props) => {
                 handleReset={handleReset}
                 logger={logger}
                 finished={finished}
-                sample={sample}
+                hierarchyRoot={sample ? sample[0] : null}
               />
             ) : null}
           </div>

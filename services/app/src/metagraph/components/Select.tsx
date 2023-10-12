@@ -35,44 +35,7 @@ function sampleFetchOptionsComplete() {
   return sfo;
 }
 
-const SampleSelector = ({
-  samples,
-  onSelect,
-}: {
-  samples: (typeof Sample)[] | null;
-  onSelect: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-}) => {
-  function localOnSelect(event: React.ChangeEvent<HTMLSelectElement>) {
-    setSelectedValue(() => event.target.value);
-    onSelect(event);
-  }
-  const [selectedValue, setSelectedValue] = useState("");
-  return (
-    <form className="selection-form">
-      {/* <div>Experiment: {experiment.identifier.identifier}</div> */}
-      <label htmlFor="select-sample">Select sample:</label>
-      {samples !== undefined ? (
-        <select
-          id="select-sample"
-          className="select-dropdown"
-          value={selectedValue}
-          onChange={localOnSelect}
-        >
-          {samples?.map((sample) => (
-            <option
-              key={sample.identifier.identifier}
-              value={sample.identifier.identifier}
-            >
-              {sample.identifier.identifier}
-            </option>
-          ))}
-        </select>
-      ) : (
-        <h3>No Samples</h3>
-      )}
-    </form>
-  );
-};
+
 
 const SampleTable = ({
   samples,
@@ -88,6 +51,8 @@ const SampleTable = ({
     [];
   const [sortColumn, setSortColumn] = useState(""); // Track the currently sorted column
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc"); // Track sorting direction
+
+  const [localSample, setLocalSample] = useState(null as typeof Sample);
 
   const handleColumnHeaderClick = (column: string) => {
     // If the column is already sorted, reverse the direction, otherwise set the column and direction
@@ -115,6 +80,19 @@ const SampleTable = ({
     return null;
   };
 
+  const handleSelection = (sample: typeof Sample) => {
+    setLocalSample(() => sample);
+    onSelectedSample(sample);
+  }
+
+  function getRowStyle(sample: typeof Sample) {
+    if (sample === localSample) {
+      return "selected-row";
+    } else {
+      return "";
+    }
+  }
+
   return (
     <table>
       <thead>
@@ -137,7 +115,7 @@ const SampleTable = ({
       </thead>
       <tbody>
         {samples?.map((sample) => (
-          <tr key={sample.identifier.identifier} onClick={() => onSelectedSample(sample)}>
+          <tr key={sample.identifier.identifier} className={getRowStyle(sample)} onClick={() => handleSelection(sample)}>
             <td>{sample.code}</td>
             <td>{sample.permId.permId}</td>
             {props.map((prop) =>

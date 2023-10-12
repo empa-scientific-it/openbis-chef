@@ -67,7 +67,7 @@ function Login() {
           >
             <h1 className="container-title">Login to openBIS instance</h1>
             <div className="login-form-input">
-              <label htmlFor="server">Instance:</label>
+              <label htmlFor="server">OpenBIS instance:</label>
               <select
                 name="server"
                 id="server"
@@ -84,7 +84,7 @@ function Login() {
             </div>
 
             <div className="login-form-input">
-              <label htmlFor="login-type">Choose login type</label>
+              <label htmlFor="login-type">Login method</label>
               <SliderButton
                 id="login-type"
                 choices={["password", "token"]}

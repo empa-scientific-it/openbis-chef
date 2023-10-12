@@ -1,4 +1,12 @@
 /* Reset default browser styles */
+:root {
+  --enabled-color: #4d77cb;
+  --enabled-light-color:#7595d7;
+  --disabled-color: #bfbfbf;
+  --text-color: #333;
+}
+
+
 body,
 h1,
 h2,
@@ -55,7 +63,7 @@ body {
 }
 
 .clickable-button {
-  background-color: #7595d7;
+  background-color: var(--enabled-light-color);
   color: white;
   border: none;
   border-radius: 10px;
@@ -67,11 +75,11 @@ body {
 }
 
 .clickable-button:hover {
-  background-color: #4d77cb;
+  background-color: var(--enabled-color);
 }
 
 .clickable-button:disabled {
-  background-color: #bfbfbf;
+  background-color: var(--disabled-color);
   cursor: not-allowed;
 }
 

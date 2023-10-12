@@ -9,7 +9,8 @@ import WorkflowResults from "./WorkflowResults";
 const WorkflowEnd = (
   logger: LoggerInterface,
   entryFinished: Boolean,
-  hierarchyRoot: typeof Sample
+  hierarchyRoot: typeof Sample,
+  onSubmit: () => void
 ) => {
   const ops = useContext(OperationContext);
   const entries = logger.logEntries();
@@ -33,6 +34,8 @@ const WorkflowEnd = (
         {entryFinished && hierarchyRoot ? (
           <WorkflowResults sample={hierarchyRoot} />
         ) : null}
+        <button className="clickable-button" onClick={onSubmit}>Submit workflow</button>
+
       </main>
     </>
   );
