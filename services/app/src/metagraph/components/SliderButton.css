@@ -27,3 +27,16 @@
     border: none;
     cursor: pointer;
 }
+
+
+.slider-chosen-left{
+    background-image: linear-gradient(to right,
+           var(--enabled-color),
+            var(--disabled-color));
+}
+
+.slider-chosen-right{
+    background-image: linear-gradient(to right,
+           var(--disabled-color),
+            var(--enabled-color));
+}
