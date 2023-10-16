@@ -3,9 +3,11 @@ import Select from "./Select";
 import Entry from "./Entry";
 import "@src/App.css";
 
+
+
 function selectEntryType(node: MetagraphNode) {
   if (node.type === "entry") {
-    return <Entry key={node.id} node={node} />;
+    return <Entry key={node.id} />;
   } else if (node.type === "select") {
     return <Select key={node.id} />;
   }

@@ -1,56 +1,43 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "@src/openbis/AuthContext";
 import { OperationContext } from "../OperationContext";
 import {
-  ExperimentFetchOptions,
-  ExperimentSearchCriteria,
   SampleFetchOptions,
-  SampleTypeFetchOptions,
   Sample,
-  SampleSearchCriteria,
-  CodeSearchCriteria,
-  Experiment,
-  AnyPropertySearchCriteria,
-  SizeSearchCriteria,
-  AnyStringPropertySearchCriteria,
   SampleSortOptions,
-  Sorting,
 } from "@src/openbis/dto";
-import { MetagraphComponentProps } from "@src/metagraph/metagraph";
-import SampleEntry from "@src/openbis/components/SampleEntry";
 import "./Select.css";
-import { on } from "process";
-import { OpenBIS } from "@src/types/openbis";
-import { Facade } from "@src/openbis/api";
-import { as } from "fp-ts/lib/Option";
 
-function sampleFetchOptionsComplete() {
-  const sfo = new SampleFetchOptions();
-  const sto: typeof SampleTypeFetchOptions = new SampleTypeFetchOptions();
-  const sso: typeof SampleFetchOptions = new SampleFetchOptions();
-  sto.withPropertyAssignments().withPropertyType().withVocabulary();
-  sso.withProperties();
-  sso.withTypeUsing(sto);
-  sfo.withProperties();
-  return sfo;
+import "./Select.css";
+import { performSampleSearch, sampleFetchOptionsComplete } from "@src/openbis/openbisService";
+
+
+
+interface batchEvent {
+  column: string;
+  direction: "asc" | "desc";
 }
-
-
 
 const SampleTable = ({
   samples,
   onSelectedSample,
   onSort,
+  batchSize,
+  onScroll,
 }: {
   samples: (typeof Sample)[];
   onSelectedSample: (s: typeof Sample) => void;
-  onSort: (s: { column: string; direction: "asc" | "desc" }) => void;
+  onSort: (s: batchEvent) => void;
+  batchSize?: number;
+  onScroll: (batch: number) => void;
 }) => {
   const props =
     [...new Set(samples?.flatMap((sample) => Object.keys(sample?.properties ?? {})))] ??
     [];
   const [sortColumn, setSortColumn] = useState(""); // Track the currently sorted column
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc"); // Track sorting direction
+
+  const [currentBatch, setCurrentBatch] = useState(0);
 
   const [localSample, setLocalSample] = useState(null as typeof Sample);
 
@@ -83,13 +70,26 @@ const SampleTable = ({
   const handleSelection = (sample: typeof Sample) => {
     setLocalSample(() => sample);
     onSelectedSample(sample);
-  }
+  };
 
   function getRowStyle(sample: typeof Sample) {
     if (sample === localSample) {
       return "selected-row";
     } else {
-      return "";
+      return "unselected-row";
+    }
+  }
+
+  function handleScroll(event: React.UIEvent<HTMLTableSectionElement, UIEvent>) {
+    console.log("Scrolling");
+    event.preventDefault();
+    const { scrollTop, scrollHeight, clientHeight } =
+      event.target as HTMLTableSectionElement;
+    console.log(scrollTop + clientHeight, scrollHeight);
+    if (scrollTop + clientHeight >= scrollHeight) {
+      console.log("End batch");
+      setCurrentBatch((current) => current + batchSize);
+      onScroll(currentBatch + batchSize);
     }
   }
 
@@ -113,9 +113,14 @@ const SampleTable = ({
           ))}
         </tr>
       </thead>
-      <tbody>
-        {samples?.map((sample) => (
-          <tr key={sample.identifier.identifier} className={getRowStyle(sample)} onClick={() => handleSelection(sample)}>
+      <tbody onScroll={handleScroll}>
+        {samples?.map((sample, index) => (
+          <tr
+            key={sample.permId.permId}
+            id={`$index`}
+            className={getRowStyle(sample)}
+            onClick={() => handleSelection(sample)}
+          >
             <td>{sample.code}</td>
             <td>{sample.permId.permId}</td>
             {props.map((prop) =>
@@ -128,32 +133,6 @@ const SampleTable = ({
   );
 };
 
-function createSearchCriteria(
-  collection: string,
-  objectType: string,
-  searchTerm: string
-) {
-  const ssc = new SampleSearchCriteria();
-  ssc.withExperiment().withIdentifier().thatEquals(collection);
-  ssc.withType().withCode().thatEquals(objectType);
-
-  ssc.withAnyProperty().thatContains(searchTerm);
-
-  console.log(ssc);
-  return ssc;
-}
-
-async function performSearch(
-  collection: string,
-  objectType: string,
-  searchTerm: string,
-  sfo: typeof SampleFetchOptions,
-  service: Facade
-) {
-  const ssc = createSearchCriteria(collection, objectType, searchTerm);
-  const result = await service.searchSamples(ssc, sfo);
-  return result;
-}
 
 const Select = () => {
   const workflowOperations = useContext(OperationContext);
@@ -161,16 +140,21 @@ const Select = () => {
   const [samples, setSamples] = useState(null as (typeof Sample)[]);
   const [currentSample, setSample] = useState(null as typeof Sample);
   const currentCollection = workflowOperations.currentOperation.collectionIdentifier;
+  const batchSize = 50;
+
   const [fetchOptions, setFetchOptions] = useState<typeof SampleFetchOptions>(
-    sampleFetchOptionsComplete()
+    sampleFetchOptionsComplete(batchSize)
   ); // Track the currently sorted column
+  const [sortColumn, setSortColumn] = useState("permId"); // Track the currently sorted column
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [currentBatch, setCurrentBatch] = useState(0);
   //Use one function to generate the fetch options
   useEffect(() => {
     if (loggedIn) {
       console.log(currentCollection);
       //Perform the search for all the objects in the experiment/collection
-      performSearch(
+      performSampleSearch(
         currentCollection,
         workflowOperations.currentOperation.objectType,
         searchTerm,
@@ -185,7 +169,7 @@ const Select = () => {
         }
       });
     }
-  }, [loggedIn, currentCollection, fetchOptions, searchTerm]);
+  }, [loggedIn, currentCollection, fetchOptions, searchTerm, currentBatch]);
 
   const handleSelection = (event: React.ChangeEvent<HTMLSelectElement>) => {
     event.preventDefault();
@@ -204,7 +188,7 @@ const Select = () => {
   };
 
   const handleSort = (s: { column: string; direction: "asc" | "desc" }) => {
-    const sfo = sampleFetchOptionsComplete();
+    const sfo = sampleFetchOptionsComplete(batchSize);
     const sb = new SampleSortOptions();
     const so = sb.property(s.column);
     if (s.direction === "desc") {
@@ -214,6 +198,19 @@ const Select = () => {
     sfo.sort = sb;
 
     setFetchOptions(sfo);
+  };
+
+  useEffect(() => {
+    console.log(fetchOptions);
+  }, [fetchOptions]);
+
+  const onScroll = (batch: number) => {
+    setFetchOptions((oldOptions) => {
+      const newOptions = oldOptions;
+      const op = newOptions.from(batch);
+      op.count = batchSize;
+      return op;
+    });
   };
 
   return (
@@ -231,6 +228,8 @@ const Select = () => {
         <SampleTable
           samples={samples}
           onSelectedSample={handleSelection}
+          onScroll={onScroll}
+          batchSize={batchSize}
           onSort={handleSort}
         />
         {/* <h3>Selected sample</h3> */}

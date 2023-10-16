@@ -1,23 +1,10 @@
 import React, { useState, useContext, useEffect, useMemo } from "react";
-import {
-  EntryNode,
-  MetagraphComponentProps,
-  MetagraphOperations,
-} from "@src/metagraph/metagraph";
 import { AuthContext } from "@src/openbis/AuthContext";
 import OpenBisEntry, { ObjectEntry } from "@src/openbis/components/OpenBisEntry";
-import {
-  SampleTypeSearchCriteria,
-  SampleTypeFetchOptions,
-  EntityTypePermId,
-  ExperimentIdentifier,
-  SampleCreation,
-  SampleType,
-  Sample,
-} from "@src/openbis/dto";
+import { SampleType } from "@src/openbis/dto";
 import { OperationContext } from "../OperationContext";
-import { OpenBIS } from "@src/types/openbis";
 import "./Select.css";
+import { performSampleTypeSearch } from "@src/openbis/openbisService";
 
 function Entry() {
   const { loggedIn, service } = useContext(AuthContext);
@@ -48,20 +35,18 @@ function Entry() {
     console.log(newEntity);
   }
 
-
   function handleSave(event: React.FormEvent<HTMLButtonElement>) {
     event.preventDefault();
     workflowOperations?.setProperties(properties);
   }
 
   useMemo(() => {
-    const ssc = new SampleTypeSearchCriteria();
-    ssc.withCode().thatEquals(workflowOperations?.currentOperation?.objectType);
-    const sfo = new SampleTypeFetchOptions();
-    sfo.withPropertyAssignments().withPropertyType().withVocabulary().withTerms();
     if (loggedIn) {
       console.log(service);
-      service.searchSampleTypes(ssc, sfo).then((res) => {
+      performSampleTypeSearch(
+        workflowOperations?.currentOperation?.objectType,
+        service
+      ).then((res) => {
         if (res.totalCount > 0) {
           setEntity(() => res.objects[0]);
           setEntityAvailable(true);

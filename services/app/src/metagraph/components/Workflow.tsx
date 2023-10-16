@@ -1,13 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import {
-  Metagraph,
-  walkGraph,
-  nodeToOperation,
-  MetagraphOperations,
-  MetagraphNode,
-  CreateOperation,
-  LinkOperation,
-} from "@src/metagraph/metagraph";
+import { Metagraph, walkGraph, nodeToOperation } from "@src/metagraph/metagraph";
 import { AuthContext } from "@src/openbis/AuthContext";
 import { useList } from "../useList";
 import Summary from "./Summary";
@@ -15,11 +7,9 @@ import "@src/App.css";
 import "./Workflow.css";
 import { useWorkflows } from "../useWorkflows";
 import NodePage from "./NodePage";
-import { Stepper } from "./Stepper";
 import { OperationContext } from "../OperationContext";
 import { useOperations } from "../useOperations";
 import {
-  AsynchronousOperationExecutionOptions,
   CreateSamplesOperation,
   EntityTypePermId,
   ExperimentIdentifier,
@@ -27,30 +17,18 @@ import {
   SampleFetchOptions,
   SampleSearchCriteria,
   SearchSamplesOperation,
-  CreateObjectsOperationResult,
   CreateSamplesOperationResult,
   SearchSamplesOperationResult,
   SynchronousOperationExecutionOptions,
-  UpdateObjectsOperation,
-  RelationshipUpdate,
   SampleUpdate,
   UpdateSamplesOperation,
 } from "@src/openbis/dto";
 import { getProjectId, getSpaceId } from "@src/openbis/identifiers";
-import {
-  CreateSampleTypesOperationResult,
-  Sample,
-  SamplePermId,
-} from "@src/types/openbis";
-import { LoggerInterface, useLog } from "../useLog";
-import Log from "./Log";
-import ObjectGraph from "./ObjectGraph";
+import { CreateSampleTypesOperationResult, Sample } from "@src/types/openbis";
+import { useLog } from "../useLog";
 import { fetchOptionsToDepth } from "@src/openbis/sampleGraph";
-import Modal from "./Modal";
-import WorkflowEditor from "./WorkflowEditor";
 import WorkflowSelection from "./WorkflowSelection";
 import { Navigate } from "react-router-dom";
-import WorkflowEnd from "./WorkflowEnd";
 import WorkflowPages from "./WorkflowPages";
 
 type Props = {
@@ -61,7 +39,13 @@ const Workflow = ({ workflows }: Props) => {
   // Get openbis service
   const { logout, service } = useContext(AuthContext);
   // Keep list of all available workflows
-  const { currentWorkflow, selectWorkflow, addWorkflow, addOrReplaceWorkflow, workflows: allWorkflows } = useWorkflows(workflows);
+  const {
+    currentWorkflow,
+    selectWorkflow,
+    addWorkflow,
+    addOrReplaceWorkflow,
+    workflows: allWorkflows,
+  } = useWorkflows(workflows);
   // Keep track of the workflow selected
   const [workflowSelected, setWorkflowSelected] = useState(false);
   // Keep track of the workflow completion
@@ -81,18 +65,15 @@ const Workflow = ({ workflows }: Props) => {
 
   function handleLogout(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    console.log("logout");
     logout();
     <Navigate
-    to="/login"
-    replace // <-- redirect
-    state={{ path: location.pathname }}
-  />;
-    
+      to="/login"
+      replace // <-- redirect
+      state={{ path: location.pathname }}
+    />;
   }
 
-
-  function activateComponent(graph: Metagraph, currentIndex: number) {
+  function activateComponent(graph: Metagraph) {
     return graph.nodes.map((node, index) => {
       return (
         <div key={index}>
@@ -177,7 +158,6 @@ const Workflow = ({ workflows }: Props) => {
         const depOp = operationResults.find((op) => op.operation === dep);
         return depOp?.objects.map((obj) => obj);
       });
-      console.log("Current operation", currentOp, "Parent ids", parentIds);
       //Create the links
       if (currentOp && parentIds.length > 0) {
         const currentObjectUpdate = new SampleUpdate();
@@ -257,20 +237,14 @@ const Workflow = ({ workflows }: Props) => {
 
   //Re-render the components when the workflow changes
   useEffect(() => {
-    console.log(currentWorkflow);
     if (currentWorkflow) {
       const operations = walkGraph(currentWorkflow, (node) => {
         return nodeToOperation(node);
       });
-      console.log("Operations", workflowOps);
       workflowOps.setOperations(operations);
-      setNodeComponents(activateComponent(currentWorkflow, nodeIndex));
+      setNodeComponents(activateComponent(currentWorkflow));
     }
-
-    console.log("Operations", workflowOps);
   }, [workflowSelected]);
-
-
 
   function WorkflowDescription({ metagraph }: { metagraph: Metagraph }) {
     return (
@@ -283,14 +257,12 @@ const Workflow = ({ workflows }: Props) => {
     );
   }
 
-
-
   function WorkflowEntry({
     metagraph,
     onSelect,
     onStart,
     disabled,
-    onNewWorkflow
+    onNewWorkflow,
   }: {
     metagraph: Metagraph;
     onSelect: (metagraph: Metagraph) => void;
@@ -326,7 +298,6 @@ const Workflow = ({ workflows }: Props) => {
     );
   }
 
-  // When finished, it should show a summary of the inputs and allow the user to run the workflow
   return (
     <OperationContext.Provider value={workflowOps}>
       <div className="App">
