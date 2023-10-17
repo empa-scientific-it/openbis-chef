@@ -81,13 +81,10 @@ const SampleTable = ({
   }
 
   function handleScroll(event: React.UIEvent<HTMLTableSectionElement, UIEvent>) {
-    console.log("Scrolling");
     event.preventDefault();
     const { scrollTop, scrollHeight, clientHeight } =
       event.target as HTMLTableSectionElement;
-    console.log(scrollTop + clientHeight, scrollHeight);
     if (scrollTop + clientHeight >= scrollHeight) {
-      console.log("End batch");
       setCurrentBatch((current) => current + batchSize);
       onScroll(currentBatch + batchSize);
     }
