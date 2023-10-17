@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { Facade } from "@src/openbis/api";
-import { useSessionStorage } from "@src/session/useSessionStorage";
+import { useLocalStorage } from "@src/session/useLocalStorage";
+
+interface SessionToken {
+  token: string;
+  server: string;
+}
 
 export function useLogin() {
   const [service, setService] = useState(new Facade());
@@ -9,7 +14,7 @@ export function useLogin() {
     item: token,
     setItem: setToken,
     removeItem: removeToken,
-  } = useSessionStorage<string | null>("token", null);
+  } = useLocalStorage<string>("token", null);
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
 
   // check if token is valid when component is mounted
@@ -35,9 +40,6 @@ export function useLogin() {
 
     checkSession().catch((e) => console.error(e));
   }, [token, loggedIn, service, removeToken]);
-
-
-
 
   const login = async (username: string, password: string) => {
     try {
