@@ -29,7 +29,6 @@ describe("useTokenStorage", () => {
       result.current.addToken("token1", "server1");
       result.current.addToken("token2", "server2");
     });
-    console.log(result.current.tokens);
     expect(result.current.tokens).toEqual({
       server1: { value: "token1", server: "server1" },
       server2: { value: "token2", server: "server2" },

@@ -2,7 +2,6 @@ import { defineConfig } from "vitest/config";
 import path from "path";
 import react from "@vitejs/plugin-react";
 import basicSsl from "@vitejs/plugin-basic-ssl";
-console.log("Running vite.config.ts");
 export default defineConfig({
   plugins: [react(), basicSsl()],
   base: "./",

@@ -14,11 +14,15 @@ export function useTokenStorage() {
 
   const addToken = (token: string, server: string) => {
     setTokens("tokens", (prevTokens) => {
+      console.log("prevTokens", prevTokens);
+
       const newToken: Token = { value: token, server };
-      return {
+
+      const newValue =  {
         ...prevTokens,
         [server]: newToken,
       };
+      return newValue
     });
   };
 

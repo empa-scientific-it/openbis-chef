@@ -25,7 +25,6 @@ function RequireAuth({ children }: { children: JSX.Element }) {
   const location = useLocation();
 
   if (!loggedIn) {
-    console.log("Redirecting to login");
     return (
       <Navigate
         to="/login"

@@ -6,7 +6,8 @@ export function useLocalStorage<T>(initialKey: string, initialState: T | null) {
   const [item, setLocalItem] = useState<T | null>(localItem);
 
   const setItem = (key: string, update: ((prevItem: T | null) => T)) => {
-    const val = update(item);
+    const permItem = getItem(key);
+    const val = update(permItem ?? item);
     setLocalItem(() => val);
     localStorage.setItem(key, JSON.stringify(val));
   };

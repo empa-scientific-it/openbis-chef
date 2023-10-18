@@ -94,14 +94,11 @@ function SampleGraphDemo() {
 
   const onNodeClick = (event: React.MouseEvent, element: Node) => {
     event.preventDefault();
-    console.log(element);
     const permId = element.id;
-    console.log(permId);
     const bo = new SampleFetchOptions();
     bo.withProperties();
     const sc = fetchOptionsToDepth(5, bo);
     service.service.getSamples([new SamplePermId(permId)], sc).then((res) => {
-      console.log(res);
       const sample = res[permId];
       setSample(sample);
     });
@@ -113,7 +110,6 @@ function SampleGraphDemo() {
       setSample(res[1]);
       setAllSamples(res);
       setSampleAvailable(true);
-      console.log(res);
     });
   }, [getSample]);
 
