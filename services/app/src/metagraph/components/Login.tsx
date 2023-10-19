@@ -17,7 +17,7 @@ function Login() {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [server, setServer] = useState("/local/");
-  const { login, loginWithPAT, setUrl, service, token } = useContext(AuthContext);
+  const { login, loginWithPAT, setUrl, service } = useContext(AuthContext);
 
   const [showToast, setShowToast] = useState(false);
 

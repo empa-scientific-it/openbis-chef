@@ -2,7 +2,6 @@ import { createContext } from "react";
 import { Facade } from "./api";
 
 export interface AuthContextInterface {
-  token: string | null;
   setToken: (token: string) => void;
   loggedIn: boolean;
   setLoggedIn: (current: boolean) => void;
@@ -14,7 +13,6 @@ export interface AuthContextInterface {
 }
 
 export const AuthContext = createContext<AuthContextInterface>({
-  token: null,
   loggedIn: false,
   setToken: () => {},
   setLoggedIn: () => {},

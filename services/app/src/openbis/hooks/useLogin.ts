@@ -51,12 +51,12 @@ export function useLogin() {
   const login = async (username: string, password: string) => {
     try {
       const newToken = await service.login(username, password);
-      setToken("token", () => newToken as string);
+      setToken(serviceUrl, { value: newToken, server: serviceUrl});
       setLoggedIn(true);
       return true;
     } catch (error) {
       setLoggedIn(false);
-      removeToken("token");
+      removeToken(serviceUrl);
       return false;
     }
   };
@@ -66,7 +66,7 @@ export function useLogin() {
       try {
         await service.logout();
       } finally {
-        removeToken("token");
+        removeToken(serviceUrl);
         setLoggedIn(false);
       }
     }
@@ -77,12 +77,12 @@ export function useLogin() {
       service.useSession(patToken);
       const result = await service.checkSession(patToken);
       if (result) {
-        setToken("token", () => patToken);
+        setToken(serviceUrl, { value: patToken, server: serviceUrl});
         setLoggedIn(true);
         return true;
       }
     } catch (error) {
-      removeToken("token");
+      removeToken(serviceUrl);
       setLoggedIn(false);
       return false;
     }
@@ -93,7 +93,7 @@ export function useLogin() {
   };
 
   return {
-    token,
+    tokens,
     setToken,
     loggedIn,
     login,
