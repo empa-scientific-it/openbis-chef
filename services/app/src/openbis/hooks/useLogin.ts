@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Facade } from "@src/openbis/api";
-import { useLocalStorage } from "@src/session/useLocalStorage";
+import { useTokenStorage } from "@src/session/useTokenStorage";
 
 interface SessionToken {
   token: string;
@@ -8,38 +8,45 @@ interface SessionToken {
 }
 
 export function useLogin() {
-  const [service, setService] = useState(new Facade());
+  const { tokens, addToken, removeToken, getToken, replaceToken: setToken } = useTokenStorage();
+  const [serviceUrl, setServiceUrl] = useState<string>("");
 
-  const {
-    item: token,
-    setItem: setToken,
-    removeItem: removeToken,
-  } = useLocalStorage<string>("token", null);
+  const [service, setService] = useState(Facade.fromURL(serviceUrl));
+
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
+  useEffect(() => {
+    if (serviceUrl) {
+      setService(Facade.fromURL(serviceUrl));
+      
+    }
+  }, [serviceUrl])
 
+
+
+    
   // check if token is valid when component is mounted
   // or when token changes
   useEffect(() => {
     const checkSession = async () => {
-      if (token) {
+      const localToken = getToken(serviceUrl)
+      if (localToken) {
         try {
-          const valid = await service.checkSession(token);
-          console.log("checkSession", valid);
+          const valid = await service.checkSession(localToken.value);
           if (valid) {
             setLoggedIn(true);
           } else {
-            removeToken("token");
+            removeToken(localToken.server);
             setLoggedIn(false);
           }
         } catch (error) {
           console.error(error);
-          removeToken("token");
+          removeToken(localToken.server);
         }
       }
     };
 
     checkSession().catch((e) => console.error(e));
-  }, [token, loggedIn, service, removeToken]);
+  }, [loggedIn, service, serviceUrl]);
 
   const login = async (username: string, password: string) => {
     try {

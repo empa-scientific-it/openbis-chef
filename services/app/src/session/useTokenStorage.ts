@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLocalStorage } from "./useLocalStorage";
 
 type Token = {
@@ -12,6 +13,9 @@ type TokenIndex = {
 export function useTokenStorage() {
   const { item: tokens, setItem: setTokens } = useLocalStorage<TokenIndex>("tokens", {});
 
+  const getToken = (server: string): Token | null => {
+    return tokens[server];
+  }
   const addToken = (token: string, server: string) => {
     setTokens("tokens", (prevTokens) => {
       console.log("prevTokens", prevTokens);
@@ -53,6 +57,7 @@ export function useTokenStorage() {
 
   return {
     tokens,
+    getToken,
     addToken,
     removeToken,
     replaceToken,
