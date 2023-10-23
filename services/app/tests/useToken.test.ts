@@ -1,10 +1,10 @@
-import { expect, describe, test,  it, beforeEach } from "vitest";
+import { expect, describe, test, it, beforeEach } from "vitest";
 
-import { useTokenStorage } from "@src/session/useTokenStorage"
+import { useTokenStorage } from "@src/session/useTokenStorage";
 import { renderHook, act } from "@testing-library/react-hooks";
 import { cons } from "fp-ts/lib/ReadonlyNonEmptyArray";
 
-describe("useTokenStorage", () => {
+describe("with clear before test", () => {
   beforeEach(() => {
     localStorage.clear();
   });
@@ -19,9 +19,10 @@ describe("useTokenStorage", () => {
     act(() => {
       result.current.addToken("newToken", "newServer");
     });
-    expect(result.current.tokens).toEqual({newServer: { value: "newToken", server: "newServer" }});
+    expect(result.current.tokens).toEqual({
+      newServer: { value: "newToken", server: "newServer" },
+    });
   });
-
 
   it("should add two tokens to the list of tokens when addToken is called twice", () => {
     const { result } = renderHook(() => useTokenStorage());
@@ -40,10 +41,12 @@ describe("useTokenStorage", () => {
     act(() => {
       result.current.addToken("token1", "server1");
       result.current.addToken("token2", "server2");
-     // result.current.removeToken("server1");
+      // result.current.removeToken("server1");
     });
-    
-    expect(result.current.tokens).toMatchObject({server2: { value: "token2", server: "server2" }});
+
+    expect(result.current.tokens).toMatchObject({
+      server2: { value: "token2", server: "server2" },
+    });
   });
 
   it("should replace a token in the list of tokens when replaceToken is called", () => {
@@ -53,7 +56,27 @@ describe("useTokenStorage", () => {
       result.current.addToken("token2", "server2");
       result.current.replaceToken("server1", { value: "newToken", server: "server1" });
     });
-    
-    expect(result.current.tokens).toEqual({"server1":{ value: "newToken", server: "server1" }, "server2":{ value: "token2", server: "server2" }});
+
+    expect(result.current.tokens).toEqual({
+      server1: { value: "newToken", server: "server1" },
+      server2: { value: "token2", server: "server2" },
+    });
   });
+});
+
+describe("without clear before test", () => {
+  it("if we store a token and reload, the token should be found", () => {
+    const { result } = renderHook(() => useTokenStorage());
+    act(() => {
+      result.current.addToken("token1", "server1");
+    });
+
+    // Reload the page
+    act(() => window.location.reload());
+
+    // Check if the token is still stored in localStorage
+    const { result: result2 } = renderHook(() => useTokenStorage());
+    expect(result2.current.getToken("server1")).toEqual({ value: "token1", server: "server1" });
+  })
+
 });

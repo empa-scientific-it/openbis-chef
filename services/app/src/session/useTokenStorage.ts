@@ -11,14 +11,11 @@ type TokenIndex = {
 };
 
 export function useTokenStorage() {
-  const { item: tokens, setItem: setTokens } = useLocalStorage<TokenIndex>("tokens", {});
+  const { item: tokens, setItem: setTokens, getItem: getStoredToken } = useLocalStorage<TokenIndex>("tokens", {});
 
-  const getToken = (server: string): Token | null => {
-    return tokens[server];
-  }
+
   const addToken = (token: string, server: string) => {
     setTokens("tokens", (prevTokens) => {
-      console.log("prevTokens", prevTokens);
 
       const newToken: Token = { value: token, server };
 
@@ -52,6 +49,15 @@ export function useTokenStorage() {
       };
     });
   };
+
+  const getToken = (server: string) => {
+    const localToken = getStoredToken("tokens");
+    console.log(`localToken`, localToken);
+    if (!localToken) {
+      return null;
+    }
+    return localToken;
+  }
 
   // Other token-related functions
 
