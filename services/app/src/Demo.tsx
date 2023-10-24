@@ -81,7 +81,6 @@ function Demo({ metagraph }: Props) {
       setNodes((prevNodes) => prevNodes.map((node) => setUnvisited(node)));
       visitedElements.clear();
       for (const node of nodes) {
-        console.log(node);
         visitedElements.add(<li>{node.id}</li>);
         await pause(500);
         setNodes((prevNodes) => {

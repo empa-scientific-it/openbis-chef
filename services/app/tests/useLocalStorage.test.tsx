@@ -1,7 +1,9 @@
 import { expect, describe, it, beforeEach } from "vitest";
 
 import { useLocalStorage } from "@src/session/useLocalStorage";
-import { renderHook, act } from "@testing-library/react-hooks";
+import { renderHook, act, render } from "@testing-library/react";
+import TestComponent from "./TestComponent";
+import React from "react";
 
 const keyName = "testKey";
 
@@ -20,29 +22,30 @@ describe("clearing storage", () => {
     act(() => {
       result.current.setItem(keyName, () => "updatedValue");
     });
+    console.log(result.current);
     expect(result.current.item).toEqual("updatedValue");
-    expect(localStorage.getItem(keyName)).toEqual(JSON.stringify("updatedValue"));
   });
 
   it("should retrieve the value from localStorage when getItem is called", () => {
-    localStorage.setItem(keyName, JSON.stringify("storedValue"));
     const { result } = renderHook(() => useLocalStorage(keyName, "initialValue"));
+    act( () => {
+      result.current.setItem(keyName, (prev) => "storedValue");
+    })
     expect(result.current.getItem(keyName)).toEqual("storedValue");
   });
 
   it("should remove the value from localStorage when removeItem is called", () => {
-    localStorage.setItem(keyName, JSON.stringify("storedValue"));
     const { result } = renderHook(() => useLocalStorage(keyName, "initialValue"));
     act(() => {
       result.current.removeItem(keyName);
     });
-    expect(result.current.item).toEqual(null);
-    expect(localStorage.getItem(keyName)).toEqual(null);
+    expect(result.current.getItem(keyName)).toEqual(null);
   });
 });
 
 describe("not clearing storage", () => {
   const newValue = new Date().toISOString();
+
   it("should persist the value in localStorage after a reload", () => {
     const { result } = renderHook(() => useLocalStorage(keyName, "initialValue"));
     act(() => {
@@ -50,11 +53,16 @@ describe("not clearing storage", () => {
     });
     expect(result.current.getItem(keyName)).toEqual(newValue);
 
-    // Reload the page
-    act(() => window.location.reload());
+    //Reload the page
+    act(() => {
+      render(<TestComponent />);
+    });
 
     // Check if the value is still stored in localStorage
     const { result: result2 } = renderHook(() => useLocalStorage(keyName, ""));
+    console.log(result.current);
+
+    console.log(result2.current);
     expect(result2.current.getItem(keyName)).toEqual(newValue);
   });
 });

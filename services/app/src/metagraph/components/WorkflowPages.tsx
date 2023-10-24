@@ -7,7 +7,6 @@ import React, { useEffect, useState } from "react";
 
 import { Stepper, Step } from "./Stepper";
 import { useList } from "../useList";
-import { Button } from "@material-ui/core";
 
 function WorkflowPages({
   handleSubmit,
@@ -52,7 +51,6 @@ function WorkflowPages({
 
   const handleMoveTo = (index: number) => {
     move(index);
-    console.log("moved");
     handleMove(index);
     setVisited(true, index);
     checkWorkflowFinished()

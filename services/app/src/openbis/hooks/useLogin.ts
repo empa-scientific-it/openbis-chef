@@ -25,31 +25,31 @@ export function useLogin() {
   const [sessionToken, setSessionToken] = useState<SessionToken | null>(null);
 
   // Crete a new facade when the serviceUrl changes
-  useEffect(() => {
-    if (serviceUrl) {
-      setServiceUrl(serviceUrl);
-      setService(Facade.fromURL(serviceUrl));
-    }
-  }, [serviceUrl]);
+  // useEffect(() => {
+  //   if (serviceUrl) {
+  //     setServiceUrl(serviceUrl);
+  //     setService(Facade.fromURL(serviceUrl));
+  //   }
+  // }, [serviceUrl]);
 
-  
-  useEffect(() => {
-    const a = async () => {
+  // useEffect(() => {
+  //   const a = async () => {
+  //     checkSession().catch((e) => console.error(e));
+  //   };
+  //   a();
+  // });
 
-      console.log("Hook loaded")
-      console.log(tokens)
-      checkSession().catch((e) => console.error(e));
-    }
-    a();
-  })
+  const setUrl = (url: string) => {
+    setServiceUrl(url);
+    setService(Facade.fromURL(url));
+  }
 
   const checkSession = async () => {
     const localToken = getToken(sessionName);
-    console.log(`localToken`, localToken);
+    console.log(`local token ${tokens};     localStorage.length ${localStorage.getItem("tokens")}`);
     if (localToken) {
       try {
         const valid = await service.checkSession(localToken.value);
-        console.log(`login valid`);
         if (valid) {
           setLoggedIn(true);
         } else {
@@ -63,19 +63,17 @@ export function useLogin() {
     }
   };
 
-
   // check if token is valid when component is mounted
   // or when token changes. If it is not valid, remove it.
   useEffect(() => {
     checkSession().catch((e) => console.error(e));
-  }, [service, serviceUrl]);
+  });
 
   const login = async (username: string, password: string) => {
     try {
       const newToken = await service.login(username, password);
       setToken(sessionName, { value: newToken, server: serviceUrl });
       setLoggedIn(true);
-      console.log(tokens)
 
       return true;
     } catch (error) {
@@ -112,10 +110,7 @@ export function useLogin() {
     }
   };
 
-  const setUrl = (url: string) => {
-    setServiceUrl(url);
-    setService(Facade.fromURL(url));
-  };
+
 
   return {
     sessionToken,

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useLocalStorage } from "./useLocalStorage";
 
 type Token = {
@@ -11,25 +10,30 @@ type TokenIndex = {
 };
 
 export function useTokenStorage() {
-  const { item: tokens, setItem: setTokens, getItem: getStoredToken } = useLocalStorage<TokenIndex>("tokens", {});
-
+  const storageKey = "tokens";
+  const {
+    item: tokens,
+    setItem: setTokens,
+    getItem: getStoredToken,
+  } = useLocalStorage<TokenIndex>(storageKey, {});
 
   const addToken = (token: string, server: string) => {
-    setTokens("tokens", (prevTokens) => {
-
+    setTokens(storageKey, (prevTokens) => {
       const newToken: Token = { value: token, server };
 
-      const newValue =  {
+      const newValue = {
         ...prevTokens,
         [server]: newToken,
       };
-      return newValue
+      return newValue;
     });
   };
 
   const removeToken = (server: string) => {
-    setTokens("tokens", (prevTokens) => {
-      const newTokens = Object.values(prevTokens).filter((token) => token.server !== server);
+    setTokens(storageKey, (prevTokens) => {
+      const newTokens = Object.values(prevTokens).filter(
+        (token) => token.server !== server
+      );
       return newTokens.reduce((acc, token) => {
         acc[token.server] = token;
         return acc;
@@ -38,7 +42,7 @@ export function useTokenStorage() {
   };
 
   const replaceToken = (server: string, newToken: Token) => {
-    setTokens("tokens", (prevTokens) => {
+    setTokens(storageKey, (prevTokens) => {
       const serverTokens = prevTokens[server];
       if (!serverTokens) {
         return prevTokens;
@@ -51,13 +55,12 @@ export function useTokenStorage() {
   };
 
   const getToken = (server: string) => {
-    const localToken = getStoredToken("tokens");
-    console.log(`localToken`, localToken);
+    const localToken = getStoredToken(storageKey);
     if (!localToken) {
       return null;
     }
-    return localToken;
-  }
+    return localToken[server];
+  };
 
   // Other token-related functions
 

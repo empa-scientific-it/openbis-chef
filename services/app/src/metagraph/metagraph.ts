@@ -407,7 +407,6 @@ export function getVisualisationNodes(
   });
   edges.map((edge) => graph.setEdge(edge.source, edge.target));
   dagre.layout(graph, config);
-  console.log(graph);
 
   return nodes.map((node) => {
     return {

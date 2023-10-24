@@ -28,17 +28,19 @@ function Login() {
 
   const validInstances = instances as openBISInstance[];
 
-  //Hide toast after 2 seconds
-  useEffect(() => {
+
+
+  const toggleToast = () => {
+    setShowToast((old) => !old);
     const timer = setTimeout(() => setShowToast((old) => false), 2000);
     return () => clearTimeout(timer);
-  }, [showToast]);
+  }
 
   function handleLogin() {
     const from = location.state?.from?.pathname || "/";
     setUrl(server);
     const doNavigate = () => navigate(from, { replace: true });
-    const failLogin = () => setShowToast((old) => true);
+    const failLogin = () => toggleToast();
 
     switch (loginMethod) {
       case "password":

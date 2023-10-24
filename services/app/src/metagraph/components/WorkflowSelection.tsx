@@ -24,24 +24,20 @@ function WorkflowSelection({
   };
 
   const handleNew = (mg: Metagraph) => {
-    console.log("closing");
-    console.log(mg)
+
     setShowNewWorkflow((old) => !old);
     handleNewMetagraph(mg);
   };
 
   const handleEdit = () => {
-    console.log("editing");
     setShowNewWorkflow((old) => !old);
   };
 
   const handleCopy = () => {
-    console.log("copying");
     handleNewMetagraph({ ...structuredClone(selected), name: selected.name + ` copy ${Date()}` });
   };
 
   const handleClose = () => {
-    console.log("closing");
     setShowNewWorkflow((old) => !old);
   }
 

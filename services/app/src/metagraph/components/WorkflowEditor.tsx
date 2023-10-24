@@ -81,7 +81,6 @@ function WorkflowEditor({
   function handleEdit(newValue: string, update: string) {
     setValue(newValue);
     const mg = nodesFromJSON(newValue);
-    console.log(mg)
     pipe(
       mg,
       E.flatMap((mg) => Metagraph.fromNodes(mg.nodes, mg.description, mg.name)),

@@ -52,7 +52,6 @@ function OpenBisEntry({ objectType, properties, onEntry }: Props) {
         properties: { ...properties, [propertyCode]: value },
       } as ObjectEntry;
       // setProperties(newObjectEntry.properties);
-      console.log(value);
       onEntry(newObjectEntry);
     }
   }

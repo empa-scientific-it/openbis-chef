@@ -15,24 +15,20 @@ function Entry() {
   const [properties, setProperties] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
-    console.log("Entry", workflowOperations.currentOperation);
     if (workflowOperations.currentOperation.type == "create") {
       setProperties(() => workflowOperations.currentOperation?.objectProperties);
     }
-  }, []);
+  });
 
   function handleEntry(objectEntry: ObjectEntry) {
-    console.log("handleEntry", objectEntry);
     setProperties((currentProperties) => {
       return { ...currentProperties, ...objectEntry.properties };
     });
-    console.log("properties", properties);
     const newEntity = {
       ...entity,
       properties: objectEntry.properties,
     };
     setEntity(newEntity);
-    console.log(newEntity);
   }
 
   function handleSave(event: React.FormEvent<HTMLButtonElement>) {
@@ -42,7 +38,6 @@ function Entry() {
 
   useMemo(() => {
     if (loggedIn) {
-      console.log(service);
       performSampleTypeSearch(
         workflowOperations?.currentOperation?.objectType,
         service

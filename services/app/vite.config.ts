@@ -9,6 +9,7 @@ export default defineConfig({
     extensions: [".js", ".jsx", ".ts", ".tsx", ".json", ".css", ".jsx"],
     alias: {
       "@src": path.resolve(__dirname, "./src"),
+      "@tests": path.resolve(__dirname, "./tests"),
       v3api: path.resolve(__dirname, "./lib/v3api/js"),
     },
   },
@@ -24,7 +25,6 @@ export default defineConfig({
     proxy: {
       configure: {
         configure(proxy, options) {
-          console.log("configure", proxy, options);
           proxy.on("proxyReq", (proxyReq, req, res, options) => {
             console.error("proxyReq", proxyReq, req, res, options);
           });
@@ -47,5 +47,6 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    setupFiles: './tests/setup.ts',
   },
 });

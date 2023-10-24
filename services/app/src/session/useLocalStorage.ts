@@ -1,19 +1,24 @@
 import { useState } from "react";
 
 export function useLocalStorage<T>(initialKey: string, initialState: T | null) {
-  const localItem = (localStorage.getItem(initialKey) as T | null) ?? initialState;
+  const [localItem, setLocalItem] = useState<T | null>(
+    (JSON.parse(localStorage.getItem(initialKey)) as T | null) ?? initialState
+  );
 
-  const [item, setLocalItem] = useState<T | null>(localItem);
-
-  const setItem = (key: string, update: ((prevItem: T | null) => T)) => {
+  const setItem = (key: string, update: (prevItem: T | null) => T) => {
     const permItem = getItem(key);
-    const val = update(permItem ?? item);
+    const val = update(permItem ?? localItem);
     setLocalItem(() => val);
+    console.log("Update:", val, update.toString())
     localStorage.setItem(key, JSON.stringify(val));
   };
 
   const getItem = (key: string) => {
-    return JSON.parse(localStorage.getItem(key) as string) as T;
+    const item = localStorage.getItem(key);
+    if (item) {
+      console.log("Found item in local storage", item);
+    }
+    return item ? (JSON.parse(item) as T) : null;
   };
 
   const removeItem = (key: string) => {
@@ -21,5 +26,5 @@ export function useLocalStorage<T>(initialKey: string, initialState: T | null) {
     setLocalItem(() => null);
   };
 
-  return { item, setItem, getItem, removeItem };
+  return { item: localItem, setItem, getItem, removeItem };
 }

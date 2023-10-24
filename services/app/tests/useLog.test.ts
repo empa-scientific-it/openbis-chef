@@ -1,6 +1,6 @@
 import { useLog } from "@src/metagraph/useLog";
 import { expect, it, describe } from "vitest";
-import { renderHook, act } from "@testing-library/react-hooks";
+import { renderHook, act } from "@testing-library/react";
 
 describe("check log hook", () => {
   const { result } = renderHook(() => useLog());
