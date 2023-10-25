@@ -56,6 +56,23 @@ services:
       - ${CADDY_PORT}:80
     hostname: openbischef.scit.empa.ch
 
+  dev:
+    build:
+      context: ./services/app
+      dockerfile: Dockerfile.dev
+    env_file:
+      - ./.env
+    environment:
+      - OPENBIS_HOST=https://openbis:443
+    volumes:
+      - ./services/app:/app
+    ports:
+      - ${DEV_PORT}:5173
+    networks:
+      - local
+    depends_on:
+      - openbis
+
 
     
 

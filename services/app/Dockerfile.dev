@@ -1,0 +1,17 @@
+# Step 1: Build the application
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package.json ./
+RUN yarn install --frozen-lockfile
+
+COPY lib/ lib/
+COPY src/ src/
+COPY tsconfig.json ./
+COPY vite.config.ts ./
+COPY index.html ./
+COPY .env ./
+CMD ["yarn","run","vite-dev"]
+
+EXPOSE 5173
+
+STOPSIGNAL SIGKILL

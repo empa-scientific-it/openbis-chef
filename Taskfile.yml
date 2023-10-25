@@ -95,12 +95,26 @@ tasks:
     preconditions:
     - sh: type -p yarn
       msg: "yarn is not installed. Please install yarn first"
+    env:
+      OPENBIS_HOST: "https://{{.OPENBIS_URL}}:{{.OPENBIS_PORT}}"
     deps:
       - dev-install
       - import_schema
     dir: ./services/app
     cmds:
+      - echo ${OPENBIS_HOST}
       - yarn run vite-dev
+  dev-docker:
+    sources:
+      - ./services/app/Dockerfile
+    deps:
+      - start_openbis
+      - import_schema
+    dir: ./services/app
+    cmds:
+      - docker compose build app-dev
+      - docker compose up app -d --force-recreate
+
   test:
     deps:
       - dev-install
