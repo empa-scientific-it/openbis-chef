@@ -2,8 +2,6 @@ import { Facade } from "@src/openbis/api";
 import {
   SampleTypeFetchOptions,
   SampleTypeSearchCriteria,
-  ExperimentIdentifier,
-  Sample,
   SampleType,
 } from "@src/openbis/dto";
 import * as E from "fp-ts/Either";
@@ -407,7 +405,6 @@ export function getVisualisationNodes(
   });
   edges.map((edge) => graph.setEdge(edge.source, edge.target));
   dagre.layout(graph, config);
-  console.log(graph);
 
   return nodes.map((node) => {
     return {

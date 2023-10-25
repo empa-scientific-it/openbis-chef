@@ -1,33 +1,27 @@
+import { useState } from "react";
 import { Sample } from "@src/openbis/dto";
-import { Metagraph } from "../metagraph";
 import { LoggerInterface } from "../useLog";
-// import { Stepper } from "./Stepper";
 import WorkflowEnd from "./WorkflowEnd";
-import React, { useEffect, useState } from "react";
-
 import { Stepper, Step } from "./Stepper";
 import { useList } from "../useList";
-import { Button } from "@material-ui/core";
 
 function WorkflowPages({
-  handleSubmit,
-  children,
   handleMove,
+  handleSubmit,
   handlePreviousStep,
   handleNextStep,
   handleReset,
+  children,
   logger,
-  finished,
-  hierarchyRoot,
+  hierarchyRoot
 }: {
-  children: JSX.Element[];
   handleMove: (index: number) => void;
+  handleSubmit: () => void;
   handlePreviousStep: () => void;
   handleNextStep: () => void;
   handleReset: () => void;
-  handleSubmit: () => void;
+  children: JSX.Element[];
   logger: LoggerInterface;
-  finished: boolean;
   hierarchyRoot: typeof Sample;
 }) {
   const {
@@ -65,11 +59,10 @@ function WorkflowPages({
   }
 
   const handleMoveToNext = () => {
-
     next();
     handleNextStep();
     setVisited(true, idx);
-    checkWorkflowFinished()
+    checkWorkflowFinished();
   };
 
   const handleMoveToPrevious = () => {
@@ -90,16 +83,12 @@ function WorkflowPages({
     return children[step];
   }
 
-
-
-
-
   return (
-    <div>
+    <>
       {workflowFinished
         ? WorkflowEnd(logger, childrenFinished, hierarchyRoot, handleSubmit)
-        : getStepElement(idx)}
-
+        : getStepElement(idx)
+      }
       <Stepper
         handleBack={handleMoveToPrevious}
         handleNext={handleMoveToNext}
@@ -118,7 +107,7 @@ function WorkflowPages({
           </Step>
         ))}
       </Stepper>
-    </div>
+    </>
   );
 }
 

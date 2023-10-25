@@ -1,6 +1,5 @@
 .workflow-actions-buttons{
     display: table-row;
-
 }
 
 .workflow-actions-buttons > button{
@@ -17,5 +16,25 @@
     display: table;
     width: 100%;
     border: none;
+}
 
+.workflow-list thead, .workflow-list tbody {
+    display: contents;
+}
+
+.available-worflows-header {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.available-worflows-title {
+    flex: 1;
+}
+
+.clickable-table-attr:hover {
+    cursor: pointer;
+}
+
+.clicked-table-attr {
+    background-color: #d7e1f4;
 }

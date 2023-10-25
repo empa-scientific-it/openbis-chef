@@ -1,13 +1,9 @@
-import { useEffect } from "react";
 import { MetagraphOperations } from "./metagraph";
 import { useList } from "./useList";
 
 export const useOperations = (init: MetagraphOperations[]) => {
 
-
-  
   const operationList = useList(init);
-
 
   const addOperation = (operation: MetagraphOperations) => {
     operationList.add(operation);
@@ -16,8 +12,6 @@ export const useOperations = (init: MetagraphOperations[]) => {
   const removeOperation = (operation: MetagraphOperations) => {
     operationList.remove(operation);
   };
-
- 
 
   const updateOperation = (operation: MetagraphOperations) => {
     operationList.set(operation, operationList.idx);
@@ -51,6 +45,14 @@ export const useOperations = (init: MetagraphOperations[]) => {
     }
   };
 
+  const getProperties = () => {
+    const currentOperation = operationList.elem;
+    if (currentOperation.type === "create") {
+      return currentOperation.objectProperties;
+    }
+    return {};
+  };
+
   const setIdentifier = (identifier: string) => {
     const newOperation = operationList.elem;
     if (newOperation.type === "link") {
@@ -60,20 +62,21 @@ export const useOperations = (init: MetagraphOperations[]) => {
   };
 
   return {
-    currentOperation: operationList.elem,
     operations: operationList.list,
     operationIndex: operationList.idx,
+    currentOperation: operationList.elem,
     addOperation,
     removeOperation,
-    nextOperation: operationList.next,
-    previousOperation: operationList.previous,
     updateOperation,
     clearOperations,
-    setOperation,
-    setOperations: operationList.setList,
     goToOperation,
+    setOperation,
     setCollection,
     setProperties,
+    getProperties,
     setIdentifier,
+    nextOperation: operationList.next,
+    previousOperation: operationList.previous,
+    setOperations: operationList.setList
   };
 };

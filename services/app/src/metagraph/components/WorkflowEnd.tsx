@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { OperationContext } from "../OperationContext";
 import { LoggerInterface } from "../useLog";
 import Log from "./Log";
@@ -16,7 +16,7 @@ const WorkflowEnd = (
   const entries = logger.logEntries();
   return (
     <>
-      <h1 className="container-title">Finished workflow </h1>
+      <h1 className="container-title">Finished workflow entries</h1>
       <main>
         <h3>Here are the operations that will be performed:</h3>
         <div>
