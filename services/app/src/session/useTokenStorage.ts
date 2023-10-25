@@ -15,42 +15,23 @@ export function useTokenStorage() {
     item: tokens,
     setItem: setTokens,
     getItem: getStoredToken,
-  } = useLocalStorage<TokenIndex>(storageKey, {});
+  } = useLocalStorage<Token |null>(storageKey, null);
 
   const addToken = (token: string, server: string) => {
     setTokens(storageKey, (prevTokens) => {
       const newToken: Token = { value: token, server };
-
-      const newValue = {
-        ...prevTokens,
-        [server]: newToken,
-      };
-      return newValue;
+      return newToken;
     });
   };
 
   const removeToken = (server: string) => {
     setTokens(storageKey, (prevTokens) => {
-      const newTokens = Object.values(prevTokens).filter(
-        (token) => token.server !== server
-      );
-      return newTokens.reduce((acc, token) => {
-        acc[token.server] = token;
-        return acc;
-      }, {} as TokenIndex);
-    });
+      return null})
   };
 
   const replaceToken = (server: string, newToken: Token) => {
     setTokens(storageKey, (prevTokens) => {
-      const serverTokens = prevTokens[server];
-      if (!serverTokens) {
-        return prevTokens;
-      }
-      return {
-        ...prevTokens,
-        [server]: newToken,
-      };
+      return newToken;
     });
   };
 
@@ -59,7 +40,7 @@ export function useTokenStorage() {
     if (!localToken) {
       return null;
     }
-    return localToken[server];
+    return localToken;
   };
 
   // Other token-related functions

@@ -24,61 +24,53 @@ export function useLogin() {
 
   const [sessionToken, setSessionToken] = useState<SessionToken | null>(null);
 
-  // Crete a new facade when the serviceUrl changes
-  // useEffect(() => {
-  //   if (serviceUrl) {
-  //     setServiceUrl(serviceUrl);
-  //     setService(Facade.fromURL(serviceUrl));
-  //   }
-  // }, [serviceUrl]);
-
-  // useEffect(() => {
-  //   const a = async () => {
-  //     checkSession().catch((e) => console.error(e));
-  //   };
-  //   a();
-  // });
+  useEffect(() => {
+    console.log("Starting session checking");
+    const check = async () => {
+      checkSession().catch((e) => console.error(e));
+      console.log("Session checked", loggedIn)
+    };
+    check();
+  }, []);
 
   const setUrl = (url: string) => {
+    console.log("Setting url", url);
     setServiceUrl(url);
     setService(Facade.fromURL(url));
-  }
+  };
 
-  const checkSession = async () => {
-    const localToken = getToken(sessionName);
-    console.log(`local token ${tokens};     localStorage.length ${localStorage.getItem("tokens")}`);
-    if (localToken) {
-      try {
-        const valid = await service.checkSession(localToken.value);
-        if (valid) {
-          setLoggedIn(true);
-        } else {
-          removeToken(sessionName);
-          setLoggedIn(false);
-        }
-      } catch (error) {
-        console.error(error);
-        removeToken(sessionName);
+  const checkToken = async (token: string) => {
+    try {
+      const valid = await service.checkSession(token);
+      console.log(`valid ${valid}`);
+      if (valid) {
+        setLoggedIn(true);
+      } else {
+        setLoggedIn(false);
       }
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  // check if token is valid when component is mounted
-  // or when token changes. If it is not valid, remove it.
-  useEffect(() => {
-    checkSession().catch((e) => console.error(e));
-  });
+  const checkSession = async () => {
+    console.log("Checking session");
+    const localToken = getToken(sessionName);
+    console.log("Local token", localToken);
+    setUrl(localToken?.server ?? "");
+    checkToken(localToken?.value ?? "");
+  };
 
   const login = async (username: string, password: string) => {
     try {
       const newToken = await service.login(username, password);
       setToken(sessionName, { value: newToken, server: serviceUrl });
       setLoggedIn(true);
-
       return true;
     } catch (error) {
       setLoggedIn(false);
-      removeToken(sessionName);
+      //removeToken(sessionName);
+      console.log("Failed to login", error);
       return false;
     }
   };
@@ -109,8 +101,6 @@ export function useLogin() {
       return false;
     }
   };
-
-
 
   return {
     sessionToken,

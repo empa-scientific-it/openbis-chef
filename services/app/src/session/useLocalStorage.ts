@@ -9,7 +9,6 @@ export function useLocalStorage<T>(initialKey: string, initialState: T | null) {
     const permItem = getItem(key);
     const val = update(permItem ?? localItem);
     setLocalItem(() => val);
-    console.log("Update:", val, update.toString())
     localStorage.setItem(key, JSON.stringify(val));
   };
 

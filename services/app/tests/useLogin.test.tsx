@@ -44,7 +44,9 @@ describe("test login hook", () => {
     act(() => {
       render(<TestComponent />);
     });
-    expect(result.current.loggedIn).toBe(true);
+    const { result: result1 } = renderHook(() => useLogin());
+
+    expect(result1.current.loggedIn).toBe(true);
   });
   //   // Reload the page
   //   // window.location.reload();
