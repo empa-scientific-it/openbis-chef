@@ -105,6 +105,9 @@ tasks:
       - echo ${OPENBIS_HOST}
       - yarn run vite-dev
   dev-docker:
+    preconditions:
+      - sh: type -p docker compose
+        msg: "docker compose is not installed. Please install docker first"
     sources:
       - ./services/app/Dockerfile
     deps:
