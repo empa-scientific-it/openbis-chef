@@ -73,6 +73,6 @@ services:
     depends_on:
       - openbis
 
-
+  
     
 

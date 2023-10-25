@@ -109,14 +109,21 @@ tasks:
       - sh: type -p docker compose
         msg: "docker compose is not installed. Please install docker first"
     sources:
-      - ./services/app/Dockerfile
+      - ./services/app/Dockerfile.dev
     deps:
       - start_openbis
       - import_schema
     dir: ./services/app
     cmds:
-      - docker compose build app-dev
-      - docker compose up app -d --force-recreate
+      - docker compose build dev
+      - docker compose up dev -d --force-recreate
+  test-docker:
+    sources:
+      - ./services/app/Dockerfile.dev
+    dir: ./services/app
+    cmds:
+      - docker compose build dev
+      - docker compose run dev yarn run test
 
   test:
     deps:
