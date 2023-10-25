@@ -12,7 +12,7 @@ import {
 } from "react-router-dom";
 import Workflow from "@src/metagraph/components/Workflow";
 import { Metagraph } from "@src/metagraph/metagraph";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import Demo from "./Demo";
 import { polyproWorkflow } from "./workflows/PolyproWorkflow";
 import { pizzaWorkflow } from "./workflows/PizzaWorkflow";
@@ -21,10 +21,23 @@ import { simpleWorkflow } from "./workflows/SimpleWorkflow";
 import StepperDemo from "./StepperDemo";
 
 function RequireAuth({ children }: { children: JSX.Element }) {
-  const { loggedIn } = useContext(AuthContext);
+  const { checkSession } = useContext(AuthContext);
+  const [loggedIn, setLoggedIn] = useState(true);
   const location = useLocation();
-
+  useEffect(() => {
+    console.log("checking session");
+    checkSession()
+      .then((res) => {
+        console.log("logged in ", loggedIn);
+        setTimeout(() => setLoggedIn(res), 1000);
+      })
+      .catch((err) => {
+        console.log("error", err);
+        setLoggedIn(false);
+      });
+  }, []);
   if (!loggedIn) {
+    console.log("redirecting");
     return (
       <Navigate
         to="/login"
@@ -36,7 +49,6 @@ function RequireAuth({ children }: { children: JSX.Element }) {
     return <>{children}</>;
   }
 }
-
 
 const workflows = [polyproWorkflow, pizzaWorkflow, simpleWorkflow];
 

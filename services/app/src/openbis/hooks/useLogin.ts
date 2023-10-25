@@ -16,40 +16,55 @@ export function useLogin() {
     getToken,
     replaceToken: setToken,
   } = useTokenStorage();
-  const [serviceUrl, setServiceUrl] = useState<string>("");
 
-  const [service, setService] = useState(Facade.fromURL(serviceUrl));
+  const DEFAULT_URL = "/local/";
+  const [serviceUrl, setServiceUrl] = useState<string>(DEFAULT_URL);
+  const [service, setService] = useState(Facade.fromURL(DEFAULT_URL));
 
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
 
-  const [sessionToken, setSessionToken] = useState<SessionToken | null>(null);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
 
   useEffect(() => {
     console.log("Starting session checking");
-    const check = async () => {
-      checkSession().catch((e) => console.error(e));
-      console.log("Session checked", loggedIn)
-    };
-    check();
+    checkSession().then((result) => {
+      console.log("Session check result", result);
+      setLoggedIn(result);
+    });
   }, []);
+
+  useEffect(() => {
+    if (loggedIn) {
+      console.log("Setting session token", sessionToken);
+      service.useSession(sessionToken ?? "");
+      console.log(service.v3._private)
+      setService(service)
+      service.getServerInformation().then((info) => {
+        console.log("Server info", info);
+      })
+    }
+  }, [loggedIn]);
 
   const setUrl = (url: string) => {
     console.log("Setting url", url);
+    setService(() => Facade.fromURL(url));
     setServiceUrl(url);
-    setService(Facade.fromURL(url));
+    console.log("service set");
   };
 
   const checkToken = async (token: string) => {
     try {
       const valid = await service.checkSession(token);
-      console.log(`valid ${valid}`);
-      if (valid) {
-        setLoggedIn(true);
+      if (valid !== null) {
+        console.log("I am logged in");
+        setSessionToken(token);
+        return true;
       } else {
-        setLoggedIn(false);
+        return false;
       }
     } catch (error) {
-      console.error(error);
+      // console.error(`error: ${error}`);
+      return false;
     }
   };
 
@@ -57,8 +72,9 @@ export function useLogin() {
     console.log("Checking session");
     const localToken = getToken(sessionName);
     console.log("Local token", localToken);
-    setUrl(localToken?.server ?? "");
-    checkToken(localToken?.value ?? "");
+    setUrl(localToken?.server ?? "default");
+    console.log("Starting checking token");
+    return await checkToken(localToken?.value ?? "");
   };
 
   const login = async (username: string, password: string) => {
@@ -111,5 +127,6 @@ export function useLogin() {
     loginWithPAT,
     setUrl,
     service,
+    checkSession,
   };
 }

@@ -10,6 +10,7 @@ export interface AuthContextInterface {
   logout: () => void;
   service: Facade;
   setUrl: (url: string) => void;
+  checkSession: () => Promise<boolean>;
 }
 
 export const AuthContext = createContext<AuthContextInterface>({
@@ -21,4 +22,5 @@ export const AuthContext = createContext<AuthContextInterface>({
   logout: () => {},
   service: null as Facade,
   setUrl: (url: string) => {},
+  checkSession: async () => false
 });
