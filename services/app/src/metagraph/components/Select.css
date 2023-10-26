@@ -12,7 +12,11 @@
     min-width: 315px;
 }
 
-.selected-row {
-    background-color: #f5f5f5;
-    border-color: var(--enabled-color);
+tr.selected-row {
+    background-color: var(--enabled-color);
+    border-top-color: var(--enabled-color);
+}
+
+tr:hover {
+    background-color: var(--enabled-light-color);
 }

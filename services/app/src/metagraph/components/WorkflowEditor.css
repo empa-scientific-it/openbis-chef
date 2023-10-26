@@ -1,0 +1,14 @@
+.workflow-editor-container{
+    display: grid; /* Use grid container */
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    height: 100%;
+    width: 100%;
+    background: #f2f2f2;
+}
+
+.workflow-editor-container > .workflow-editor-text,
+.workflow-editor-container > .workflow-editor-graph {
+    height: 100%;
+    width: 100%;
+    background: #f2f2f2;
+}

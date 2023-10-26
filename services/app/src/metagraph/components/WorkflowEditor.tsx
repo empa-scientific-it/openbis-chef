@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from "rea
 import Toast from "react-bootstrap/Toast";
 import schema from "@src/metagraph/metagraph.schema.json";
 import "./Workflow.css";
+import "./WorkflowEditor.css";
 import {
   Metagraph,
   formatFailure,
@@ -18,6 +19,7 @@ import Modal from "./Modal";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import { AuthContext } from "@src/openbis/AuthContext";
+import Summary from "./Summary";
 
 function ErrorDisplay(messages: string[]) {
   return (
@@ -63,6 +65,9 @@ interface WorkflowEditorProps {
   initialValue: Metagraph;
 }
 
+
+
+
 function WorkflowEditor({
   handleNewMetagraph,
   isOpen,
@@ -72,11 +77,13 @@ function WorkflowEditor({
   const { service } = useContext(AuthContext);
   const [value, setValue] = useState("// some comment");
   const [toastComponent, setToastComponent] = useState<JSX.Element | null>();
+  const [localMetagraph, setLocalMetagraph] = useState<Metagraph | null>(null);
 
-  function handleSave(ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
-    ev.preventDefault();
-    console.log(value);
-    const mg = nodesFromJSON(value);
+
+  function handleEdit(newValue: string, update: string) {
+    setValue(newValue);
+    const mg = nodesFromJSON(newValue);
+    console.log(mg)
     pipe(
       mg,
       E.flatMap((mg) => Metagraph.fromNodes(mg.nodes, mg.description, mg.name)),
@@ -88,7 +95,7 @@ function WorkflowEditor({
           checkMetagraphData(graph, service).then((result) => {
             if (result.valid) {
               setToastComponent(SuccessDisplay());
-              handleNewMetagraph(graph);
+              setLocalMetagraph(graph);
             } else {
               setToastComponent(ErrorDisplay(result.failures.map(formatFailure)));
             }
@@ -98,14 +105,19 @@ function WorkflowEditor({
     );
   }
 
+  function handleSave(ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    ev.preventDefault();
+    if (localMetagraph) {
+      handleNewMetagraph(localMetagraph);
+    }
+  }
+
+
   useEffect(() => {
     setValue(JSON.stringify(initialValue, null, 2));
+    handleEdit(JSON.stringify(initialValue, null, 2), "");
   }, [initialValue]);
 
-  const handleChange = useCallback((value: string, update) => {
-    console.log(value);
-    setValue(value);
-  }, []);
 
   const handleLocalClose = useCallback(
     (ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -119,17 +131,25 @@ function WorkflowEditor({
   return (
     <div>
       <Modal isOpen={isOpen}>
-        <AceEditor
-          mode="json"
-          theme="github"
-          value={value}
-          onChange={handleChange}
-          name="UNIQUE_ID_OF_EDITOR"
-          editorProps={{ $blockScrolling: true }}
-          setOptions={{
-            useWorker: false,
-          }}
-        />
+        <div className="workflow-editor-container">
+          <div className="workflow-editor-text">
+            <AceEditor
+              mode="json"
+              theme="github"
+              value={value}
+              onChange={handleEdit}
+              name="UNIQUE_ID_OF_EDITOR"
+              editorProps={{ $blockScrolling: true }}
+              setOptions={{
+                useWorker: false,
+              }}
+            />
+          </div>
+          <div className="workflow-editor-graph">
+            { localMetagraph ? <Summary metagraph={localMetagraph} /> : null}
+          </div>
+        </div>
+
         {toastComponent}
         <div className="workflow-footer-buttons">
           <button className="clickable-button" onClick={handleSave}>

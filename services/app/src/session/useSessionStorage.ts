@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function useSessionStorage<T>(
   initialKey: string,
@@ -16,13 +16,17 @@ export function useSessionStorage<T>(
   };
 
   const getItem = (key: string) => {
-    return sessionStorage.getItem(key) as T;
+    return localStorage.getItem(key) as T;
   };
 
   const removeItem = (key: string) => {
     localStorage.removeItem(key);
     setLocalItem(() => null);
   };
+
+  useEffect(() => { 
+    console.log("useEffect", item);
+  }, [item]);
 
   return { item, setItem, getItem, removeItem };
 }
