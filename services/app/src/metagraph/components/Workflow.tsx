@@ -63,14 +63,16 @@ const Workflow = ({ workflows }: Props) => {
 
   const logger = useLog();
 
-  function handleLogout(event: React.FormEvent<HTMLFormElement>) {
+  function handleLogout(event: React.FormEvent<MouseEvent>) {
     event.preventDefault();
-    logout();
-    <Navigate
-      to="/login"
-      replace // <-- redirect
-      state={{ path: location.pathname }}
-    />;
+    logout().then(() => {
+      console.log("logged out");
+      <Navigate
+        to="/login"
+        replace // <-- redirect
+        state={{ path: location.pathname }}
+      />;
+    })
   }
 
   function activateComponent(graph: Metagraph) {

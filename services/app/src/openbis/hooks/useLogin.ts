@@ -28,16 +28,13 @@ export function useLogin() {
   useEffect(() => {
     console.log("Starting session checking");
     checkSession().then((result) => {
-      console.log("Session check result", result);
       setLoggedIn(result);
     });
   }, []);
 
   useEffect(() => {
     if (loggedIn) {
-      console.log("Setting session token", sessionToken);
       service.useSession(sessionToken ?? "");
-      console.log(service.v3._private)
       setService(service)
       service.getServerInformation().then((info) => {
         console.log("Server info", info);
@@ -46,17 +43,14 @@ export function useLogin() {
   }, [loggedIn]);
 
   const setUrl = (url: string) => {
-    console.log("Setting url", url);
     setService(() => Facade.fromURL(url));
     setServiceUrl(url);
-    console.log("service set");
   };
 
   const checkToken = async (token: string) => {
     try {
       const valid = await service.checkSession(token);
       if (valid !== null) {
-        console.log("I am logged in");
         setSessionToken(token);
         return true;
       } else {
@@ -69,11 +63,8 @@ export function useLogin() {
   };
 
   const checkSession = async () => {
-    console.log("Checking session");
     const localToken = getToken(sessionName);
-    console.log("Local token", localToken);
     setUrl(localToken?.server ?? "default");
-    console.log("Starting checking token");
     return await checkToken(localToken?.value ?? "");
   };
 
@@ -95,6 +86,7 @@ export function useLogin() {
     if (loggedIn) {
       try {
         await service.logout();
+        
       } finally {
         removeToken(sessionName);
         setLoggedIn(false);

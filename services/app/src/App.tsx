@@ -66,7 +66,10 @@ const App: React.FC = () => {
               path="/"
               element={
                 <RequireAuth>
+
                   <Workflow workflows={workflows} />
+
+
                 </RequireAuth>
               }
             />

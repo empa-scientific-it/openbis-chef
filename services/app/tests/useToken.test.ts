@@ -1,26 +1,28 @@
 import { expect, describe, test, it, beforeEach } from "vitest";
 
 import { useTokenStorage } from "@src/session/useTokenStorage";
-import { renderHook, act } from "@testing-library/react-hooks";
-import { cons } from "fp-ts/lib/ReadonlyNonEmptyArray";
+import { renderHook, act } from "@testing-library/react";
+import { mapNullable } from "fp-ts/lib/Option";
 
 describe("with clear before test", () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it("should initialize with an empty array if no tokens are stored in localStorage", () => {
+  it("should return null if no token are stored", () => {
     const { result } = renderHook(() => useTokenStorage());
-    expect(result.current.tokens).toEqual({});
+    expect(result.current.tokens).toEqual(null);
   });
 
   it("should add a new token to the list of tokens when addToken is called", () => {
     const { result } = renderHook(() => useTokenStorage());
+    const tokenVal = "token1";
+    const serverVal = "server1";
     act(() => {
-      result.current.addToken("newToken", "newServer");
+      result.current.addToken(tokenVal, serverVal);
     });
     expect(result.current.tokens).toEqual({
-      newServer: { value: "newToken", server: "newServer" },
+      [serverVal]: {"server": serverVal, "value": tokenVal},
     });
   });
 
@@ -41,7 +43,7 @@ describe("with clear before test", () => {
     act(() => {
       result.current.addToken("token1", "server1");
       result.current.addToken("token2", "server2");
-      // result.current.removeToken("server1");
+      result.current.removeToken("server1");
     });
 
     expect(result.current.tokens).toMatchObject({
