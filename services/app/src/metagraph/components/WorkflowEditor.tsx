@@ -111,8 +111,11 @@ function WorkflowEditor({
 
 
   useEffect(() => {
-    setValue(JSON.stringify(initialValue, null, 2));
-    handleEdit(JSON.stringify(initialValue, null, 2), "");
+    if(isOpen){
+      setValue(JSON.stringify(initialValue, null, 2));
+      handleEdit(JSON.stringify(initialValue, null, 2), "");
+    }
+
   }, [initialValue]);
 
 
