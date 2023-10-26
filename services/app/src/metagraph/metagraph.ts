@@ -2,8 +2,6 @@ import { Facade } from "@src/openbis/api";
 import {
   SampleTypeFetchOptions,
   SampleTypeSearchCriteria,
-  ExperimentIdentifier,
-  Sample,
   SampleType,
 } from "@src/openbis/dto";
 import * as E from "fp-ts/Either";

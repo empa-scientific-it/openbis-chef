@@ -23,8 +23,10 @@ import Summary from "./Summary";
 
 function ErrorDisplay(messages: string[]) {
   return (
-    <div>
-      The following errors were found:
+    <div className="workflow-editor-errors">
+      <p>
+        <b>The following errors were found:</b>
+      </p>
       <ul>
         {messages.map((msg, idx) => (
           <li key={idx}>{msg}</li>
@@ -138,7 +140,7 @@ function WorkflowEditor({
               theme="github"
               value={value}
               onChange={handleEdit}
-              name="UNIQUE_ID_OF_DIV"
+              name="UNIQUE_ID_OF_EDITOR"
               editorProps={{ $blockScrolling: true }}
               setOptions={{
                 useWorker: false,
@@ -148,16 +150,17 @@ function WorkflowEditor({
           <div className="workflow-editor-graph">
             { localMetagraph ? <Summary metagraph={localMetagraph} /> : null}
           </div>
-
         </div>
 
         {toastComponent}
-        <button className="clickable-button" onClick={handleSave}>
-          Save
-        </button>
-        <button className="clickable-button" onClick={handleLocalClose}>
-          Close
-        </button>
+        <div className="workflow-footer-buttons">
+          <button className="clickable-button" onClick={handleSave}>
+            Save
+          </button>
+          <button className="clickable-button" onClick={handleLocalClose}>
+            Close
+          </button>
+        </div>
       </Modal>
     </div>
   );

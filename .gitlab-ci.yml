@@ -10,9 +10,10 @@ build-docker:
   services:
     - docker:23.0.6-dind-alpine3.18
   tags:
-    - dind
+    - openbis
+    - scit
   before_script:
-    - echo "$REGISTRY_PASSWORD" | docker login --password-stdin --username "$REGISTRY_USER" -- "$CI_REGISTRY"
+    - echo "$REGISTRY_PASSWORD" | docker login  --username "$REGISTRY_USER" -- "$CI_REGISTRY" --password-stdin
   script:
     - docker build --pull -t $CI_REGISTRY_IMAGE:latest services/app
     - docker push $CI_REGISTRY_IMAGE
@@ -26,7 +27,6 @@ deploy-docker:
   services:
      - docker:23.0.6-dind-alpine3.18
   variables:
-    DOCKER_HOST: ssh://$DEPLOY_HOST
     GIT_STRATEGY: none
   # services:
   #   - docker:23.0.6-dind-alpine3.18
@@ -34,24 +34,13 @@ deploy-docker:
   #   - dind
   # before_script:
   #   - DOCKER_HOST=ssh://$DEPLOY_HOST  docker login --username $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-  before_script:
-    - echo $DEPLOY_HOST
-    - echo $CI_REGISTRY_USER
-    - echo $DOCKER_HOST
-    - apk add openssh-client openssh
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - touch ~/.ssh/known_hosts
-    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
-
-    # - ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - 
   stage: deploy
+  tags:
+    - openbis
+    - scit
   script:
-    - ping $DEPLOY_HOST
-    - echo "$REGISTRY_PASSWORD" | docker login --password-stdin --username "$REGISTRY_USER" -- "$CI_REGISTRY" 
+    - echo "$REGISTRY_PASSWORD" | docker login --username "$REGISTRY_USER" -- "$CI_REGISTRY""  --password-stdin
     - docker pull $CI_REGISTRY_IMAGE
     - docker stop app || true
     - docker rm app || true
-    - docker run --name app -p 8000:80  $CI_REGISTRY_IMAGE
+    - docker run --detached --name app -p 8000:80  $CI_REGISTRY_IMAGE

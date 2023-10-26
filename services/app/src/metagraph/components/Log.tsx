@@ -1,4 +1,3 @@
-import React, { useState, useContext } from "react";
 import { LogEntry } from "../useLog";
 import "./Log.css";
 
@@ -14,8 +13,8 @@ const Log = ({ entries }: { entries: LogEntry[] }) => {
           </tr>
         </thead>
         <tbody>
-          {cleanEntries?.map((entry) => (
-            <tr>
+          {cleanEntries?.map((entry, index) => (
+            <tr key={index}>
               <td>{entry?.timestamp.toISOString()}</td>
               <td>{entry?.message}</td>
             </tr>

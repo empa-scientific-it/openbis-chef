@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Metagraph } from "../metagraph";
 import WorkflowEditor from "./WorkflowEditor";
 import "./Workflow.css";
@@ -8,92 +8,82 @@ function WorkflowSelection({
   workflows,
   onSelect,
   handleNewMetagraph,
-  currentWofklow,
+  context
 }: {
   workflows: Metagraph[];
   onSelect: (selectedWorkflow: Metagraph) => void;
   handleNewMetagraph: (mg: Metagraph) => void;
-  currentWofklow: Metagraph;
-}) {
-  const [showNewWorkflow, setShowNewWorkflow] = useState(false);
-  const [selected, setSelected] = useState(currentWofklow);
+  context: React.Context<Metagraph>;
+}) { 
+  const [showWorkflowEditor, setShowWorkflowEditor] = useState(false);
+  const currentWorkflow = useContext(context);
+  const [workflowToEdit, setworkflowToEdit] = useState(currentWorkflow);
 
-  const handleWorkflowSelect = (workflow: Metagraph) => {
-    setSelected(currentWofklow);
-    onSelect(workflow);
+  const handleNew = () => {
+    handleNewMetagraph(new Metagraph([], "This is a new workflow", "New workflow" + ` ${Date()}`));
   };
 
-  const handleNew = (mg: Metagraph) => {
-
-    setShowNewWorkflow((old) => !old);
-    handleNewMetagraph(mg);
+  const handleCopy = (mg: Metagraph) => {
+    handleNewMetagraph({ ...structuredClone(mg), name: mg.name + ` copy ${Date()}` });
   };
 
-  const handleEdit = () => {
-    setShowNewWorkflow((old) => !old);
+  const toggleWorkflowEditor = (mg?: Metagraph) => {
+    if (mg) {
+      setworkflowToEdit(mg);
+    }
+    setShowWorkflowEditor(prev => !prev);
   };
-
-  const handleCopy = () => {
-    handleNewMetagraph({ ...structuredClone(selected), name: selected.name + ` copy ${Date()}` });
-  };
-
-  const handleClose = () => {
-    setShowNewWorkflow((old) => !old);
-  }
 
   return (
-    <div>
-      <h3>Available workflows:</h3>
-      <div className="workflow-actions-buttons">
-        <button onClick={handleEdit}>Edit workflow</button>
-        <button onClick={handleCopy}>Copy</button>
-        <button className="workflow-selection-item" onClick={handleNew}>
+    <>
+      <div className="available-worflows-header">
+        <h3 className="available-worflows-title">
+          Available workflows:
+        </h3>
+        <button className="workflow-selection-item" style={{fontSize: "medium"}} onClick={handleNew}>
           Add workflow
         </button>
       </div>
+
       <table className="workflow-list">
         <thead>
           <tr>
             <th>Name</th>
             <th>Description</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {workflows.map((workflow) => (
-            <tr
-              onClick={() => handleWorkflowSelect(workflow)}
-              className={
-                "workflow-selection-item" +
-                (selected.name === workflow.name
-                  ? " workflow-selection-item-selected"
-                  : "")
-              }
-            >
-              <td>{workflow.name}</td>
-              {/* <td>
-                    {workflow.name === selected ? <div className="workflow-selection-item-selected-indicator"></div> : <div className="workflow-selection-item-unselected-indicator"></div>}
-                </td> */}
-              <td>{workflow.description}</td>
-              {/* <button
-                  key={workflow.name}
-                  id={workflow.name}
-                  onClick={() => handleWorkflowSelect(workflow)}
-
-                >
-                  {workflow.name}
-                </button> */}
+          {workflows.map((workflow, index) => (
+            <tr key={index} className={(currentWorkflow.name === workflow.name ? "clicked-table-attr" : "")}>
+              <td
+                className="clickable-table-attr"
+                onClick={() => onSelect(workflow)}
+              >
+                {workflow.name}
+              </td>
+              <td
+                className="clickable-table-attr"
+                onClick={() => onSelect(workflow)}
+              >
+                {workflow.description}
+              </td>
+              <td>
+                <button className="workflow-selection-item" onClick={() => toggleWorkflowEditor(workflow)}>Edit</button>
+                <button className="workflow-selection-item" onClick={() => handleCopy(workflow)}>Copy</button>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
 
       <WorkflowEditor
-        initialValue={selected}
+        initialValue={workflowToEdit}
         handleNewMetagraph={handleNewMetagraph}
-        isOpen={showNewWorkflow}
-        handleClose={handleClose}
+        isOpen={showWorkflowEditor}
+        handleClose={toggleWorkflowEditor}
       />
-    </div>
+    </>
   );
 }
 

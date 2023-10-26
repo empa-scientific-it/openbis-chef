@@ -69,8 +69,8 @@
 }
 
 .workflow-selection-item {
-    margin-top: 10px;
     padding: 5px;
+    margin: 5px 0;
     cursor: pointer;
     display: table;
     border: 1px solid #ccc;
@@ -79,10 +79,6 @@
 
 .workflow-selection-item:hover {
     border: 1px solid #666;
-}
-
-.workflow-selection-item-selected, .workflow-selection-item-selected:hover {
-    border: 2px solid #4d77cb;
 }
 
 ul > li {
@@ -100,4 +96,25 @@ ul > li {
 
 .operations-log {
     margin: 30px 0;
+}
+
+#UNIQUE_ID_OF_EDITOR {
+    width: 50% !important;
+    margin-bottom: 2%;
+}
+
+.ace_print-margin {
+    display: none !important;
+}
+
+.workflow-editor-errors {
+    width: 80%;
+    margin: 3% 8%;
+    border: #8c8c8c solid 1px;
+    border-radius: 5px;
+    padding: 2%;
+}
+
+.workflow-footer-buttons {
+    text-align: center;
 }
