@@ -26,21 +26,26 @@ export function useLogin() {
   const [sessionToken, setSessionToken] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log("Starting session checking");
-    checkSession().then((result) => {
-      setLoggedIn(result);
-    });
+    async function check() {
+      console.log("Starting session checking", sessionToken);
+      const result = await checkSession();
+      if (result) {
+        console.log("Performing post-login actions");
+        console.log("Session token", sessionToken);
+        afterLogin();
+      }
+    }
+    check();
   }, []);
 
-  useEffect(() => {
-    if (loggedIn) {
-      service.useSession(sessionToken ?? "");
-      setService(service)
-      service.getServerInformation().then((info) => {
-        console.log("Server info", info);
-      })
-    }
-  }, [loggedIn]);
+  const afterLogin = async () => {
+    console.log("After login");
+    setLoggedIn(true);
+    service.useSession(sessionToken);
+    const info = await service.getServerInformation();
+    console.log(info);
+    setService(service);
+  };
 
   const setUrl = (url: string) => {
     setService(() => Facade.fromURL(url));
@@ -51,21 +56,26 @@ export function useLogin() {
     try {
       const valid = await service.checkSession(token);
       if (valid !== null) {
-        setSessionToken(token);
+        setSessionToken(() => token);
+        console.log("Token is valid", sessionToken);
         return true;
       } else {
         return false;
       }
     } catch (error) {
-      // console.error(`error: ${error}`);
+      console.error(`error: ${error}`);
       return false;
     }
   };
 
   const checkSession = async () => {
     const localToken = getToken(sessionName);
-    setUrl(localToken?.server ?? "default");
-    return await checkToken(localToken?.value ?? "");
+    if (localToken === null) {
+      return false;
+    } else {
+      setUrl(localToken?.server);
+      return await checkToken(localToken?.value);
+    }
   };
 
   const login = async (username: string, password: string) => {
@@ -76,7 +86,6 @@ export function useLogin() {
       return true;
     } catch (error) {
       setLoggedIn(false);
-      //removeToken(sessionName);
       console.log("Failed to login", error);
       return false;
     }
@@ -86,9 +95,9 @@ export function useLogin() {
     if (loggedIn) {
       try {
         await service.logout();
-        
       } finally {
         removeToken(sessionName);
+        console.log("Logged out");
         setLoggedIn(false);
       }
     }

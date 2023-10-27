@@ -28,16 +28,13 @@ function RequireAuth({ children }: { children: JSX.Element }) {
     console.log("checking session");
     checkSession()
       .then((res) => {
-        console.log("logged in ", loggedIn);
         setTimeout(() => setLoggedIn(res), 1000);
       })
       .catch((err) => {
-        console.log("error", err);
         setLoggedIn(false);
       });
   }, []);
   if (!loggedIn) {
-    console.log("redirecting");
     return (
       <Navigate
         to="/login"

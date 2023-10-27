@@ -299,7 +299,7 @@ const Workflow = ({ workflows }: Props) => {
     <OperationContext.Provider value={workflowOps}>
       <div className="App">
         <div className="app-container">
-          <button className="logout-button" name="Logout" onClick={() => handleLogout}>
+          <button className="logout-button" name="Logout" onClick={handleLogout}>
             Logout
           </button>
 
