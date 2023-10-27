@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => {
       extensions: [".js", ".jsx", ".ts", ".tsx", ".json", ".css", ".jsx"],
       alias: {
         "@src": path.resolve(__dirname, "./src"),
+        "@tests": path.resolve(__dirname, "./tests"),
         v3api: path.resolve(__dirname, "./lib/v3api/js"),
       },
     },
@@ -42,7 +43,6 @@ export default defineConfig(({ mode }) => {
           secure: false,
           rewrite: (path) => {
             const newPath = path.replace("/local", "");
-            console.log(newPath);
             return newPath;
           },
         },
@@ -51,7 +51,6 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
           rewrite: (path) => {
-            console.log(path);
             return path.replace(/^\/openbis-empa-(\w+)/, "/$1");
           },
         },
