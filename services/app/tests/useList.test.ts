@@ -1,6 +1,6 @@
 import { useList } from "@src/metagraph/useList";
 import { expect, it, describe, beforeAll } from "vitest";
-import { renderHook, act } from "@testing-library/react-hooks";
+import { renderHook, act } from "@testing-library/react";
 
 describe("check list hook", () => {
   const { result } = renderHook(() => useList([1, 2, 3, 4]));

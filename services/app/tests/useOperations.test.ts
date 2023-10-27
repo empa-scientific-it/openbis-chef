@@ -1,6 +1,6 @@
 import { useOperations } from "@src/metagraph/useOperations";
 import { expect, it, describe } from "vitest";
-import { renderHook, act } from "@testing-library/react-hooks";
+import { renderHook, act } from "@testing-library/react";
 
 describe("check operations hook", () => {
   const { result } = renderHook(() => useOperations([]));
