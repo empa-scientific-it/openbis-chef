@@ -22,19 +22,21 @@ import StepperDemo from "./StepperDemo";
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   const { checkSession } = useContext(AuthContext);
-  const [loggedIn, setLoggedIn] = useState(true);
   const location = useLocation();
+
+  const [checked, setChecked] = useState(true);
   useEffect(() => {
-    console.log("checking session");
-    checkSession()
-      .then((res) => {
-        setTimeout(() => setLoggedIn(res), 1000);
-      })
-      .catch((err) => {
-        setLoggedIn(false);
-      });
+    console.log("Auth check")
+    async function check() {
+      console.log("Auth check");
+      const res = await checkSession();
+      console.log("The user is logged in: ", res);
+      setChecked(res);
+    }
+    check();
   }, []);
-  if (!loggedIn) {
+
+  if (!checked) {
     return (
       <Navigate
         to="/login"
@@ -52,6 +54,7 @@ const workflows = [polyproWorkflow, pizzaWorkflow, simpleWorkflow];
 const App: React.FC = () => {
   const openbisContext = useLogin();
 
+
   return (
     <>
       {/* <CounterComponent></CounterComponent> */}
@@ -60,13 +63,10 @@ const App: React.FC = () => {
           <Routes>
             <Route path="login" element={<Login />} />
             <Route
-              path="/"
+              path="/main"
               element={
                 <RequireAuth>
-
                   <Workflow workflows={workflows} />
-
-
                 </RequireAuth>
               }
             />

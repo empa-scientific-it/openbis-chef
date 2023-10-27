@@ -54,6 +54,10 @@ const Workflow = ({ workflows }: Props) => {
   const [sample, setSample] = useState<Sample[] | null>(null as Sample[]);
   const logger = useLog();
 
+  const {checkSession} = useContext(AuthContext);
+
+
+
   function handleLogout(event: React.FormEvent<MouseEvent>) {
     event.preventDefault();
     logout().then(() => {

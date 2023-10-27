@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
 import { Facade } from "@src/openbis/api";
 import { useTokenStorage } from "@src/session/useTokenStorage";
-
-interface SessionToken {
-  token: string;
-  server: string;
-}
+import { cons } from "fp-ts/lib/ReadonlyNonEmptyArray";
+import { or } from "fp-ts/lib/Predicate";
 
 export function useLogin() {
   const sessionName = "sessionToken";
@@ -18,46 +15,46 @@ export function useLogin() {
   } = useTokenStorage();
 
   const DEFAULT_URL = "/local/";
-  const [serviceUrl, setServiceUrl] = useState<string>(DEFAULT_URL);
-  const [service, setService] = useState(Facade.fromURL(DEFAULT_URL));
 
-  const [loggedIn, setLoggedIn] = useState<boolean>(false);
+  const initialState = {
+    serviceUrl: DEFAULT_URL,
+    loggedIn: false,
+    sessionToken: null,
+    service: Facade.fromURL(DEFAULT_URL),
+  };
 
-  const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const [state, setState] = useState(initialState);
 
-  useEffect(() => {
-    async function check() {
-      console.log("Starting session checking", sessionToken);
-      const result = await checkSession();
-      if (result) {
-        console.log("Performing post-login actions");
-        console.log("Session token", sessionToken);
-        afterLogin();
-      }
+  async function checkSession() {
+    const localToken = getToken(sessionName);
+    if (!localToken || localToken.server === "") {
+      return false;
+    } else {
+      await setUrl(localToken.server);
+      return await checkToken(localToken.value);
     }
-    check();
-  }, []);
+  }
 
-  const afterLogin = async () => {
-    console.log("After login");
-    setLoggedIn(true);
-    service.useSession(sessionToken);
-    const info = await service.getServerInformation();
-    console.log(info);
-    setService(service);
-  };
+  async function setUrl(url) {
+    setState((prevState) => ({
+      ...prevState,
+      serviceUrl: url,
+      service: Facade.fromURL(url),
+    }));
+  }
 
-  const setUrl = (url: string) => {
-    setService(() => Facade.fromURL(url));
-    setServiceUrl(url);
-  };
-
-  const checkToken = async (token: string) => {
+  async function checkToken(token) {
     try {
+      const { service } = state;
       const valid = await service.checkSession(token);
       if (valid !== null) {
-        setSessionToken(() => token);
-        console.log("Token is valid", sessionToken);
+        setState((prevState) => ({
+          ...prevState,
+          sessionToken: token,
+          loggedIn: true,
+        }));
+
+        await afterLogin(token);
         return true;
       } else {
         return false;
@@ -66,68 +63,75 @@ export function useLogin() {
       console.error(`error: ${error}`);
       return false;
     }
-  };
+  }
 
-  const checkSession = async () => {
-    const localToken = getToken(sessionName);
-    if (localToken === null) {
-      return false;
-    } else {
-      setUrl(localToken?.server);
-      return await checkToken(localToken?.value);
-    }
-  };
-
-  const login = async (username: string, password: string) => {
+  async function login(username, password) {
     try {
+      const { service, serviceUrl } = state;
       const newToken = await service.login(username, password);
       setToken(sessionName, { value: newToken, server: serviceUrl });
-      setLoggedIn(true);
+      await afterLogin(newToken);
       return true;
     } catch (error) {
-      setLoggedIn(false);
-      console.log("Failed to login", error);
+      console.error("Failed to login", error);
       return false;
     }
-  };
+  }
 
-  const logout = async () => {
-    if (loggedIn) {
+  function MakeProxyFacade(facade, state: typeof initialState) {
+    //This is a proxy to the facade that will log all calls
+    //We use it to spy on the facade and log all calls to ensure the 
+    //url and the token are right
+    return new Proxy(facade, {
+      get: function (target, prop, receiver) {
+        console.log("proxy", target, prop, receiver, state);
+        const origMethod = target[prop];
+        return origMethod;
+      },
+      construct: function (target, args) {
+        console.log("proxy", target, args);
+        const origMethod = target;
+        return origMethod;
+      }
+    });
+  }
+
+  async function afterLogin(token) {
+    const { service } = state;
+    service.useSession(token);
+    const info = await service.getServerInformation();
+    // Additional actions after login if needed
+    setState((prevState) => ({
+      ...prevState,
+      sessionToken: token,
+      loggedIn: true,
+      service: MakeProxyFacade(service, state),
+    }));
+  }
+
+  async function logout() {
+    if (state.loggedIn) {
+      const { service } = state;
       try {
         await service.logout();
       } finally {
         removeToken(sessionName);
-        console.log("Logged out");
-        setLoggedIn(false);
+        setState((prevState) => ({
+          ...prevState,
+          sessionToken: null,
+          loggedIn: false,
+        }));
       }
     }
-  };
-
-  const loginWithPAT = async (patToken: string) => {
-    try {
-      service.useSession(patToken);
-      const result = await service.checkSession(patToken);
-      if (result) {
-        setToken(sessionName, { value: patToken, server: serviceUrl });
-        setLoggedIn(true);
-        return true;
-      }
-    } catch (error) {
-      removeToken(sessionName);
-      setLoggedIn(false);
-      return false;
-    }
-  };
+  }
 
   return {
-    sessionToken,
-    setToken,
-    loggedIn,
+    sessionToken: state.sessionToken,
+    loggedIn: state.loggedIn,
     login,
     logout,
-    loginWithPAT,
     setUrl,
-    service,
     checkSession,
+    service: state.service,
   };
 }

@@ -37,7 +37,7 @@ function Login() {
   }
 
   function handleLogin() {
-    const from = location.state?.from?.pathname || "/";
+    const from = location.state?.from?.pathname || "/main";
     setUrl(server);
     const doNavigate = () => navigate(from, { replace: true });
     const failLogin = () => toggleToast();
