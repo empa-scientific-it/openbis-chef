@@ -7,3 +7,5 @@
 utils/instance-io.jar
 **/package-lock.json
 **yarn.lock
+instance-io.jar
+instance-io.jar:Zone.Identifier

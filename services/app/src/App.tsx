@@ -12,7 +12,7 @@ import {
 } from "react-router-dom";
 import Workflow from "@src/metagraph/components/Workflow";
 import { Metagraph } from "@src/metagraph/metagraph";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import Demo from "./Demo";
 import { polyproWorkflow } from "./workflows/PolyproWorkflow";
 import { pizzaWorkflow } from "./workflows/PizzaWorkflow";
@@ -21,11 +21,22 @@ import { simpleWorkflow } from "./workflows/SimpleWorkflow";
 import StepperDemo from "./StepperDemo";
 
 function RequireAuth({ children }: { children: JSX.Element }) {
-  const { loggedIn } = useContext(AuthContext);
+  const { checkSession } = useContext(AuthContext);
   const location = useLocation();
 
-  if (!loggedIn) {
-    console.log("Redirecting to login");
+  const [checked, setChecked] = useState(true);
+  useEffect(() => {
+    console.log("Auth check")
+    async function check() {
+      console.log("Auth check");
+      const res = await checkSession();
+      console.log("The user is logged in: ", res);
+      setChecked(res);
+    }
+    check();
+  }, []);
+
+  if (!checked) {
     return (
       <Navigate
         to="/login"
@@ -38,11 +49,11 @@ function RequireAuth({ children }: { children: JSX.Element }) {
   }
 }
 
-
 const workflows = [polyproWorkflow, pizzaWorkflow, simpleWorkflow];
 
 const App: React.FC = () => {
   const openbisContext = useLogin();
+
 
   return (
     <>
@@ -52,7 +63,7 @@ const App: React.FC = () => {
           <Routes>
             <Route path="login" element={<Login />} />
             <Route
-              path="/"
+              path="/main"
               element={
                 <RequireAuth>
                   <Workflow workflows={workflows} />

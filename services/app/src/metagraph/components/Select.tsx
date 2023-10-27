@@ -149,7 +149,6 @@ const Select = () => {
   //Use one function to generate the fetch options
   useEffect(() => {
     if (loggedIn) {
-      console.log(currentCollection);
       //Perform the search for all the objects in the experiment/collection
       performSampleSearch(
         currentCollection,
@@ -159,7 +158,6 @@ const Select = () => {
         service
       ).then((res) => {
         if (res.totalCount > 0) {
-          console.log(res);
           setSamples(() => res.objects);
         } else {
           setSamples(() => []);
@@ -191,14 +189,12 @@ const Select = () => {
     if (s.direction === "desc") {
       so.asc = false;
     }
-    console.log(s.direction, sb);
     sfo.sort = sb;
 
     setFetchOptions(sfo);
   };
 
   useEffect(() => {
-    console.log(fetchOptions);
   }, [fetchOptions]);
 
   const onScroll = (batch: number) => {

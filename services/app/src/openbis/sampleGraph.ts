@@ -84,7 +84,7 @@ export function getGraphToDepth<E extends Edge, N extends Node>(
   accumulator: SampleGraph = { nodes: [], edges: [] },
   visited: Set<String> = new Set()
 ): Graph<N, E> {
-  console.log("getGraphToDepth", s, maxDepth, depth, accumulator, visited);
+  // console.log("getGraphToDepth", s, maxDepth, depth, accumulator, visited);
   if (depth >= maxDepth || visited.has(s.permId.permId)) {
     // If depth reaches maxDepth or the sample is already visited, return the accumulated graph
     return {

@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { PropertyWithType } from "../typeMappers";
+import React, { useState, useContext } from "react";
 import { DataType } from "../dto";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
+import { OperationContext } from "../../metagraph/OperationContext";
 
 type Props = {
   name: string;
@@ -26,17 +26,21 @@ type PropertyComponent<T extends boolean> = (
 ) => React.JSX.Element;
 
 type PropertyEditor = (props: PropertyComponentProps<true>) => React.JSX.Element;
-
 type PropertyDisplay = (props: PropertyComponentProps<false>) => React.JSX.Element;
 
 function TextInput({ name, value, onChange, className }: EditorProps) {
+  const operationContext = useContext(OperationContext);
+
   return (
     <input
       type="text"
       className={className}
       name={name}
       value={value}
-      onChange={(e) => onChange(name, e.target.value)}
+      onChange={(e) => {
+        onChange(name, e.target.value);
+        operationContext.setProperties({ ...operationContext.getProperties(), [name]: e.target.value })
+      }}
     />
   );
 }
@@ -46,13 +50,18 @@ function TextDisplay({ name, value, className }: DisplayProps) {
 }
 
 function DateInput({ name, value, onChange, className }: EditorProps) {
+  const operationContext = useContext(OperationContext);
+
   return (
     <input
       className={className}
       type="date"
       name={name}
       value={value}
-      onChange={(e) => onChange(name, e.target.value)}
+      onChange={(e) => {
+        onChange(name, e.target.value);
+        operationContext.setProperties({ ...operationContext.getProperties(), [name]: e.target.value })
+      }}
     />
   );
 }
@@ -62,13 +71,19 @@ function DateDisplay({ name, value, className }: DisplayProps) {
 }
 
 function BooleanInput({ name, value, onChange, className }: EditorProps) {
+  const operationContext = useContext(OperationContext);
+
   return (
     <input
       type="checkbox"
       className={className}
       name={name}
       checked={value === "true"}
-      onChange={(e) => onChange(name, e.target.checked ? "true" : "false")}
+      onChange={(e) => {
+        const targetValue = e.target.checked ? "true" : "false"
+        onChange(name, targetValue);
+        operationContext.setProperties({ ...operationContext.getProperties(), [name]: targetValue })
+      }}
     />
   );
 }
@@ -78,13 +93,18 @@ function BooleanDisplay({ name, value, className }: DisplayProps) {
 }
 
 function NumberInput({ name, value, onChange, className }: EditorProps) {
+  const operationContext = useContext(OperationContext);
+
   return (
     <input
       className={className}
       type="number"
       name={name}
       value={value}
-      onChange={(e) => onChange(name, e.target.value)}
+      onChange={(e) => {
+        onChange(name, e.target.value);
+        operationContext.setProperties({ ...operationContext.getProperties(), [name]: e.target.value })
+      }}
     />
   );
 }
@@ -100,12 +120,17 @@ function SelectInput({
   onChange,
   choices,
 }: EditorProps & { choices: string[] }) {
+  const operationContext = useContext(OperationContext);
+
   return (
     <select
       className={className}
       name={name}
       value={value}
-      onChange={(e) => onChange(name, e.target.value)}
+      onChange={(e) => {
+        onChange(name, e.target.value);
+        operationContext.setProperties({ ...operationContext.getProperties(), [name]: e.target.value })
+      }}
     >
       {choices.map((c) => (
         <option key={c} value={c}>
@@ -148,12 +173,17 @@ function XMLDisplay({ name, value, className }: DisplayProps) {
 }
 
 function MultiLineTextInput({ name, value, onChange, className }: EditorProps) {
+  const operationContext = useContext(OperationContext);
+
   return (
     <textarea
       className={className}
       name={name}
       value={value}
-      onChange={(e) => onChange(name, e.target.value)}
+      onChange={(e) => {
+        onChange(name, e.target.value);
+        operationContext.setProperties({ ...operationContext.getProperties(), [name]: e.target.value })
+      }}
     />
   );
 }
@@ -163,13 +193,18 @@ function MultiLineTextDisplay({ name, value }: DisplayProps) {
 }
 
 function HyperlinkInput({ name, value, onChange, className }: EditorProps) {
+  const operationContext = useContext(OperationContext);
+
   return (
     <input
       type="url"
       className={className}
       name={name}
       value={value}
-      onChange={(e) => onChange(name, e.target.value)}
+      onChange={(e) => {
+        onChange(name, e.target.value);
+        operationContext.setProperties({ ...operationContext.getProperties(), [name]: e.target.value })
+      }}
     />
   );
 }
@@ -183,13 +218,18 @@ function HyperlinkDisplay({ name, value, className }: DisplayProps) {
 }
 
 function SampleInput({ name, value, onChange, className }: EditorProps) {
+  const operationContext = useContext(OperationContext);
+
   return (
     <input
       type="text"
       className={className}
       name={name}
       value={value}
-      onChange={(e) => onChange(name, e.target.value)}
+      onChange={(e) => {
+        onChange(name, e.target.value);
+        operationContext.setProperties({ ...operationContext.getProperties(), [name]: e.target.value })
+      }}
     />
   );
 }

@@ -1,35 +1,40 @@
 import { createContext } from "react";
 import { MetagraphOperations } from "./metagraph";
-import { Sample } from "@src/types/openbis";
 
 export interface OperationContextInterface {
-  currentOperation: MetagraphOperations;
-  operationIndex: number;
   operations: MetagraphOperations[];
+  operationIndex: number;
+  currentOperation: MetagraphOperations;
   addOperation: (operation: MetagraphOperations) => void;
   removeOperation: (operation: MetagraphOperations) => void;
+  updateOperation: (operation: MetagraphOperations) => void;
   clearOperations: () => void;
+  goToOperation: (operation: number) => void;
+  setOperation: (operation: MetagraphOperations, index: number) => void;
+  setCollection: (collection: string) => void;
+  setProperties: (properties: { [key: string]: string }) => void;
+  getProperties: () =>  { [key: string]: string };
+  setIdentifier:  (identifier: string) => void;
   nextOperation: () => void;
   previousOperation: () => void;
-  setOperation: (operation: MetagraphOperations, index: number) => void;
-  updateOperationOriginObject: (originObject: Sample) => void;
-  setProperties: (properties: { [key: string]: string }) => void;
-  setIdentifier:  (identifier: string) => void;
-  setCollection: (collection: string) => void;
+  setOperations: (operations: MetagraphOperations[]) => void;
 }
 
 export const OperationContext = createContext<OperationContextInterface>({
-  currentOperation: {} as MetagraphOperations,
-  operationIndex: 0,
   operations: [],
+  operationIndex: 0,
+  currentOperation: {} as MetagraphOperations,
   addOperation: (operation: MetagraphOperations) => {},
   removeOperation: (operation: MetagraphOperations) => {},
+  updateOperation: (operation: MetagraphOperations) => {},
   clearOperations: () => {},
+  goToOperation: (operation: number) => {},
+  setOperation: (operation: MetagraphOperations, index: number) => {},
+  setCollection: (collection: string) => {},
+  setProperties: (properties: { [key: string]: string }) => {},
+  getProperties: () => Object({}),
+  setIdentifier:  (identifier: string) => {},
   nextOperation: () => {},
   previousOperation: () => {},
-  setOperation: (operation: MetagraphOperations, index: number) => {},
-  updateOperationOriginObject: (originObject: Sample) => {},
-  setProperties: (properties: { [key: string]: string }) => {},
-  setIdentifier:  (identifier: string) => {},
-  setCollection: (collection: string) => {},
+  setOperations: (operations: MetagraphOperations[]) => {}
 });

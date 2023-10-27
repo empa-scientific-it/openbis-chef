@@ -23,8 +23,10 @@ import Summary from "./Summary";
 
 function ErrorDisplay(messages: string[]) {
   return (
-    <div>
-      The following errors were found:
+    <div className="workflow-editor-errors">
+      <p>
+        <b>The following errors were found:</b>
+      </p>
       <ul>
         {messages.map((msg, idx) => (
           <li key={idx}>{msg}</li>
@@ -81,7 +83,6 @@ function WorkflowEditor({
   function handleEdit(newValue: string, update: string) {
     setValue(newValue);
     const mg = nodesFromJSON(newValue);
-    console.log(mg)
     pipe(
       mg,
       E.flatMap((mg) => Metagraph.fromNodes(mg.nodes, mg.description, mg.name)),
@@ -112,8 +113,11 @@ function WorkflowEditor({
 
 
   useEffect(() => {
-    setValue(JSON.stringify(initialValue, null, 2));
-    handleEdit(JSON.stringify(initialValue, null, 2), "");
+    if(isOpen){
+      setValue(JSON.stringify(initialValue, null, 2));
+      handleEdit(JSON.stringify(initialValue, null, 2), "");
+    }
+
   }, [initialValue]);
 
 
@@ -136,7 +140,7 @@ function WorkflowEditor({
               theme="github"
               value={value}
               onChange={handleEdit}
-              name="UNIQUE_ID_OF_DIV"
+              name="UNIQUE_ID_OF_EDITOR"
               editorProps={{ $blockScrolling: true }}
               setOptions={{
                 useWorker: false,
@@ -146,16 +150,17 @@ function WorkflowEditor({
           <div className="workflow-editor-graph">
             { localMetagraph ? <Summary metagraph={localMetagraph} /> : null}
           </div>
-
         </div>
 
         {toastComponent}
-        <button className="clickable-button" onClick={handleSave}>
-          Save
-        </button>
-        <button className="clickable-button" onClick={handleLocalClose}>
-          Close
-        </button>
+        <div className="workflow-footer-buttons">
+          <button className="clickable-button" onClick={handleSave}>
+            Save
+          </button>
+          <button className="clickable-button" onClick={handleLocalClose}>
+            Close
+          </button>
+        </div>
       </Modal>
     </div>
   );

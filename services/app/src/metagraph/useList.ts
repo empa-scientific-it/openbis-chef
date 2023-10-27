@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export const useList = <T>(initialData: T[]) => {
   const [list, setList] = useState<T[]>(initialData);
@@ -22,7 +22,6 @@ export const useList = <T>(initialData: T[]) => {
       } else {
         setFinished(() => false);
       }
-
     }
   };
 

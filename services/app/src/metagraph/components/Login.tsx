@@ -17,7 +17,7 @@ function Login() {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [server, setServer] = useState("/local/");
-  const { login, loginWithPAT, setUrl, service, token } = useContext(AuthContext);
+  const { login, loginWithPAT, setUrl, service } = useContext(AuthContext);
 
   const [showToast, setShowToast] = useState(false);
 
@@ -28,17 +28,19 @@ function Login() {
 
   const validInstances = instances as openBISInstance[];
 
-  //Hide toast after 2 seconds
-  useEffect(() => {
+
+
+  const toggleToast = () => {
+    setShowToast((old) => !old);
     const timer = setTimeout(() => setShowToast((old) => false), 2000);
     return () => clearTimeout(timer);
-  }, [showToast]);
+  }
 
   function handleLogin() {
-    const from = location.state?.from?.pathname || "/";
+    const from = location.state?.from?.pathname || "/main";
     setUrl(server);
     const doNavigate = () => navigate(from, { replace: true });
-    const failLogin = () => setShowToast((old) => true);
+    const failLogin = () => toggleToast();
 
     switch (loginMethod) {
       case "password":

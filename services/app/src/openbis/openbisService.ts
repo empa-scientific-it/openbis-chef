@@ -19,7 +19,6 @@ export function createSearchCriteria(
 
   ssc.withAnyProperty().thatContains(searchTerm);
 
-  console.log(ssc);
   return ssc;
 }
 
