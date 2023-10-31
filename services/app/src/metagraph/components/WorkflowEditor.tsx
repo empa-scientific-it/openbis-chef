@@ -65,9 +65,6 @@ interface WorkflowEditorProps {
   initialValue: Metagraph;
 }
 
-
-
-
 function WorkflowEditor({
   handleNewMetagraph,
   isOpen,
@@ -75,10 +72,13 @@ function WorkflowEditor({
   initialValue,
 }: WorkflowEditorProps) {
   const { service } = useContext(AuthContext);
-  const [value, setValue] = useState("// some comment");
+  const [value, setValue] = useState(JSON.stringify(initialValue, null, 4));
   const [toastComponent, setToastComponent] = useState<JSX.Element | null>();
-  const [localMetagraph, setLocalMetagraph] = useState<Metagraph | null>(null);
+  const [localMetagraph, setLocalMetagraph] = useState<Metagraph | null>(initialValue);
 
+  useEffect(() => {
+    console.log(localMetagraph);
+  }, [localMetagraph]);
 
   function handleEdit(newValue: string, update: string) {
     setValue(newValue);
@@ -94,9 +94,10 @@ function WorkflowEditor({
           checkMetagraphData(graph, service).then((result) => {
             if (result.valid) {
               setToastComponent(SuccessDisplay());
-              setLocalMetagraph(graph);
+              setLocalMetagraph(()=>graph);
             } else {
               setToastComponent(ErrorDisplay(result.failures.map(formatFailure)));
+              setLocalMetagraph(null);
             }
           });
         }
@@ -111,20 +112,16 @@ function WorkflowEditor({
     }
   }
 
-
   useEffect(() => {
-    if(isOpen){
+    if (isOpen) {
       setValue(JSON.stringify(initialValue, null, 2));
       handleEdit(JSON.stringify(initialValue, null, 2), "");
     }
-
-  }, [initialValue]);
-
+  }, [initialValue, isOpen]);
 
   const handleLocalClose = useCallback(
     (ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       ev.preventDefault();
-      // setLocalIsOpen(() => false);
       handleClose();
     },
     []
@@ -148,7 +145,7 @@ function WorkflowEditor({
             />
           </div>
           <div className="workflow-editor-graph">
-            { localMetagraph ? <Summary metagraph={localMetagraph} /> : null}
+            {localMetagraph !== null ? <Summary metagraph={localMetagraph} /> : null}
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import ReactFlow, {
   addEdge,
   MiniMap,
@@ -22,6 +22,11 @@ function Summary({ metagraph }: Props) {
   const [edges, setEdges, onEdgesChange] = useEdgesState(getEdges(metagraph));
   const onConnect = useCallback((params) => console.log("not possible"), []);
   const onInit = (reactFlowInstance) => console.log("flow loaded:", nodes, edges);
+
+  useEffect(() => {
+    console.log("nodes changed:", nodes);
+  }
+  , [nodes]);
 
   return (
     <div className="flow" style={{ width: "100%", height: "100%" }}>
