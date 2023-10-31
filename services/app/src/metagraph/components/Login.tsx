@@ -10,6 +10,8 @@ import instances from "@src/openbis/config/instances.json";
 import SliderButton from "./SliderButton";
 
 import Toast from "react-bootstrap/Toast";
+import Popup from "@src/notification/components/Popup";
+import { NotificationContext } from "@src/notification/NotificationContext";
 
 type LoginMethods = "password" | "token";
 
@@ -28,19 +30,17 @@ function Login() {
 
   const validInstances = instances as openBISInstance[];
 
+  const not = useContext(NotificationContext)
 
-
-  const toggleToast = () => {
-    setShowToast((old) => !old);
-    const timer = setTimeout(() => setShowToast((old) => false), 2000);
-    return () => clearTimeout(timer);
-  }
+  const fail = () => {
+    not.addNotification("Login failed", "error");
+  };
 
   function handleLogin() {
     const from = location.state?.from?.pathname || "/main";
     setUrl(server);
     const doNavigate = () => navigate(from, { replace: true });
-    const failLogin = () => toggleToast();
+    const failLogin = () => fail();
 
     switch (loginMethod) {
       case "password":
@@ -135,10 +135,7 @@ function Login() {
             </button>
           </form>
         </div>
-        <Toast show={showToast}>
-          <Toast.Header className="toast-container">Error</Toast.Header>
-          <Toast.Body>Wrong password</Toast.Body>
-        </Toast>
+        <Popup timeout={2000} />
       </div>
     </div>
   );

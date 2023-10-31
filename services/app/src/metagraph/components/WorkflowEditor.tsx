@@ -20,6 +20,9 @@ import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import { AuthContext } from "@src/openbis/AuthContext";
 import Summary from "./Summary";
+import { NotificationContext } from "@src/notification/NotificationContext";
+import { not } from "fp-ts/lib/Predicate";
+import Popup from "@src/notification/components/Popup";
 
 function ErrorDisplay(messages: string[]) {
   return (
@@ -65,20 +68,17 @@ interface WorkflowEditorProps {
   initialValue: Metagraph;
 }
 
-
-
-
 function WorkflowEditor({
   handleNewMetagraph,
   isOpen,
   handleClose,
   initialValue,
 }: WorkflowEditorProps) {
+  const notCont = useContext(NotificationContext);
   const { service } = useContext(AuthContext);
   const [value, setValue] = useState("// some comment");
   const [toastComponent, setToastComponent] = useState<JSX.Element | null>();
   const [localMetagraph, setLocalMetagraph] = useState<Metagraph | null>(null);
-
 
   function handleEdit(newValue: string, update: string) {
     setValue(newValue);
@@ -88,15 +88,19 @@ function WorkflowEditor({
       E.flatMap((mg) => Metagraph.fromNodes(mg.nodes, mg.description, mg.name)),
       match(
         (failure) => {
-          setToastComponent(ErrorDisplay(failure.map(formatFailure)));
+          failure.map((f) => {
+            notCont.addNotification(formatFailure(f), "error");
+          });
         },
         (graph) => {
           checkMetagraphData(graph, service).then((result) => {
             if (result.valid) {
-              setToastComponent(SuccessDisplay());
+              notCont.addNotification("Workflow is valid", "success");
               setLocalMetagraph(graph);
             } else {
-              setToastComponent(ErrorDisplay(result.failures.map(formatFailure)));
+              result.failures.map(formatFailure).map((msg) => {
+                notCont.addNotification(msg, "error");
+              });
             }
           });
         }
@@ -111,15 +115,12 @@ function WorkflowEditor({
     }
   }
 
-
   useEffect(() => {
-    if(isOpen){
+    if (isOpen) {
       setValue(JSON.stringify(initialValue, null, 2));
       handleEdit(JSON.stringify(initialValue, null, 2), "");
     }
-
   }, [initialValue]);
-
 
   const handleLocalClose = useCallback(
     (ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -148,7 +149,7 @@ function WorkflowEditor({
             />
           </div>
           <div className="workflow-editor-graph">
-            { localMetagraph ? <Summary metagraph={localMetagraph} /> : null}
+            {localMetagraph ? <Summary metagraph={localMetagraph} /> : null}
           </div>
         </div>
 
@@ -161,6 +162,7 @@ function WorkflowEditor({
             Close
           </button>
         </div>
+        <Popup timeout={2000} />
       </Modal>
     </div>
   );

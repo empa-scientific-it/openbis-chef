@@ -30,6 +30,7 @@ import { fetchOptionsToDepth } from "@src/openbis/sampleGraph";
 import WorkflowSelection from "./WorkflowSelection";
 import { Navigate } from "react-router-dom";
 import WorkflowPages from "./WorkflowPages";
+import Popup from "@src/notification/components/Popup";
 
 type Props = {
   workflows: Metagraph[];
@@ -39,7 +40,13 @@ const Workflow = ({ workflows }: Props) => {
   // Get openbis service
   const { logout, service } = useContext(AuthContext);
   // Keep list of all available workflows
-  const { currentWorkflow, setCurrentWorkflow, addOrReplaceWorkflow, workflows: allWorkflows, currentWorkflowContext } = useWorkflows(workflows);
+  const {
+    currentWorkflow,
+    setCurrentWorkflow,
+    addOrReplaceWorkflow,
+    workflows: allWorkflows,
+    currentWorkflowContext,
+  } = useWorkflows(workflows);
   // Keep track of the workflow selected
   const [workflowSelected, setWorkflowSelected] = useState(false);
   // Keep track of the workflow completion
@@ -54,10 +61,6 @@ const Workflow = ({ workflows }: Props) => {
   const [sample, setSample] = useState<Sample[] | null>(null as Sample[]);
   const logger = useLog();
 
-  const {checkSession} = useContext(AuthContext);
-
-
-
   function handleLogout(event: React.FormEvent<MouseEvent>) {
     event.preventDefault();
     logout().then(() => {
@@ -67,7 +70,7 @@ const Workflow = ({ workflows }: Props) => {
         replace // <-- redirect
         state={{ path: location.pathname }}
       />;
-    })
+    });
   }
 
   function activateComponent(graph: Metagraph) {
@@ -330,7 +333,9 @@ const Workflow = ({ workflows }: Props) => {
             ) : null}
           </div>
         </div>
+        <Popup timeout={2000} />
       </div>
+
     </OperationContext.Provider>
   );
 };
