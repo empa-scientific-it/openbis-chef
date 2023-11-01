@@ -32,7 +32,7 @@ function RequireAuth({ children }: { children: JSX.Element }) {
 
   const [checked, setChecked] = useState(true);
   useEffect(() => {
-    console.log("Auth check")
+    console.log("Auth check");
     async function check() {
       console.log("Auth check");
       const res = await checkSession();
@@ -59,7 +59,7 @@ const workflows = [polyproWorkflow, pizzaWorkflow, simpleWorkflow];
 
 const App: React.FC = () => {
   const openbisContext = useLogin();
-
+  const notification = useNotification();
 
   return (
     <>
@@ -86,6 +86,7 @@ const App: React.FC = () => {
           </AuthContext.Provider>
         </NotificationContext.Provider>
       </Router>
+
     </>
   );
 };
