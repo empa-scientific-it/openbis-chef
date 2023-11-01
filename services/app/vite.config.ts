@@ -15,6 +15,7 @@ export default defineConfig(({ mode }) => {
       alias: {
         "@src": path.resolve(__dirname, "./src"),
         "@tests": path.resolve(__dirname, "./tests"),
+        '@bootstrap': path.resolve(__dirname, './node_modules/bootstrap'),
         v3api: path.resolve(__dirname, "./lib/v3api/js"),
       },
     },

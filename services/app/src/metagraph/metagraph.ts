@@ -9,16 +9,21 @@ import dagre from "dagre";
 import { Either } from "fp-ts/Either";
 import { ExperimentFetchOptions, ExperimentSearchCriteria } from "v3api/V3API.esm";
 
+export enum MetagraphNodeType {
+  Entry = "entry",
+  Select = "select",
+}
+
 export interface Node {
   id: string;
   entityType: string;
-  type: string;
+  type: MetagraphNodeType;
   description: string | null;
 }
 
 export interface EntryNode extends Node {
   id: string;
-  type: "entry";
+  type: MetagraphNodeType.Entry;
   entityType: string;
   collection: string;
   dependencies: string[]; // IDs of nodes this node depends on
@@ -26,7 +31,7 @@ export interface EntryNode extends Node {
 
 export interface SelectNode extends Node {
   id: string;
-  type: "select";
+  type: MetagraphNodeType.Select;
   entityType: string;
   collection: string;
   dependencies: string[]; // IDs of nodes this node depends on
@@ -411,6 +416,7 @@ export function getVisualisationNodes(
       id: node.id,
       data: { label: node.description },
       type: "default",
+      draggable: true,
       position: {
         y: graph.node(node.id).y,
         x: graph.node(node.id).x,

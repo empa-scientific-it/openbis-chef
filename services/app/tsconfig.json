@@ -24,7 +24,8 @@
     "paths": {
       "v3api/*": ["./lib/v3api/js/*"],
       "as/*": ["./lib/v3/as/*"],
-      "@src/*": ["./src/*"]
+      "@src/*": ["./src/*"],
+      "@bootstrap/*": ["node_modules/bootstrap/*"],
     }
   },
   "include": [

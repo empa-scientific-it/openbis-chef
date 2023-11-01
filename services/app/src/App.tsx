@@ -1,3 +1,5 @@
+import '@bootstrap/dist/css/bootstrap.min.css'
+
 import "./App.css";
 import Login from "@src/metagraph/components/Login";
 import { useLogin } from "@src/openbis/hooks/useLogin";
@@ -19,6 +21,10 @@ import { pizzaWorkflow } from "./workflows/PizzaWorkflow";
 import SampleGraphDemo from "./SampleGraphDemo";
 import { simpleWorkflow } from "./workflows/SimpleWorkflow";
 import StepperDemo from "./StepperDemo";
+import PopupDemo from "./notification/components/PopupDemo";
+import { NotificationContext } from "./notification/NotificationContext";
+import { useNotification } from "./notification/hooks/useNotification";
+import GraphicalEditor from "./metagraph/components/GraphicalEditor";
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   const { checkSession } = useContext(AuthContext);
@@ -59,22 +65,26 @@ const App: React.FC = () => {
     <>
       {/* <CounterComponent></CounterComponent> */}
       <Router>
-        <AuthContext.Provider value={openbisContext}>
-          <Routes>
-            <Route path="login" element={<Login />} />
-            <Route
-              path="/main"
-              element={
-                <RequireAuth>
-                  <Workflow workflows={workflows} />
-                </RequireAuth>
-              }
-            />
-            <Route path="demo" element={<Demo metagraph={pizzaWorkflow} />} />
-            <Route path="sampledemo" element={<SampleGraphDemo />} />
-            <Route path="stepper" element={<StepperDemo />} />
-          </Routes>
-        </AuthContext.Provider>
+        <NotificationContext.Provider value={notification}>
+          <AuthContext.Provider value={openbisContext}>
+            <Routes>
+              <Route path="login" element={<Login />} />
+              <Route
+                path="/main"
+                element={
+                  <RequireAuth>
+                    <Workflow workflows={workflows} />
+                  </RequireAuth>
+                }
+              />
+              <Route path="demo" element={<Demo metagraph={pizzaWorkflow} />} />
+              <Route path="sampledemo" element={<SampleGraphDemo />} />
+              <Route path="stepper" element={<StepperDemo />} />
+              <Route path="popup" element={<PopupDemo />} />
+              <Route path="grapheditor" element={<GraphicalEditor  metagraph={simpleWorkflow}/>} />
+            </Routes>
+          </AuthContext.Provider>
+        </NotificationContext.Provider>
       </Router>
     </>
   );
