@@ -347,12 +347,12 @@ function GraphicalEditor({ metagraph }: Props) {
   }
 
   function onNodeDragStart(event: any, node: any) {
-    console.log("drag start", node, event);
+    console.log("drag start", node.position, event);
     const newNode = {
       ...node,
       position: {
-        x: event.clientX,
-        y: event.clientY,
+        x: node.position.x,
+        y: node.position.y,
       },
     };
 
