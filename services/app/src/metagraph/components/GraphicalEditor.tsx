@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-  useMemo,
-} from "react";
+import React, { useCallback, useContext, useEffect, useState, useMemo } from "react";
 import Dropdown from "react-bootstrap/Dropdown";
 import ReactFlow, {
   addEdge,
@@ -18,6 +12,7 @@ import ReactFlow, {
   Handle,
   Position,
   Node,
+  Edge,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import {
@@ -38,6 +33,7 @@ import ButtonToolbar from "react-bootstrap/ButtonToolbar";
 import Popup from "@src/notification/components/Popup";
 import { NotificationContext } from "@src/notification/NotificationContext";
 import Modal from "react-bootstrap/Modal";
+import DropdownMenu from "react-bootstrap/esm/DropdownMenu";
 
 import { NodeProps } from "reactflow";
 
@@ -45,29 +41,67 @@ type NoteContextProps = {
   show: boolean;
   onHide: () => void;
 };
-function NodeContextMenu({show, onHide}: NoteContextProps) {
+
+function NodeContextMenu({ show, onHide }: NoteContextProps) {
   return <div hidden={!show}>Context menu</div>;
 }
 
-export type CounterData = {
-  initialCount?: number;
+export type EditableNodeProps = {
+  type: "editableNode";
+  metagraphNode: MetagraphNode;
+  onEdit: (node: MetagraphNode) => void;
+  onDelete: (node: MetagraphNode) => void;
 };
 
-function CounterNode(props: NodeProps<CounterData>) {
-  const [count, setCount] = useState(props.data?.initialCount ?? 0);
+function EditableNode({ data }: NodeProps<EditableNodeProps>) {
   const [showContextMenu, setShowContextMenu] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
   function handleNodeClick(event: React.MouseEvent<Element, MouseEvent>) {
-    console.log("node click", event, showContextMenu);
+    event.stopPropagation();
     setShowContextMenu((old) => !old);
   }
+  function handleLocalEdit(event) {
+    event.stopPropagation();
+    setShowEditor((old) => !old);
+  }
+  function handleLocalDelete(event) {
+    event.stopPropagation();
+    data.onDelete(data.metagraphNode);
+  }
+  function handleLocalSave(node: MetagraphNode) {
+    setShowEditor((old) => false);
+    setShowContextMenu((old) => false);
+    data.onEdit(node);
+  }
+
+  function handleLocalClose() {
+    setShowContextMenu((old) => false);
+    setShowEditor((old) => false);
+  }
+
+  function handleCloseContextMenu() {
+    setShowContextMenu(false);
+  }
+
   return (
     <div onClick={handleNodeClick}>
       <Handle type="target" position={Position.Top} />
-      <p>Count: {count}</p>
-      <button className="nodrag" onClick={() => setCount(count + 1)}>
-        Increment
-      </button>
-      <NodeContextMenu show={showContextMenu} onHide={() => 1}/>
+      <Button>
+        <p>{data.metagraphNode.name}</p>
+        <DropdownMenu show={showContextMenu}>
+          <Dropdown.Header>Node Actions</Dropdown.Header>
+          <Dropdown.Item onClick={handleLocalEdit}>Edit node</Dropdown.Item>
+          <Dropdown.Item onClick={handleLocalDelete}>Delete node</Dropdown.Item>
+          <Dropdown.Item onClick={handleCloseContextMenu}>Clone node</Dropdown.Item>
+        </DropdownMenu>
+      </Button>
+
+      <NodeEditor
+        node={data.metagraphNode}
+        show={showEditor}
+        onSave={handleLocalSave}
+        onHide={handleLocalClose}
+      />
       <Handle type="source" position={Position.Bottom} />
     </div>
   );
@@ -144,18 +178,14 @@ function NodeEditor({ node, show, onHide, onSave }: NodeEditorProps) {
             id="nameInput"
             type="text"
             value={localNode.name}
-            onChange={(event) =>
-              handlePropertyChange("name", event.target.value)
-            }
+            onChange={(event) => handlePropertyChange("name", event.target.value)}
           />
           <label htmlFor="descriptionInput">Node description</label>
           <input
             id="descriptionInput"
             type="text"
             value={localNode.description}
-            onChange={(event) =>
-              handlePropertyChange("description", event.target.value)
-            }
+            onChange={(event) => handlePropertyChange("description", event.target.value)}
           />
         </form>
       </Modal.Body>
@@ -172,11 +202,7 @@ function NodeEditor({ node, show, onHide, onSave }: NodeEditorProps) {
   );
 }
 
-function NodeDropdown({
-  onSelect,
-}: {
-  onSelect: (node: MetagraphNode) => void;
-}) {
+function NodeDropdown({ onSelect }: { onSelect: (node: MetagraphNode) => void }) {
   const [nodeCount, setNodeCount] = useState(0);
 
   function addNode(nodeType: MetagraphNodeType) {
@@ -215,9 +241,7 @@ function NodeDropdown({
       <Dropdown.Toggle id="dropdown-basic">Add Node</Dropdown.Toggle>
       <Dropdown.Menu>
         {Object.values(MetagraphNodeType).map((nodeType) => (
-          <Dropdown.Item onClick={() => addNode(nodeType)}>
-            {nodeType}
-          </Dropdown.Item>
+          <Dropdown.Item onClick={() => addNode(nodeType)}>{nodeType}</Dropdown.Item>
         ))}
       </Dropdown.Menu>
     </Dropdown>
@@ -228,19 +252,40 @@ function ContextMenu({ node }: { node: MetagraphNode }) {
   return <div>Context menu</div>;
 }
 
-function getDisplayNodes(nodes: Metagraph) {
-  return getVisualisationNodes(nodes, { type: "counterNode" });
+function getDisplayNodes(
+  nodes: Metagraph,
+  onEdit: (node: MetagraphNode) => void,
+  onDelete: (node: MetagraphNode) => void
+) {
+  return getVisualisationNodes(nodes, {}, (node) => {
+    return {
+      type: "editableNode",
+      metagraphNode: node,
+      onEdit: onEdit,
+      onDelete: onDelete,
+    };
+  });
 }
 
 function GraphicalEditor({ metagraph }: Props) {
-  const initialgraph = metagraph;
   const [localGraph, setLocalGraph] = useState(metagraph);
-  const [nodes, setNodes, onNodesChange] = useNodesState(
-    getDisplayNodes(localGraph)
+
+  const getNode = useCallback(
+    (metagraph: Metagraph) => {
+      return getDisplayNodes(
+        metagraph,
+        (node) => console.log("edit", node),
+        (node) => handleNodeDeletion(node)
+      );
+    },
+    [localGraph]
   );
+  const initialgraph = metagraph;
+  const [nodes, setNodes, onNodesChange] = useNodesState(getNode(localGraph));
   const [edges, setEdges, onEdgesChange] = useEdgesState(getEdges(localGraph));
-  const onInit = (reactFlowInstance) =>
-    console.log("flow loaded:", nodes, edges);
+  const onInit = (reactFlowInstance) => console.log("flow loaded:", nodes, edges);
+
+  const [selectedEdge, setSelectedEdge] = useState<Edge<any> | null>(null);
 
   const notificationManager = useContext(NotificationContext);
 
@@ -250,7 +295,7 @@ function GraphicalEditor({ metagraph }: Props) {
     localGraph.nodes[0]
   );
 
-  const nodeTypes = useMemo(() => ({ counterNode: CounterNode }), []);
+  const nodeTypes = useMemo(() => ({ editableNode: EditableNode }), []);
 
   const [showContextMenu, setShowContextMenu] = useState(false);
 
@@ -289,16 +334,16 @@ function GraphicalEditor({ metagraph }: Props) {
   }
 
   function updateGraph(graph: Metagraph) {
-    setLocalGraph(graph);
-    setNodes(() => getDisplayNodes(graph));
-    setEdges(() => getEdges(graph));
+    setNodes((nodes) => getNode(graph));
+    setEdges((nodes) => getEdges(graph));
     console.log("updating graph", graph);
+    setLocalGraph(() => graph);
   }
 
   function handleLayout() {
     console.log("layout");
     console.log(localGraph);
-    setNodes((nodes) => getDisplayNodes(localGraph));
+    setNodes((nodes) => getNode(localGraph));
   }
 
   function onNodeDragStart(event: any, node: any) {
@@ -306,8 +351,8 @@ function GraphicalEditor({ metagraph }: Props) {
     const newNode = {
       ...node,
       position: {
-        x: event.x,
-        y: event.y,
+        x: event.clientX,
+        y: event.clientY,
       },
     };
 
@@ -323,7 +368,7 @@ function GraphicalEditor({ metagraph }: Props) {
 
   function handleReset() {
     setLocalGraph(initialgraph);
-    setNodes(getVisualisationNodes(initialgraph));
+    setNodes(getNode(initialgraph));
     setEdges(getEdges(initialgraph));
   }
 
@@ -362,6 +407,7 @@ function GraphicalEditor({ metagraph }: Props) {
 
   function handleNodeSave(node: MetagraphNode) {
     console.log("node save", node);
+    console.log("local graph", localGraph);
     const newGraph = {
       ...localGraph,
       nodes: localGraph.nodes.map((n) => {
@@ -382,8 +428,66 @@ function GraphicalEditor({ metagraph }: Props) {
     updateGraph(newGraph);
   }
 
+  function handleEdgeClick(
+    event: React.MouseEvent<Element, MouseEvent>,
+    edge: Edge<any>
+  ) {
+    setSelectedEdge(edge);
+  }
+
+  function handleNodeDeletion(node: MetagraphNode) {
+    console.log("deleting node", node);
+    console.log("local graph", localGraph);
+    const newGraph = {
+      ...localGraph,
+      nodes: localGraph.nodes.filter((n) => n.id !== node.id),
+    };
+
+    const filteredGraph = {
+      ...newGraph,
+      nodes: newGraph.nodes.map((n) => {
+        return {
+          ...n,
+          dependencies: n.dependencies.filter((dep) => dep !== node.id),
+        };
+      }),
+    };
+    console.log("new graph", filteredGraph);
+    updateGraph(filteredGraph);
+  }
+
+  function handleEdgeDelete(edge: Edge<any>) {
+    console.log("deleting edge", edge);
+    const newGraph = {
+      ...localGraph,
+      nodes: localGraph.nodes.map((node) => {
+        if (node.id === edge.target) {
+          return {
+            ...node,
+            dependencies: node.dependencies.filter((dep) => dep !== edge.source),
+          };
+        } else {
+          return node;
+        }
+      }),
+    };
+    updateGraph(newGraph);
+  }
+
+  function handkeKeyDown(event: React.KeyboardEvent<Element>) {
+    if (event.key === "Delete") {
+      if (selectedEdge) {
+        handleEdgeDelete(selectedEdge);
+      }
+    }
+  }
+
   return (
-    <div className="flow" style={{ width: "2000px", height: "800px" }}>
+    <div
+      className="flow"
+      style={{ width: "2000px", height: "800px" }}
+      onKeyDown={handkeKeyDown}
+    >
       <Toolbar
         onAddNode={handleNewNode}
         onLayout={handleLayout}
@@ -405,7 +509,9 @@ function GraphicalEditor({ metagraph }: Props) {
         onConnect={onConnect}
         onNodeClick={(event, node) => handleNodeClick(event, node)}
         onInit={onInit}
+        onNodeDrag={onNodeDragStart}
         nodesDraggable={true}
+        onEdgeClick={(event, edge) => handleEdgeClick(event, edge)}
         attributionPosition="top-right"
         maxZoom={1}
         elementsSelectable={true}

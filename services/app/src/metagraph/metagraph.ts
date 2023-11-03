@@ -51,15 +51,7 @@ export interface Metagraph {
   nodes: MetagraphNode[];
 }
 
-export interface VisualisationNode {
-  id: string;
-  data: { label: string};
-  type: "default";
-  position: {
-    x: number;
-    y: number;
-  };
-}
+
 
 export interface CircularDependencyFailure {
   type: "circularDependency";
@@ -363,22 +355,31 @@ export function findRootNodes(g: Metagraph): MetagraphNode[] {
   });
 }
 
-function getDepth(node: Node, g: Metagraph): number {
-  //If the node never appears in a chain of dependencies, its depth is 0
-  if (!g.nodes.some((n) => n.dependencies.includes(node.id))) {
-    return 0;
-  }
-  //Otherwise, we check for a chain of dependencies
-  else {
-    return g.nodes
-      .filter((n) => n.dependencies.includes(node.id))
-      .map((n) => 1 + getDepth(n, g))
-      .reduce((a, b) => Math.max(a, b));
-  }
+export interface CustomNodeType {
+  type: string;
+  [key: string]: any;
 }
 
-function getRandomInt(max) {
-  return Math.floor(Math.random() * max);
+export interface DefaultNodeType extends CustomNodeType {
+  type: "default";
+}
+
+export interface VisualisationNode<T extends CustomNodeType> {
+  id: string;
+  data: T;
+  type: string;
+  position: {
+    x: number;
+    y: number;
+  };
+}
+
+interface LayoutConfig {
+  width: number;
+  height: number;
+  rankdir: "LR" | "TD";
+  nodesep: number;
+  align: "UL";
 }
 
 /**
@@ -386,17 +387,11 @@ function getRandomInt(max) {
  * using react-flow
  *
  */
-export function getVisualisationNodes(
+export function getVisualisationNodes<T extends CustomNodeType>(
   g: Metagraph,
-  config: {
-    width: number;
-    height: number;
-    rankdir: "LR" | "TD";
-    nodesep: number;
-    align: "UL";
-    type: string;
-  } | undefined = undefined
-): VisualisationNode[] {
+  config: Partial<LayoutConfig>,
+  extraData: (node: MetagraphNode) => T | undefined = (node: MetagraphNode) => undefined
+): VisualisationNode<T>[] {
   const defaultConfig = { width: 200, height: 100, rankdir: "TD", nodesep: 200, align: "UL", type: "default" }
   const mergedConfig = {...defaultConfig, ...config}
   //Place the node hierarchically
@@ -420,8 +415,8 @@ export function getVisualisationNodes(
   return nodes.map((node) => {
     return {
       id: node.id,
-      data: { label: node.name },
-      type: mergedConfig.type,
+      data: { label: node.name, ...extraData(node) },
+      type:  extraData(node).type ?? mergedConfig.type,
       draggable: true,
       position: {
         y: graph.node(node.id).y,
