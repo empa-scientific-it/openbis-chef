@@ -19,10 +19,12 @@ export interface Node {
   entityType: string;
   type: MetagraphNodeType;
   description: string | null;
+  name: string;
 }
 
 export interface EntryNode extends Node {
   id: string;
+  name: string;
   type: MetagraphNodeType.Entry;
   entityType: string;
   collection: string;
@@ -31,6 +33,7 @@ export interface EntryNode extends Node {
 
 export interface SelectNode extends Node {
   id: string;
+  name: string;
   type: MetagraphNodeType.Select;
   entityType: string;
   collection: string;
@@ -50,7 +53,7 @@ export interface Metagraph {
 
 export interface VisualisationNode {
   id: string;
-  data: Node;
+  data: { label: string};
   type: "default";
   position: {
     x: number;
@@ -391,8 +394,11 @@ export function getVisualisationNodes(
     rankdir: "LR" | "TD";
     nodesep: number;
     align: "UL";
-  } = { width: 200, height: 100, rankdir: "TD", nodesep: 200, align: "UL" }
+    type: string;
+  } | undefined = undefined
 ): VisualisationNode[] {
+  const defaultConfig = { width: 200, height: 100, rankdir: "TD", nodesep: 200, align: "UL", type: "default" }
+  const mergedConfig = {...defaultConfig, ...config}
   //Place the node hierarchically
   const nodes = walkGraph(g, (node) => node);
   const edges = getEdges(g);
@@ -406,16 +412,16 @@ export function getVisualisationNodes(
     return {};
   });
   nodes.map((node) => {
-    graph.setNode(node.id, { width: 100, height: 100, label: node.description });
+    graph.setNode(node.id, { width: mergedConfig.width, height: mergedConfig.height, label: node.description });
   });
   edges.map((edge) => graph.setEdge(edge.source, edge.target));
-  dagre.layout(graph, config);
+  dagre.layout(graph, mergedConfig);
 
   return nodes.map((node) => {
     return {
       id: node.id,
-      data: { label: node.description },
-      type: "default",
+      data: { label: node.name },
+      type: mergedConfig.type,
       draggable: true,
       position: {
         y: graph.node(node.id).y,

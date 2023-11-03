@@ -10,6 +10,8 @@ import ReactFlow, {
   Node,
   useReactFlow,
   ReactFlowInstance,
+  Handle,
+  Position
 } from "reactflow";
 import "reactflow/dist/style.css";
 import "./ObjectGraph.css";
@@ -29,7 +31,6 @@ import {
 } from "@src/openbis/sampleGraph";
 import { AuthContext } from "@src/openbis/AuthContext";
 import { useCallback } from "react";
-import { Handle, Position } from "reactflow";
 import SampleEntry from "@src/openbis/components/SampleEntry";
 
 type Props = {

@@ -4,6 +4,7 @@ export const polyproWorkflow = new Metagraph(
     [
       {
         id: "Select extruder",
+        name: "Select extruder",
         collection: "/POLPRO_EQUIPMENT/EXTRUSION/EXTRUSION_EXP_1",
         type: "select",
         entityType: "EXTRUDER",
@@ -12,6 +13,7 @@ export const polyproWorkflow = new Metagraph(
       },
       {
         id: "Extruder Parameter",
+        name: "Extruder Parameter",
         collection: "/POLPRO_RUDOLF.HUFENUS_AT_EMPA.CH/TEST/TEST_EXP_1",
         type: "entry",
         entityType: "PARAMETER_EXTRUDER",
@@ -20,83 +22,15 @@ export const polyproWorkflow = new Metagraph(
       },
       {
         id: "Select spin pack",
+        name: "Select spin pack",
         collection: "/POLPRO_EQUIPMENT/EXTRUSION/EXTRUDER_EXP_8",
         type: "select",
         entityType: "SPIN_PACK",
         dependencies: [],
         description: "Select the spin pack",
       },
-      {
-        id: "Spin pack parameter",
-        collection: "/POLPRO_RUDOLF.HUFENUS_AT_EMPA.CH/TEST/TEST_EXP_1",
-        type: "entry",
-        entityType: "PARAMETER_SPIN_PACK",
-        dependencies: ["Select spin pack"],
-        description: "Enter the parameters for the spin pack",
-      },
-      {
-        id: "Select die",
-        collection: "/POLPRO_EQUIPMENT/EXTRUSION/EXTRUDER_EXP_2",
-        type: "select",
-        entityType: "DIES",
-        dependencies: [],
-        description: "Select the die",
-      },
-      {
-        id: "Die parameter",
-        collection: "/POLPRO_RUDOLF.HUFENUS_AT_EMPA.CH/TEST/TEST_EXP_1",
-        type: "entry",
-        entityType: "PARAMETER_DIES",
-        dependencies: ["Select die"],
-        description: "Enter the parameters for the die",
-      },
-      {
-        id: "Select godet",
-        collection: "/POLPRO_EQUIPMENT/EXTRUSION/EXTRUDER_EXP_4",
-        type: "select",
-        entityType: "GODETS",
-        dependencies: [],
-        description: "Select the godet",
-      },
-      {
-        id: "Godet parameter",
-        collection: "/POLPRO_RUDOLF.HUFENUS_AT_EMPA.CH/TEST/TEST_EXP_1",
-        type: "entry",
-        entityType: "PARAMETER_GODET",
-        dependencies: ["Select godet"],
-        description: "Enter the parameters for the die",
-      },
-      {
-        id: "Select winder",
-        collection: "/POLPRO_EQUIPMENT/EXTRUSION/EXTRUDER_EXP_10",
-        type: "select",
-        entityType: "WINDERS",
-        dependencies: [],
-        description: "Select the winder",
-      },
-      {
-        id: "Winder parameter",
-        collection: "/POLPRO_RUDOLF.HUFENUS_AT_EMPA.CH/TEST/TEST_EXP_1",
-        type: "entry",
-        entityType: "PARAMETER_WINDER",
-        dependencies: ["Select winder"],
-        description: "Enter the parameters for the winder",
-      },
-      {
-        id: "Create fiber",
-        collection: "/POLPRO_RUDOLF.HUFENUS_AT_EMPA.CH/TEST/TEST_EXP_1",
-        type: "entry",
-        entityType: "EXPERIMENTAL_STEP",
-        dependencies: [
-          "Extruder Parameter",
-          "Spin pack parameter",
-          "Die parameter",
-          "Godet parameter",
-          "Winder parameter"
-        ],
-        description: "Create the fiber",
-      }
+      // Add more nodes here
     ],
-    "Create fiber",
-    "Create fiber",
-  );
+    "Polypro Workflow", // Add a name for the metagraph
+    "This metagraph represents the workflow for the Polypro project." // Add a description for the metagraph
+);
