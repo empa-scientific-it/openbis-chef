@@ -1,4 +1,10 @@
-import React, { useCallback, useContext, useEffect, useState, useMemo } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+} from "react";
 import Dropdown from "react-bootstrap/Dropdown";
 import ReactFlow, {
   addEdge,
@@ -24,10 +30,11 @@ import {
   MetagraphNodeType,
   validateMetagraph,
   formatFailure,
+  LayoutConfig,
 } from "../metagraph";
 import Button from "react-bootstrap/Button";
 import "./GraphicalEditor.css";
-
+import Form from "react-bootstrap/Form";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import ButtonToolbar from "react-bootstrap/ButtonToolbar";
 import Popup from "@src/notification/components/Popup";
@@ -36,6 +43,8 @@ import Modal from "react-bootstrap/Modal";
 import DropdownMenu from "react-bootstrap/esm/DropdownMenu";
 
 import { NodeProps } from "reactflow";
+import WorkflowEditor from "./WorkflowEditor";
+import { Me } from "v3api/V3API.esm";
 
 type NoteContextProps = {
   show: boolean;
@@ -92,7 +101,9 @@ function EditableNode({ data }: NodeProps<EditableNodeProps>) {
           <Dropdown.Header>Node Actions</Dropdown.Header>
           <Dropdown.Item onClick={handleLocalEdit}>Edit node</Dropdown.Item>
           <Dropdown.Item onClick={handleLocalDelete}>Delete node</Dropdown.Item>
-          <Dropdown.Item onClick={handleCloseContextMenu}>Clone node</Dropdown.Item>
+          <Dropdown.Item onClick={handleCloseContextMenu}>
+            Clone node
+          </Dropdown.Item>
         </DropdownMenu>
       </Button>
 
@@ -116,9 +127,16 @@ type ToolbarProps = {
   onLayout: () => void;
   onReset: () => void;
   onSave: () => void;
+  onEdit: () => void;
 };
 
-function Toolbar({ onAddNode, onLayout, onReset, onSave }: ToolbarProps) {
+function Toolbar({
+  onAddNode,
+  onLayout,
+  onReset,
+  onSave,
+  onEdit,
+}: ToolbarProps) {
   return (
     <div className="toolbar">
       <ButtonToolbar>
@@ -127,8 +145,25 @@ function Toolbar({ onAddNode, onLayout, onReset, onSave }: ToolbarProps) {
           <Button onClick={() => onLayout()}>Auto Layout</Button>
           <Button onClick={() => onReset()}>Reset</Button>
           <Button onClick={() => onSave()}>Save</Button>
+          <Button onClick={() => onEdit()}>Edit JSON</Button>
         </ButtonGroup>
       </ButtonToolbar>
+    </div>
+  );
+}
+
+type MetagraphPropertiesEditorProps = {
+  metagraph: Metagraph;
+};
+function MetagraphPropertiesEditor({ metagraph }: MetagraphPropertiesEditorProps) {
+  return (
+    <div>
+      <Form>
+        <Form.Group>
+          <Form.Label>Metagraph name</Form.Label>
+          <Form.Control type="text" placeholder={metagraph.name} />
+        </Form.Group>
+      </Form>
     </div>
   );
 }
@@ -178,14 +213,18 @@ function NodeEditor({ node, show, onHide, onSave }: NodeEditorProps) {
             id="nameInput"
             type="text"
             value={localNode.name}
-            onChange={(event) => handlePropertyChange("name", event.target.value)}
+            onChange={(event) =>
+              handlePropertyChange("name", event.target.value)
+            }
           />
           <label htmlFor="descriptionInput">Node description</label>
           <input
             id="descriptionInput"
             type="text"
             value={localNode.description}
-            onChange={(event) => handlePropertyChange("description", event.target.value)}
+            onChange={(event) =>
+              handlePropertyChange("description", event.target.value)
+            }
           />
         </form>
       </Modal.Body>
@@ -202,7 +241,11 @@ function NodeEditor({ node, show, onHide, onSave }: NodeEditorProps) {
   );
 }
 
-function NodeDropdown({ onSelect }: { onSelect: (node: MetagraphNode) => void }) {
+function NodeDropdown({
+  onSelect,
+}: {
+  onSelect: (node: MetagraphNode) => void;
+}) {
   const [nodeCount, setNodeCount] = useState(0);
 
   function addNode(nodeType: MetagraphNodeType) {
@@ -241,7 +284,9 @@ function NodeDropdown({ onSelect }: { onSelect: (node: MetagraphNode) => void })
       <Dropdown.Toggle id="dropdown-basic">Add Node</Dropdown.Toggle>
       <Dropdown.Menu>
         {Object.values(MetagraphNodeType).map((nodeType) => (
-          <Dropdown.Item onClick={() => addNode(nodeType)}>{nodeType}</Dropdown.Item>
+          <Dropdown.Item onClick={() => addNode(nodeType)}>
+            {nodeType}
+          </Dropdown.Item>
         ))}
       </Dropdown.Menu>
     </Dropdown>
@@ -254,10 +299,11 @@ function ContextMenu({ node }: { node: MetagraphNode }) {
 
 function getDisplayNodes(
   nodes: Metagraph,
+  config: Partial<LayoutConfig> = {},
   onEdit: (node: MetagraphNode) => void,
   onDelete: (node: MetagraphNode) => void
 ) {
-  return getVisualisationNodes(nodes, {}, (node) => {
+  return getVisualisationNodes(nodes, config, (node) => {
     return {
       type: "editableNode",
       metagraphNode: node,
@@ -267,13 +313,28 @@ function getDisplayNodes(
   });
 }
 
-function GraphicalEditor({ metagraph }: Props) {
+type GraphicalEditorProps = {
+  metagraph: Metagraph;
+  width: number | undefined;
+  height: number | undefined;
+  nodeWidth: number | undefined;
+  nodeHeight: number | undefined;
+};
+
+function GraphicalEditor({
+  metagraph,
+  width = 800,
+  height = 800,
+  nodeWidth = 100,
+  nodeHeight = 100,
+}: GraphicalEditorProps) {
   const [localGraph, setLocalGraph] = useState(metagraph);
 
   const getNode = useCallback(
     (metagraph: Metagraph) => {
       return getDisplayNodes(
         metagraph,
+        { width: nodeWidth, height: nodeHeight },
         (node) => console.log("edit", node),
         (node) => handleNodeDeletion(node)
       );
@@ -283,9 +344,11 @@ function GraphicalEditor({ metagraph }: Props) {
   const initialgraph = metagraph;
   const [nodes, setNodes, onNodesChange] = useNodesState(getNode(localGraph));
   const [edges, setEdges, onEdgesChange] = useEdgesState(getEdges(localGraph));
-  const onInit = (reactFlowInstance) => console.log("flow loaded:", nodes, edges);
+  const onInit = (reactFlowInstance) =>
+    console.log("flow loaded:", nodes, edges);
 
   const [selectedEdge, setSelectedEdge] = useState<Edge<any> | null>(null);
+  const [selectedNode, setSelectedNode] = useState<MetagraphNode | null>(null);
 
   const notificationManager = useContext(NotificationContext);
 
@@ -389,10 +452,8 @@ function GraphicalEditor({ metagraph }: Props) {
     event: React.MouseEvent<Element, MouseEvent>,
     node: MetagraphNode
   ) {
-    console.log("node click", event, showEditor, node);
     setShowContextMenu((old) => !old);
-    // setCurrentNode(localGraph.nodes.find((n) => n.id === node.id));
-    // setShowEditor((old) => !old);
+    setSelectedNode(node);
   }
 
   function handleNodeDoubleClick(node: MetagraphNode) {
@@ -464,7 +525,9 @@ function GraphicalEditor({ metagraph }: Props) {
         if (node.id === edge.target) {
           return {
             ...node,
-            dependencies: node.dependencies.filter((dep) => dep !== edge.source),
+            dependencies: node.dependencies.filter(
+              (dep) => dep !== edge.source
+            ),
           };
         } else {
           return node;
@@ -479,49 +542,62 @@ function GraphicalEditor({ metagraph }: Props) {
       if (selectedEdge) {
         handleEdgeDelete(selectedEdge);
       }
+      if (selectedNode) {
+        handleNodeDeletion(selectedNode);
+      }
     }
   }
 
+  function handleNewMetagraph(metagraph: Metagraph) {
+    console.log("new metagraph", metagraph);
+    updateGraph(metagraph);
+  }
+
   return (
-    <div
-      className="flow"
-      style={{ width: "2000px", height: "800px" }}
-      onKeyDown={handkeKeyDown}
-    >
-      <Toolbar
-        onAddNode={handleNewNode}
-        onLayout={handleLayout}
-        onReset={handleReset}
-        onSave={handleSavingMetagraph}
-      />
-      <NodeEditor
-        node={currentNode}
-        show={showEditor}
-        onHide={handleCloseModal}
-        onSave={handleNodeSave}
-      />
-
-      <ContextMenu node={currentNode} />
-
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onConnect={onConnect}
-        onNodeClick={(event, node) => handleNodeClick(event, node)}
-        onInit={onInit}
-        onNodeDrag={onNodeDragStart}
-        nodesDraggable={true}
-        onEdgeClick={(event, edge) => handleEdgeClick(event, edge)}
-        attributionPosition="top-right"
-        maxZoom={1}
-        elementsSelectable={true}
-        minZoom={0.2}
-        fitView
-        nodeTypes={nodeTypes}
+    <div className="sideBySide">
+      <div
+        className="flow"
+        style={{ width: `${width}px`, height: `${height}px` }}
+        onKeyDown={handkeKeyDown}
       >
-        <Controls />
-        <MiniMap />
-      </ReactFlow>
+        <Toolbar
+          onAddNode={handleNewNode}
+          onLayout={handleLayout}
+          onReset={handleReset}
+          onSave={handleSavingMetagraph}
+          onEdit={() => setShowEditor(true)}
+        />
+        <MetagraphPropertiesEditor metagraph={localGraph}/>
+
+        <ContextMenu node={currentNode} />
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onConnect={onConnect}
+          onNodeClick={(event, node) => handleNodeClick(event, node)}
+          onInit={onInit}
+          onNodeDrag={onNodeDragStart}
+          nodesDraggable={true}
+          onEdgeClick={(event, edge) => handleEdgeClick(event, edge)}
+          attributionPosition="top-right"
+          maxZoom={1}
+          elementsSelectable={true}
+          minZoom={0.2}
+          fitView
+          nodeTypes={nodeTypes}
+        >
+          <Controls />
+          <MiniMap />
+        </ReactFlow>
+      </div>
+      <div>
+        <WorkflowEditor
+          initialValue={localGraph}
+          isOpen={showEditor}
+          handleClose={() => setShowEditor(false)}
+          handleNewMetagraph={handleNewMetagraph}
+        />
+      </div>
       <Popup timeout={2000} />
     </div>
   );

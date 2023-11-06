@@ -374,7 +374,7 @@ export interface VisualisationNode<T extends CustomNodeType> {
   };
 }
 
-interface LayoutConfig {
+export interface LayoutConfig {
   width: number;
   height: number;
   rankdir: "LR" | "TD";
